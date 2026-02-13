@@ -8,17 +8,51 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body { background-color: #121212; color: #fff; font-family: 'Inter', sans-serif; }
+        
         .glass-card {
             background: #1e1e1e;
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 20px;
-            padding: 2rem;
+            padding: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-        .table { color: #fff; }
-        .table-hover tbody tr:hover { color: #fff; background-color: rgba(255,255,255,0.05); }
+
+        /* Tabela Transparente e Dark */
+        .table-custom {
+            --bs-table-bg: transparent;
+            --bs-table-color: #fff;
+            --bs-table-border-color: rgba(255,255,255,0.1);
+            --bs-table-hover-bg: rgba(255,255,255,0.05);
+        }
+        
+        .table-custom th {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #aaa;
+            border-bottom-width: 2px;
+        }
+
         .back-link { color: #aaa; text-decoration: none; display: inline-block; margin-bottom: 20px; }
         .back-link:hover { color: #fff; }
-        .badge-dias { background: #333; padding: 5px 10px; border-radius: 10px; font-size: 0.9em; }
+
+        /* Badge Dias Ativos mais compacto */
+        .badge-dias { 
+            background: rgba(255, 255, 255, 0.1); 
+            padding: 6px 10px; 
+            border-radius: 8px; 
+            font-size: 0.85em;
+            white-space: nowrap; /* Não quebra linha */
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* Ajustes Mobile */
+        @media (max-width: 576px) {
+            .glass-card { padding: 1rem; }
+            h2 { font-size: 1.5rem; }
+            .badge-dias { font-size: 0.75em; padding: 4px 6px; }
+            .table-custom td, .table-custom th { padding: 0.5rem; font-size: 0.9rem; }
+        }
     </style>
 </head>
 <body>
@@ -26,33 +60,49 @@
     <a href="{% url 'dashboard' %}" class="back-link">← Voltar para o Dashboard</a>
     
     <div class="glass-card">
-        <h2 class="mb-4 text-center">🏆 Hall da Fama Geral</h2>
-        <p class="text-center text-muted mb-5">Somatório de todos os tempos, dias ativos e níveis de conquista.</p>
+        <div class="text-center mb-4">
+            <h2 class="mb-2">🏆 Hall da Fama Geral</h2>
+            <p class="text-muted small">Somatório de todos os tempos</p>
+        </div>
         
         <div class="table-responsive">
-            <table class="table table-hover align-middle">
+            <table class="table table-custom table-hover align-middle">
                 <thead>
                     <tr>
-                        <th>Pos</th>
+                        <th style="width: 50px;">#</th>
                         <th>Atleta</th>
-                        <th>Nível (Badge)</th>
-                        <th class="text-center">Dias Ativos</th>
-                        <th class="text-end">Total Geral (KM)</th>
+                        <th>Nível</th>
+                        <th class="text-center">Atividade</th>
+                        <th class="text-end">Total</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for corredor in ranking %}
                     <tr>
-                        <td class="fw-bold text-muted">#{{ forloop.counter }}</td>
-                        <td class="fw-bold fs-5">{{ corredor.nome_usuario }}</td>
-                        <td class="{{ corredor.classe_nivel }} fw-bold">{{ corredor.nivel }}</td>
-                        <td class="text-center">
-                            <span class="badge-dias">📅 {{ corredor.dias_ativos }} dias</span>
+                        <td class="fw-bold text-secondary">{{ forloop.counter }}</td>
+                        
+                        <td class="fw-bold">
+                            {{ corredor.nome_usuario }}
                         </td>
-                        <td class="text-end fs-5 text-warning">{{ corredor.total_km_geral|floatformat:2 }} km</td>
+                        
+                        <td>
+                            <small class="{{ corredor.classe_nivel }} fw-bold" style="font-size: 0.8rem;">
+                                {{ corredor.nivel }}
+                            </small>
+                        </td>
+                        
+                        <td class="text-center">
+                            <span class="badge-dias">
+                                📅 {{ corredor.dias_ativos }} dias
+                            </span>
+                        </td>
+                        
+                        <td class="text-end fw-bold text-warning">
+                            {{ corredor.total_km_geral|floatformat:1 }} km
+                        </td>
                     </tr>
                     {% empty %}
-                    <tr><td colspan="5" class="text-center">Ainda sem dados.</td></tr>
+                    <tr><td colspan="5" class="text-center text-muted py-4">Ainda sem dados.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
