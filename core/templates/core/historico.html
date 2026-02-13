@@ -8,37 +8,62 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body { background-color: #121212; color: #fff; font-family: 'Inter', sans-serif; }
+        
         .glass-card {
             background: #1e1e1e;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
+            border-radius: 16px;
             padding: 1.5rem;
             margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
-        .progress { height: 25px; background-color: #333; border-radius: 15px; }
+
+        /* Fundo da barra de progresso mais escuro para contraste */
+        .progress { 
+            height: 25px; 
+            background-color: #333; 
+            border-radius: 12px; 
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .progress-bar {
+            font-weight: bold;
+            line-height: 25px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        }
+
         .back-link { color: #aaa; text-decoration: none; display: inline-block; margin-bottom: 20px; }
         .back-link:hover { color: #fff; }
+
+        /* Cor personalizada para o texto de KM (substituindo text-muted) */
+        .km-text {
+            color: #b0b0b0; /* Cinza claro legível */
+            font-size: 1.1rem;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
 <div class="container py-5">
     <a href="{% url 'dashboard' %}" class="back-link">← Voltar para o Dashboard</a>
-    <h2 class="mb-4">📅 Histórico de Metas</h2>
+    <h3 class="mb-4">📅 Histórico de Metas</h3>
 
     <div class="row">
         {% for item in dados %}
         <div class="col-md-6 col-lg-4">
             <div class="glass-card">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h4 class="mb-0">{{ item.mes_nome }} / {{ item.ano }}</h4>
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h4 class="mb-0 text-white">{{ item.mes_nome }} / {{ item.ano }}</h4>
                     {% if item.atingiu %}
-                        <span class="badge bg-success">Meta Batida! 🏆</span>
+                        <span class="badge bg-success shadow-sm">Meta Batida! 🏆</span>
                     {% else %}
-                        <span class="badge bg-secondary">Em andamento</span>
+                        <span class="badge bg-secondary opacity-50">Em andamento</span>
                     {% endif %}
                 </div>
                 
-                <h5 class="text-muted">{{ item.total|floatformat:1 }} / {{ item.objetivo|floatformat:0 }} km</h5>
+                <div class="km-text">
+                    <strong>{{ item.total|floatformat:1 }}</strong> / {{ item.objetivo|floatformat:0 }} km
+                </div>
                 
                 <div class="progress mt-3">
                     <div class="progress-bar {% if item.atingiu %}bg-success{% else %}bg-primary{% endif %}" 
