@@ -135,7 +135,7 @@ def desempenho(request):
             mes_passado = 12 if mes_atual == 1 else mes_atual - 1
             ano_passado = ano_atual - 1 if mes_atual == 1 else ano_atual
 
-            # 1. Comparativo de Meses (KMs)
+            # 1. Comparativo de Meses
             km_atual = atividades.filter(data_envio__month=mes_atual, data_envio__year=ano_atual).aggregate(Sum('quantidade_km'))['quantidade_km__sum'] or 0
             km_passado = atividades.filter(data_envio__month=mes_passado, data_envio__year=ano_passado).aggregate(Sum('quantidade_km'))['quantidade_km__sum'] or 0
 
@@ -145,74 +145,62 @@ def desempenho(request):
             elif km_atual > 0:
                 variacao_pct = 100 
 
-            # 2. Estatísticas Avançadas & Projeção
+            # 2. Estatísticas Gerais
             media_km = atividades.aggregate(Avg('quantidade_km'))['quantidade_km__avg'] or 0
             total_corridas = atividades.count()
             maior_corrida = atividades.aggregate(Max('quantidade_km'))['quantidade_km__max'] or 0
             
-            # Projeção de fim de mês
-            _, ult_dia_mes = calendar.monthrange(ano_atual, mes_atual)
-            dia_hoje = hoje.day
-            projecao_mensal = (float(km_atual) / dia_hoje) * ult_dia_mes if dia_hoje > 0 else 0
+            # 3. Dia Favorito
+            fav_day_query = atividades.annotate(dia=ExtractWeekDay('data_envio')).values('dia').annotate(count=Count('id')).order_by('-count').first()
+            fav_idx = (fav_day_query['dia'] - 2) % 7 if fav_day_query else 6 
+            dias_pt = {0: 'Segunda', 1: 'Terça', 2: 'Quarta', 3: 'Quinta', 4: 'Sexta', 5: 'Sábado', 6: 'Domingo'}
+            dia_favorito = dias_pt[fav_idx]
 
+            # 4. Lógica Baseada na Última Corrida
+            ultima = atividades.first()
+            km_recomendado = float(ultima.quantidade_km) * 1.10 if ultima else 0
+            default_pace = ultima.pace if (ultima and ultima.pace) else "06:00"
+
+            dias_descanso = 2 if ultima and float(ultima.quantidade_km) > 10 else 1
+            prox_data = ultima.data_envio + timedelta(days=dias_descanso) if ultima else hoje
+            if prox_data.date() <= hoje.date():
+                mensagem_data = "Hoje! Corpo recuperado."
+            else:
+                mensagem_data = f"{prox_data.strftime('%d/%m')} (Amanhã/Em breve)"
+
+            # 5. Projeção e Calorias
+            _, ult_dia_mes = calendar.monthrange(ano_atual, mes_atual)
+            projecao_mensal = (float(km_atual) / hoje.day) * ult_dia_mes if hoje.day > 0 else 0
             total_km_historico = atividades.aggregate(Sum('quantidade_km'))['quantidade_km__sum'] or 0
             calorias_queimadas = float(total_km_historico) * 65 
             fatias_pizza = int(calorias_queimadas / 285) 
 
-            # 3. Dia Favorito e Calendário
-            fav_day_query = atividades.annotate(dia=ExtractWeekDay('data_envio')).values('dia').annotate(count=Count('id')).order_by('-count').first()
-            
-            # Converter dia do Django (1=Dom, 7=Sáb) para Python (0=Seg, 6=Dom)
-            fav_idx = (fav_day_query['dia'] - 2) % 7 if fav_day_query else 6 # Padrão Domingo se não tiver
-            
-            dias_pt = {0: 'Segunda', 1: 'Terça', 2: 'Quarta', 3: 'Quinta', 4: 'Sexta', 5: 'Sábado', 6: 'Domingo'}
-            dia_favorito = dias_pt[fav_idx]
-
-            # 4. Cálculo de Pace e Última Corrida
-            ultima = atividades.first()
-            km_recomendado = float(ultima.quantidade_km) * 1.10 
-            default_pace = ultima.pace if (ultima and ultima.pace) else "06:00"
-
-            pace_rec_leve = "06:00"
-            pace_rec_forte = "05:00"
-            if ultima.pace and ':' in ultima.pace:
-                try:
-                    m, s = map(int, ultima.pace.split(':'))
-                    t_seg = (m * 60) + s
-                    pace_rec_leve = f"{(t_seg + 45)//60:02d}:{(t_seg + 45)%60:02d}"
-                    pace_rec_forte = f"{(t_seg - 15)//60:02d}:{(t_seg - 15)%60:02d}"
-                except: pass
-
-            # 5. GERADOR DO CALENDÁRIO INTELIGENTE (7 DIAS)
+            # 6. Calendário Semanal
             plano_semanal = []
             for i in range(7):
                 d_date = hoje + timedelta(days=i)
                 d_idx = d_date.weekday()
-                
-                # Regras simples do Coach baseadas no dia favorito
                 if d_idx == fav_idx:
                     tipo, cor, icon, desc = "Treino Longo", "warning", "🏃‍♂️🔥", f"Até {round(km_recomendado,1)}km"
-                elif (d_idx - fav_idx) % 7 == 1: # Dia seguinte ao longo
+                elif (d_idx - fav_idx) % 7 == 1:
                     tipo, cor, icon, desc = "Descanso", "secondary", "🛌💤", "Recuperação total"
-                elif (d_idx - fav_idx) % 7 == -3 or (d_idx - fav_idx) % 7 == 4: # Meio da semana
-                    tipo, cor, icon, desc = "Tiros/Ritmo", "danger", "⚡⏱️", f"Pace {pace_rec_forte}"
+                elif (d_idx - fav_idx) % 7 == -3 or (d_idx - fav_idx) % 7 == 4:
+                    tipo, cor, icon, desc = "Tiros/Ritmo", "danger", "⚡⏱️", "Treino Forte"
                 else:
-                    tipo, cor, icon, desc = "Rodagem Leve", "success", "🍃👟", f"Pace {pace_rec_leve}"
+                    tipo, cor, icon, desc = "Rodagem Leve", "success", "🍃👟", "Pace Leve"
                     
                 plano_semanal.append({
-                    'data': d_date.strftime("%d/%m"),
-                    'dia_semana': dias_pt[d_idx],
-                    'tipo': tipo, 'cor': cor, 'icon': icon, 'desc': desc,
-                    'is_hoje': i == 0
+                    'data': d_date.strftime("%d/%m"), 'dia_semana': dias_pt[d_idx],
+                    'tipo': tipo, 'cor': cor, 'icon': icon, 'desc': desc, 'is_hoje': i == 0
                 })
 
             context.update({
                 'km_atual': km_atual, 'km_passado': km_passado, 'variacao_pct': round(variacao_pct, 1),
                 'media_km': round(media_km, 2), 'total_corridas': total_corridas, 'maior_corrida': maior_corrida,
-                'projecao_mensal': round(projecao_mensal, 1),
-                'dia_favorito': dia_favorito, 'ultima': ultima, 'default_pace': default_pace,
-                'calorias': int(calorias_queimadas), 'pizzas': fatias_pizza,
-                'plano_semanal': plano_semanal # Enviando o calendário
+                'dia_favorito': dia_favorito, 'ultima': ultima, 'km_recomendado': round(km_recomendado, 2),
+                'mensagem_data': mensagem_data, 'default_pace': default_pace,
+                'projecao_mensal': round(projecao_mensal, 1), 'calorias': int(calorias_queimadas), 'pizzas': fatias_pizza,
+                'plano_semanal': plano_semanal 
             })
 
     return render(request, 'core/desempenho.html', context)
