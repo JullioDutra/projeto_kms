@@ -12,6 +12,7 @@ class MetaMensal(models.Model):
 class Atividade(models.Model):
     nome_usuario = models.CharField(max_length=100, verbose_name="Nome do Corredor")
     quantidade_km = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="KM Percorrido")
+    pace = models.CharField(max_length=5, blank=True, null=True, verbose_name="Pace (Min/Km)", help_text="Ex: 05:30")
     foto_comprovante = models.ImageField(upload_to='comprovantes/', verbose_name="Foto do Comprovante")
     data_envio = models.DateTimeField(auto_now_add=True)
 
