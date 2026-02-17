@@ -9,24 +9,27 @@
     <style>
         body { background-color: #121212; color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
         .glass-card { background: #1e1e1e; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
-        .stat-value { font-size: 2rem; font-weight: 900; }
+        .stat-value { font-size: 2.2rem; font-weight: 900; }
+        .text-green { color: #2ecc71; }
+        .text-red { color: #e74c3c; }
+        
+        /* Box do Coach e Pace */
+        .coach-box { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); border-left: 5px solid #00d2ff; }
         .pace-lab-box { background: linear-gradient(135deg, #111 0%, #222 100%); border-left: 5px solid #f39c12; }
         
-        /* Estilos do Calendário */
+        /* Calendário Scroll */
         .calendar-scroll { display: flex; overflow-x: auto; gap: 15px; padding-bottom: 10px; scrollbar-width: thin; scrollbar-color: #555 #1e1e1e; }
         .calendar-scroll::-webkit-scrollbar { height: 8px; }
         .calendar-scroll::-webkit-scrollbar-thumb { background-color: #555; border-radius: 10px; }
-        .day-card { min-width: 140px; background: #2a2a2a; border-radius: 12px; text-align: center; padding: 15px 10px; border: 1px solid #444; transition: transform 0.2s; }
-        .day-card:hover { transform: translateY(-5px); }
+        .day-card { min-width: 140px; background: #2a2a2a; border-radius: 12px; text-align: center; padding: 15px 10px; border: 1px solid #444; }
         .day-card.hoje { border: 2px solid #00d2ff; background: #1a2a3a; }
-        
-        /* Estilos do Simulador (Accordion) */
+
+        /* Estilos Globais */
         .accordion-item { background-color: #1e1e1e; border: 1px solid #333; }
         .accordion-button { background-color: #2b2b2b; color: #fff; font-weight: bold; }
         .accordion-button:not(.collapsed) { background-color: #3a7bd5; color: #fff; box-shadow: none; }
         .accordion-button::after { filter: invert(1); }
         .accordion-body { color: #ccc; background-color: #1a1a1a; }
-
         .form-select, .form-control { background-color: #2b2b2b; color: white; border: 1px solid #444; }
         .form-select:focus, .form-control:focus { background-color: #333; color: white; border-color: #00d2ff; box-shadow: none; }
         .back-link { color: #aaa; text-decoration: none; display: inline-block; margin-bottom: 20px; }
@@ -39,7 +42,7 @@
 <div class="container py-5">
     <a href="{% url 'dashboard' %}" class="back-link">← Voltar para o Dashboard</a>
     
-    <h2 class="mb-4">📊 Smart Coach 360º</h2>
+    <h2 class="mb-4 text-white">📊 Análise de Desempenho 360º</h2>
 
     <div class="glass-card mb-4">
         <form method="GET" class="row align-items-center">
@@ -52,7 +55,7 @@
                 </select>
             </div>
             <div class="col-md-4 col-sm-12">
-                <button type="submit" class="btn btn-primary w-100 btn-lg">Gerar Análise</button>
+                <button type="submit" class="btn btn-primary w-100 btn-lg fw-bold text-white">Gerar Relatório</button>
             </div>
         </form>
     </div>
@@ -62,42 +65,125 @@
             
             <div class="col-md-4">
                 <div class="glass-card text-center h-100">
-                    <h6 class="text-muted text-uppercase">📈 Projeção do Mês</h6>
-                    <div class="stat-value text-primary mt-2">{{ projecao_mensal|floatformat:1 }} <small class="fs-6">km</small></div>
-                    <div class="mt-2 text-muted small">Mantendo seu ritmo atual, você fechará o mês com essa marca! (Atual: {{ km_atual|floatformat:1 }}km)</div>
+                    <h6 class="text-white text-uppercase fw-bold">Mês Atual vs Passado</h6>
+                    <div class="stat-value text-white mt-2">{{ km_atual|floatformat:1 }} <small class="fs-6">km</small></div>
+                    {% if variacao_pct > 0 %}
+                        <div class="text-green fw-bold mt-2">▲ +{{ variacao_pct }}% (Cresceu!)</div>
+                    {% elif variacao_pct < 0 %}
+                        <div class="text-red fw-bold mt-2">▼ {{ variacao_pct }}% (Caiu)</div>
+                    {% else %}
+                        <div class="text-warning fw-bold mt-2">Estável</div>
+                    {% endif %}
+                    <small class="text-white-50">Mês passado: {{ km_passado|floatformat:1 }} km</small>
                 </div>
             </div>
 
             <div class="col-md-4">
                 <div class="glass-card text-center h-100">
-                    <h6 class="text-muted text-uppercase">🥇 Recorde Pessoal</h6>
+                    <h6 class="text-white text-uppercase fw-bold">Estatísticas Vitais</h6>
+                    <ul class="list-unstyled mt-3 mb-0 text-start text-white">
+                        <li class="mb-2">👟 <strong>Média p/ corrida:</strong> {{ media_km }} km</li>
+                        <li class="mb-2">🏆 <strong>Total Corridas:</strong> {{ total_corridas }}</li>
+                        <li>📅 <strong>Dia Favorito:</strong> <span class="text-white fw-bold">{{ dia_favorito }}</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="glass-card text-center h-100">
+                    <h6 class="text-white text-uppercase fw-bold">Último Registro</h6>
+                    <div class="stat-value text-white mt-2">{{ ultima.quantidade_km|floatformat:1 }} <small class="fs-6">km</small></div>
+                    <div class="mt-2 text-white-50">
+                        Pace: <strong class="text-white">{{ ultima.pace|default:"Não informado" }}</strong><br>
+                        Feito em: {{ ultima.data_envio|date:"d/m/Y" }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 mt-4">
+                <div class="glass-card coach-box">
+                    <h4 class="mb-3 text-white">🤖 Recomendação Direta (Baseada no Último Treino)</h4>
+                    <div class="row mt-3">
+                        <div class="col-md-4 mb-3">
+                            <h6 class="text-white fw-bold">Quando correr de novo?</h6>
+                            <h5 class="text-white">⏱️ {{ mensagem_data }}</h5>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <h6 class="text-white fw-bold">Meta de Distância Máxima</h6>
+                            <h5 class="text-white">📏 Não passe de {{ km_recomendado }} km</h5>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <h6 class="text-white fw-bold">Estatística Mágica</h6>
+                            <h5 class="text-white">📅 Você rende mais nas <strong>{{ dia_favorito }}s</strong>!</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 mt-4">
+                <div class="glass-card pace-lab-box">
+                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+                        <h4 class="mb-0 text-white">🔬 Laboratório de Pace & Zonas</h4>
+                        <div class="d-flex align-items-center mt-2 mt-md-0">
+                            <label class="me-2 text-white fw-bold text-nowrap">Simular Pace:</label>
+                            <input type="text" id="inputPace" class="form-control text-center fw-bold text-warning" value="{{ default_pace }}" style="width: 100px; font-size: 1.2rem;" placeholder="Ex: 05:30">
+                        </div>
+                    </div>
+                    <p class="text-white-50">Altere o campo temporário de pace acima para calcular na hora seus ritmos recomendados e previsão de prova!</p>
+                    
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-4">
+                            <h6 class="text-white fw-bold">Paces Recomendados (Zonas)</h6>
+                            <ul class="list-unstyled mt-3 text-white">
+                                <li class="mb-2">🟢 <strong>Treino Leve:</strong> <span id="paceLeve" class="fw-bold fs-5 text-white"></span> min/km</li>
+                                <li class="mb-2">🔴 <strong>Treino Forte:</strong> <span id="paceForte" class="fw-bold fs-5 text-white"></span> min/km</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-8">
+                            <h6 class="text-warning fw-bold">🏆 Previsão de Provas com este Pace</h6>
+                            <div class="row g-2 mt-1">
+                                <div class="col-6 col-md-3"><div class="time-box"><small class="text-white-50 d-block mb-1">5 KM</small><h5 id="time5k">--:--</h5></div></div>
+                                <div class="col-6 col-md-3"><div class="time-box"><small class="text-white-50 d-block mb-1">10 KM</small><h5 id="time10k">--:--</h5></div></div>
+                                <div class="col-6 col-md-3"><div class="time-box"><small class="text-white-50 d-block mb-1">Meia (21k)</small><h5 id="time21k">--:--</h5></div></div>
+                                <div class="col-6 col-md-3"><div class="time-box"><small class="text-white-50 d-block mb-1">Maratona</small><h5 id="time42k">--:--</h5></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mt-4">
+                <div class="glass-card text-center h-100">
+                    <h6 class="text-white text-uppercase fw-bold">📈 Projeção Fim do Mês</h6>
+                    <div class="stat-value text-white mt-2">{{ projecao_mensal|floatformat:1 }} <small class="fs-6">km</small></div>
+                </div>
+            </div>
+            <div class="col-md-4 mt-4">
+                <div class="glass-card text-center h-100">
+                    <h6 class="text-white text-uppercase fw-bold">🥇 Recorde Pessoal</h6>
                     <div class="stat-value text-warning mt-2">{{ maior_corrida|floatformat:1 }} <small class="fs-6">km</small></div>
-                    <div class="mt-2 text-muted small">Essa foi a maior distância que você já registrou de uma vez.</div>
                 </div>
             </div>
-
-            <div class="col-md-4">
+            <div class="col-md-4 mt-4">
                 <div class="glass-card text-center h-100">
-                    <h6 class="text-muted text-uppercase">🔥 Energia Gasta</h6>
+                    <h6 class="text-white text-uppercase fw-bold">🔥 Energia Gasta</h6>
                     <div class="stat-value text-danger mt-2">{{ calorias }} <small class="fs-6">kcal</small></div>
-                    <div class="mt-2 text-muted small">Você já correu {{ total_corridas }} vezes. Queimou o equivalente a <strong>🍕 {{ pizzas }} pizzas!</strong></div>
+                    <small class="text-white-50">Equivale a <strong class="text-white">🍕 {{ pizzas }} fatias de pizza!</strong></small>
                 </div>
             </div>
 
             <div class="col-12 mt-4">
                 <div class="glass-card">
-                    <h4 class="mb-1">📅 Seu Calendário de Treinos (Próximos 7 dias)</h4>
-                    <p class="text-muted small mb-3">Baseado no seu dia favorito ({{ dia_favorito }}), montamos essa sugestão de rotina:</p>
-                    
+                    <h4 class="mb-1 text-white">📅 Calendário de Treinos (Próximos 7 dias)</h4>
+                    <p class="text-white-50 small mb-3">Baseado no seu dia favorito (<strong class="text-white">{{ dia_favorito }}</strong>), montamos essa rotina:</p>
                     <div class="calendar-scroll">
                         {% for dia in plano_semanal %}
                         <div class="day-card {% if dia.is_hoje %}hoje{% endif %}">
-                            {% if dia.is_hoje %}<span class="badge bg-info mb-2">HOJE</span><br>{% endif %}
-                            <small class="text-muted fw-bold">{{ dia.dia_semana }}</small>
+                            {% if dia.is_hoje %}<span class="badge bg-info mb-2 text-white">HOJE</span><br>{% endif %}
+                            <small class="text-white-50 fw-bold">{{ dia.dia_semana }}</small>
                             <div class="fs-5 fw-bold text-white mb-1">{{ dia.data }}</div>
                             <div class="fs-2 mb-2">{{ dia.icon }}</div>
-                            <span class="badge bg-{{ dia.cor }} d-block mb-1">{{ dia.tipo }}</span>
-                            <small class="text-white-50">{{ dia.desc }}</small>
+                            <span class="badge bg-{{ dia.cor }} d-block mb-1 text-white">{{ dia.tipo }}</span>
                         </div>
                         {% endfor %}
                     </div>
@@ -105,68 +191,10 @@
             </div>
 
             <div class="col-12 mt-4">
-                <h4 class="mb-3 px-2">🧠 Coach de Bolso: Simulador de Situações</h4>
+                <h4 class="mb-3 px-2 text-white">🧠 Coach de Bolso: Simulador de Situações</h4>
                 <div class="accordion" id="coachAccordion">
-                    
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cenario1">
-                                🌧️ Situação 1: "Está chovendo muito e não quero ir pra rua."
-                            </button>
-                        </h2>
-                        <div id="cenario1" class="accordion-collapse collapse" data-bs-parent="#coachAccordion">
-                            <div class="accordion-body">
-                                <strong>Recomendação:</strong> Não pule o treino! Faça um treino de fortalecimento em casa (Core, Agachamentos, Flexões) por 30 minutos, ou se tiver acesso a uma esteira, coloque inclinação em 1% a 2% para simular a resistência da rua.
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cenario2">
-                                🥱 Situação 2: "Dormi mal, estou estressado ou com dores leves."
-                            </button>
-                        </h2>
-                        <div id="cenario2" class="accordion-collapse collapse" data-bs-parent="#coachAccordion">
-                            <div class="accordion-body">
-                                <strong>Recomendação:</strong> Troque o treino de hoje por <strong>Descanso Ativo</strong>. Faça uma caminhada leve de 20 minutos ou uma sessão de alongamento/Yoga. Forçar um treino forte hoje pode aumentar o risco de lesões. Escute seu corpo!
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cenario3">
-                                🚀 Situação 3: "Quero melhorar meu tempo (bater meu RP)."
-                            </button>
-                        </h2>
-                        <div id="cenario3" class="accordion-collapse collapse" data-bs-parent="#coachAccordion">
-                            <div class="accordion-body">
-                                <strong>Recomendação:</strong> Para correr mais rápido, você precisa treinar mais lento! 80% dos seus treinos na semana devem ser <strong>leves</strong> (num ritmo que dê para conversar). Use apenas 1 dia na semana para fazer "Tiros de Velocidade" ou treino de subida.
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-
-            <div class="col-12 mt-4">
-                <div class="glass-card pace-lab-box">
-                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
-                        <h4 class="mb-0">🔬 Laboratório de Previsão</h4>
-                        <div class="d-flex align-items-center mt-2 mt-md-0">
-                            <label class="me-2 text-muted fw-bold text-nowrap">Seu Pace Atual:</label>
-                            <input type="text" id="inputPace" class="form-control text-center fw-bold text-warning" value="{{ default_pace }}" style="width: 100px; font-size: 1.2rem;">
-                        </div>
-                    </div>
-                    <p class="text-muted">Mude o pace acima para recalcular seus tempos de prova!</p>
-                    
-                    <div class="row g-2 mt-1">
-                        <div class="col-6 col-md-3"><div class="time-box"><small class="text-muted d-block mb-1">5 KM</small><h5 id="time5k">--:--</h5></div></div>
-                        <div class="col-6 col-md-3"><div class="time-box"><small class="text-muted d-block mb-1">10 KM</small><h5 id="time10k">--:--</h5></div></div>
-                        <div class="col-6 col-md-3"><div class="time-box"><small class="text-muted d-block mb-1">Meia (21k)</small><h5 id="time21k">--:--</h5></div></div>
-                        <div class="col-6 col-md-3"><div class="time-box"><small class="text-muted d-block mb-1">Maratona (42k)</small><h5 id="time42k">--:--</h5></div></div>
-                    </div>
+                    <div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cenario1">🌧️ "Está chovendo muito e não quero ir pra rua."</button></h2><div id="cenario1" class="accordion-collapse collapse" data-bs-parent="#coachAccordion"><div class="accordion-body"><strong>Recomendação:</strong> Faça treino de fortalecimento em casa (Core, Agachamentos, Flexões) por 30min, ou use a esteira.</div></div></div>
+                    <div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cenario2">🥱 "Dormi mal, estou estressado ou com dor."</button></h2><div id="cenario2" class="accordion-collapse collapse" data-bs-parent="#coachAccordion"><div class="accordion-body"><strong>Recomendação:</strong> Troque o treino por <strong>Descanso Ativo</strong> (caminhada leve de 20min ou alongamento). Escute seu corpo!</div></div></div>
                 </div>
             </div>
 
@@ -194,6 +222,9 @@
             
             let partes = val.split(':');
             let totalSegundos = (parseInt(partes[0]) * 60) + parseInt(partes[1]);
+
+            document.getElementById('paceLeve').innerText = formataTempo(totalSegundos + 45); 
+            document.getElementById('paceForte').innerText = formataTempo(totalSegundos - 15); 
 
             document.getElementById('time5k').innerText = formataTempo(totalSegundos * 5);
             document.getElementById('time10k').innerText = formataTempo(totalSegundos * 10);
