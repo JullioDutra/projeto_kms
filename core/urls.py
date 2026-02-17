@@ -6,4 +6,5 @@ urlpatterns = [
     path('registrar/', views.registrar_km, name='registrar'),
     path('historico/', views.historico, name='historico'),
     path('ranking-geral/', views.ranking_geral, name='ranking_geral'),
+    path('desempenho/', views.desempenho, name='desempenho'),
 ]
