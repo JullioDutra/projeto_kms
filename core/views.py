@@ -7,6 +7,7 @@ from .forms import AtividadeForm
 from django.db.models.functions import ExtractWeekDay
 from django.db.models import Sum, Avg, Count, Max
 from datetime import timedelta
+import calendar
 
 # Helper para nomes dos meses
 MESES_NOME = {
