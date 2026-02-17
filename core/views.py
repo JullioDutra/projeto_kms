@@ -142,7 +142,8 @@ def desempenho(request):
 
             variacao_pct = 0
             if km_passado > 0:
-                variacao_pct = ((km_atual - km_passado) / float(km_passado)) * 100
+                # Convertendo os dois valores para float antes de subtrair e dividir
+                variacao_pct = ((float(km_atual) - float(km_passado)) / float(km_passado)) * 100
             elif km_atual > 0:
                 variacao_pct = 100 # Se não correu mês passado, crescimento de 100%
 
