@@ -7,13 +7,26 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #121212; color: #fff; font-family: 'Inter', sans-serif; }
+        body { background-color: #121212; color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
         .glass-card { background: #1e1e1e; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
         .stat-value { font-size: 2rem; font-weight: 900; }
-        .text-green { color: #2ecc71; }
-        .text-red { color: #e74c3c; }
-        .coach-box { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); border-left: 5px solid #00d2ff; }
         .pace-lab-box { background: linear-gradient(135deg, #111 0%, #222 100%); border-left: 5px solid #f39c12; }
+        
+        /* Estilos do Calendário */
+        .calendar-scroll { display: flex; overflow-x: auto; gap: 15px; padding-bottom: 10px; scrollbar-width: thin; scrollbar-color: #555 #1e1e1e; }
+        .calendar-scroll::-webkit-scrollbar { height: 8px; }
+        .calendar-scroll::-webkit-scrollbar-thumb { background-color: #555; border-radius: 10px; }
+        .day-card { min-width: 140px; background: #2a2a2a; border-radius: 12px; text-align: center; padding: 15px 10px; border: 1px solid #444; transition: transform 0.2s; }
+        .day-card:hover { transform: translateY(-5px); }
+        .day-card.hoje { border: 2px solid #00d2ff; background: #1a2a3a; }
+        
+        /* Estilos do Simulador (Accordion) */
+        .accordion-item { background-color: #1e1e1e; border: 1px solid #333; }
+        .accordion-button { background-color: #2b2b2b; color: #fff; font-weight: bold; }
+        .accordion-button:not(.collapsed) { background-color: #3a7bd5; color: #fff; box-shadow: none; }
+        .accordion-button::after { filter: invert(1); }
+        .accordion-body { color: #ccc; background-color: #1a1a1a; }
+
         .form-select, .form-control { background-color: #2b2b2b; color: white; border: 1px solid #444; }
         .form-select:focus, .form-control:focus { background-color: #333; color: white; border-color: #00d2ff; box-shadow: none; }
         .back-link { color: #aaa; text-decoration: none; display: inline-block; margin-bottom: 20px; }
@@ -26,7 +39,7 @@
 <div class="container py-5">
     <a href="{% url 'dashboard' %}" class="back-link">← Voltar para o Dashboard</a>
     
-    <h2 class="mb-4">📊 Smart Coach & Analytics</h2>
+    <h2 class="mb-4">📊 Smart Coach 360º</h2>
 
     <div class="glass-card mb-4">
         <form method="GET" class="row align-items-center">
@@ -39,7 +52,7 @@
                 </select>
             </div>
             <div class="col-md-4 col-sm-12">
-                <button type="submit" class="btn btn-primary w-100 btn-lg">Gerar Relatório</button>
+                <button type="submit" class="btn btn-primary w-100 btn-lg">Gerar Análise</button>
             </div>
         </form>
     </div>
@@ -49,106 +62,110 @@
             
             <div class="col-md-4">
                 <div class="glass-card text-center h-100">
-                    <h6 class="text-muted text-uppercase">Mês Atual vs Passado</h6>
-                    <div class="stat-value mt-2">{{ km_atual|floatformat:1 }} <small class="fs-6">km</small></div>
-                    {% if variacao_pct > 0 %}
-                        <div class="text-green fw-bold mt-2">▲ +{{ variacao_pct }}%</div>
-                    {% elif variacao_pct < 0 %}
-                        <div class="text-red fw-bold mt-2">▼ {{ variacao_pct }}%</div>
-                    {% else %}
-                        <div class="text-warning fw-bold mt-2">Estável</div>
-                    {% endif %}
+                    <h6 class="text-muted text-uppercase">📈 Projeção do Mês</h6>
+                    <div class="stat-value text-primary mt-2">{{ projecao_mensal|floatformat:1 }} <small class="fs-6">km</small></div>
+                    <div class="mt-2 text-muted small">Mantendo seu ritmo atual, você fechará o mês com essa marca! (Atual: {{ km_atual|floatformat:1 }}km)</div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="glass-card text-center h-100">
+                    <h6 class="text-muted text-uppercase">🥇 Recorde Pessoal</h6>
+                    <div class="stat-value text-warning mt-2">{{ maior_corrida|floatformat:1 }} <small class="fs-6">km</small></div>
+                    <div class="mt-2 text-muted small">Essa foi a maior distância que você já registrou de uma vez.</div>
                 </div>
             </div>
 
             <div class="col-md-4">
                 <div class="glass-card text-center h-100">
                     <h6 class="text-muted text-uppercase">🔥 Energia Gasta</h6>
-                    <div class="stat-value text-warning mt-2">{{ calorias }} <small class="fs-6">kcal</small></div>
-                    <div class="mt-3 text-muted">
-                        Isso equivale a queimar aproximadamente:<br>
-                        <strong class="text-white fs-5">🍕 {{ pizzas }} fatias de pizza!</strong>
+                    <div class="stat-value text-danger mt-2">{{ calorias }} <small class="fs-6">kcal</small></div>
+                    <div class="mt-2 text-muted small">Você já correu {{ total_corridas }} vezes. Queimou o equivalente a <strong>🍕 {{ pizzas }} pizzas!</strong></div>
+                </div>
+            </div>
+
+            <div class="col-12 mt-4">
+                <div class="glass-card">
+                    <h4 class="mb-1">📅 Seu Calendário de Treinos (Próximos 7 dias)</h4>
+                    <p class="text-muted small mb-3">Baseado no seu dia favorito ({{ dia_favorito }}), montamos essa sugestão de rotina:</p>
+                    
+                    <div class="calendar-scroll">
+                        {% for dia in plano_semanal %}
+                        <div class="day-card {% if dia.is_hoje %}hoje{% endif %}">
+                            {% if dia.is_hoje %}<span class="badge bg-info mb-2">HOJE</span><br>{% endif %}
+                            <small class="text-muted fw-bold">{{ dia.dia_semana }}</small>
+                            <div class="fs-5 fw-bold text-white mb-1">{{ dia.data }}</div>
+                            <div class="fs-2 mb-2">{{ dia.icon }}</div>
+                            <span class="badge bg-{{ dia.cor }} d-block mb-1">{{ dia.tipo }}</span>
+                            <small class="text-white-50">{{ dia.desc }}</small>
+                        </div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-4">
-                <div class="glass-card text-center h-100">
-                    <h6 class="text-muted text-uppercase">Último Registro</h6>
-                    <div class="stat-value text-info mt-2">{{ ultima.quantidade_km|floatformat:1 }} <small class="fs-6">km</small></div>
-                    <div class="mt-2 text-muted">Feito em: {{ ultima.data_envio|date:"d/m/Y" }}</div>
+            <div class="col-12 mt-4">
+                <h4 class="mb-3 px-2">🧠 Coach de Bolso: Simulador de Situações</h4>
+                <div class="accordion" id="coachAccordion">
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cenario1">
+                                🌧️ Situação 1: "Está chovendo muito e não quero ir pra rua."
+                            </button>
+                        </h2>
+                        <div id="cenario1" class="accordion-collapse collapse" data-bs-parent="#coachAccordion">
+                            <div class="accordion-body">
+                                <strong>Recomendação:</strong> Não pule o treino! Faça um treino de fortalecimento em casa (Core, Agachamentos, Flexões) por 30 minutos, ou se tiver acesso a uma esteira, coloque inclinação em 1% a 2% para simular a resistência da rua.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cenario2">
+                                🥱 Situação 2: "Dormi mal, estou estressado ou com dores leves."
+                            </button>
+                        </h2>
+                        <div id="cenario2" class="accordion-collapse collapse" data-bs-parent="#coachAccordion">
+                            <div class="accordion-body">
+                                <strong>Recomendação:</strong> Troque o treino de hoje por <strong>Descanso Ativo</strong>. Faça uma caminhada leve de 20 minutos ou uma sessão de alongamento/Yoga. Forçar um treino forte hoje pode aumentar o risco de lesões. Escute seu corpo!
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cenario3">
+                                🚀 Situação 3: "Quero melhorar meu tempo (bater meu RP)."
+                            </button>
+                        </h2>
+                        <div id="cenario3" class="accordion-collapse collapse" data-bs-parent="#coachAccordion">
+                            <div class="accordion-body">
+                                <strong>Recomendação:</strong> Para correr mais rápido, você precisa treinar mais lento! 80% dos seus treinos na semana devem ser <strong>leves</strong> (num ritmo que dê para conversar). Use apenas 1 dia na semana para fazer "Tiros de Velocidade" ou treino de subida.
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
             <div class="col-12 mt-4">
                 <div class="glass-card pace-lab-box">
                     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
-                        <h4 class="mb-0">🔬 Laboratório de Pace & Previsão de Provas</h4>
+                        <h4 class="mb-0">🔬 Laboratório de Previsão</h4>
                         <div class="d-flex align-items-center mt-2 mt-md-0">
                             <label class="me-2 text-muted fw-bold text-nowrap">Seu Pace Atual:</label>
                             <input type="text" id="inputPace" class="form-control text-center fw-bold text-warning" value="{{ default_pace }}" style="width: 100px; font-size: 1.2rem;">
                         </div>
                     </div>
-                    <p class="text-muted">Mude o pace acima para recalcular automaticamente seus tempos de prova e treinos!</p>
+                    <p class="text-muted">Mude o pace acima para recalcular seus tempos de prova!</p>
                     
-                    <div class="row g-3 mt-2">
-                        <div class="col-md-4">
-                            <h6 class="text-info">Zonas de Treino Sugeridas</h6>
-                            <ul class="list-unstyled mt-3">
-                                <li class="mb-2">🟢 <strong>Regenerativo (Leve):</strong> <span id="paceLeve" class="fw-bold"></span> min/km</li>
-                                <li class="mb-2">🔴 <strong>Tempo Run (Forte):</strong> <span id="paceForte" class="fw-bold"></span> min/km</li>
-                            </ul>
-                        </div>
-                        
-                        <div class="col-md-8">
-                            <h6 class="text-warning">🏆 Previsão de Conclusão de Provas</h6>
-                            <div class="row g-2 mt-1">
-                                <div class="col-6 col-md-3">
-                                    <div class="time-box">
-                                        <small class="text-muted d-block mb-1">5 KM</small>
-                                        <h5 id="time5k">--:--</h5>
-                                    </div>
-                                </div>
-                                <div class="col-6 col-md-3">
-                                    <div class="time-box">
-                                        <small class="text-muted d-block mb-1">10 KM</small>
-                                        <h5 id="time10k">--:--</h5>
-                                    </div>
-                                </div>
-                                <div class="col-6 col-md-3">
-                                    <div class="time-box">
-                                        <small class="text-muted d-block mb-1">Meia (21k)</small>
-                                        <h5 id="time21k">--:--</h5>
-                                    </div>
-                                </div>
-                                <div class="col-6 col-md-3">
-                                    <div class="time-box">
-                                        <small class="text-muted d-block mb-1">Maratona (42k)</small>
-                                        <h5 id="time42k">--:--</h5>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-12 mt-2">
-                <div class="glass-card coach-box">
-                    <h4 class="mb-2">🤖 Próximo Treino Seguro</h4>
-                    <div class="row mt-3">
-                        <div class="col-md-4">
-                            <h6 class="text-info">Data Ideal</h6>
-                            <h5>⏱️ {{ mensagem_data }}</h5>
-                        </div>
-                        <div class="col-md-4">
-                            <h6 class="text-info">Teto Máximo (Regra 10%)</h6>
-                            <h5>📏 Não passe de {{ km_recomendado }} km</h5>
-                        </div>
-                        <div class="col-md-4">
-                            <h6 class="text-info">Estatística Mágica</h6>
-                            <h5>📅 Você rende mais nas <strong>{{ dia_favorito }}s</strong>!</h5>
-                        </div>
+                    <div class="row g-2 mt-1">
+                        <div class="col-6 col-md-3"><div class="time-box"><small class="text-muted d-block mb-1">5 KM</small><h5 id="time5k">--:--</h5></div></div>
+                        <div class="col-6 col-md-3"><div class="time-box"><small class="text-muted d-block mb-1">10 KM</small><h5 id="time10k">--:--</h5></div></div>
+                        <div class="col-6 col-md-3"><div class="time-box"><small class="text-muted d-block mb-1">Meia (21k)</small><h5 id="time21k">--:--</h5></div></div>
+                        <div class="col-6 col-md-3"><div class="time-box"><small class="text-muted d-block mb-1">Maratona (42k)</small><h5 id="time42k">--:--</h5></div></div>
                     </div>
                 </div>
             </div>
@@ -166,43 +183,27 @@
             let h = Math.floor(totalSegundos / 3600);
             let m = Math.floor((totalSegundos % 3600) / 60);
             let s = Math.floor(totalSegundos % 60);
-            
             let format_m = m.toString().padStart(2, '0');
             let format_s = s.toString().padStart(2, '0');
-            
-            if (h > 0) {
-                return `${h.toString().padStart(2, '0')}:${format_m}:${format_s}`;
-            }
-            return `${format_m}:${format_s}`;
+            return h > 0 ? `${h.toString().padStart(2, '0')}:${format_m}:${format_s}` : `${format_m}:${format_s}`;
         }
 
         function calcularTudo() {
             let val = inputPace.value.trim();
-            // Valida o formato MM:SS
             if(!/^\d{1,2}:\d{2}$/.test(val)) return; 
             
             let partes = val.split(':');
-            let min = parseInt(partes[0]);
-            let seg = parseInt(partes[1]);
-            let totalSegundos = (min * 60) + seg;
+            let totalSegundos = (parseInt(partes[0]) * 60) + parseInt(partes[1]);
 
-            // Zonas de Treino
-            document.getElementById('paceLeve').innerText = formataTempo(totalSegundos + 45);
-            document.getElementById('paceForte').innerText = formataTempo(totalSegundos - 15);
-
-            // Previsões
             document.getElementById('time5k').innerText = formataTempo(totalSegundos * 5);
             document.getElementById('time10k').innerText = formataTempo(totalSegundos * 10);
             document.getElementById('time21k').innerText = formataTempo(totalSegundos * 21.0975);
             document.getElementById('time42k').innerText = formataTempo(totalSegundos * 42.195);
         }
-
-        // Calcula ao carregar a página
         calcularTudo();
-
-        // Calcula sempre que o usuário digita
         inputPace.addEventListener('input', calcularTudo);
     });
 </script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
