@@ -13,8 +13,13 @@ class Atividade(models.Model):
     nome_usuario = models.CharField(max_length=100, verbose_name="Nome do Corredor")
     quantidade_km = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="KM Percorrido")
     pace = models.CharField(max_length=5, blank=True, null=True, verbose_name="Pace (Min/Km)", help_text="Ex: 05:30")
-    foto_comprovante = models.ImageField(upload_to='comprovantes/', verbose_name="Foto do Comprovante")
+    
+    # MODIFICADO: A foto agora é opcional (para o Strava poder salvar sem foto)
+    foto_comprovante = models.ImageField(upload_to='comprovantes/', verbose_name="Foto do Comprovante", blank=True, null=True)
+    
     data_envio = models.DateTimeField(auto_now_add=True)
+    
+    strava_id = models.CharField(max_length=100, blank=True, null=True, unique=True)
 
     def __str__(self):
         return f"{self.nome_usuario} - {self.quantidade_km}km"
