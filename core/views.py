@@ -1,3 +1,5 @@
+import requests
+from django.conf import settings
 from django.shortcuts import render, redirect
 from .models import Atividade, MetaMensal
 from django.db.models import Sum, Count
@@ -204,3 +206,79 @@ def desempenho(request):
             })
 
     return render(request, 'core/desempenho.html', context)
+
+# ==========================================
+# INTEGRAÇÃO COM STRAVA
+# ==========================================
+
+def strava_login(request):
+    """ Redireciona o usuário para a tela oficial de login do Strava """
+    client_id = settings.STRAVA_CLIENT_ID
+    redirect_uri = settings.STRAVA_REDIRECT_URI
+    # Pedimos permissão para ler as atividades ('activity:read_all')
+    url = f"https://www.strava.com/oauth/authorize?client_id={client_id}&response_type=code&redirect_uri={redirect_uri}&approval_prompt=force&scope=activity:read_all"
+    return redirect(url)
+
+def strava_callback(request):
+    """ O Strava devolve o usuário para cá após o login """
+    error = request.GET.get('error')
+    if error:
+        return redirect('dashboard') # Se a pessoa clicar em "Cancelar" no Strava
+
+    code = request.GET.get('code')
+    if not code:
+        return redirect('dashboard')
+
+    # 1. Trocar o 'code' por um Token de Acesso Oficial
+    token_url = "https://www.strava.com/oauth/token"
+    payload = {
+        'client_id': settings.STRAVA_CLIENT_ID,
+        'client_secret': settings.STRAVA_CLIENT_SECRET,
+        'code': code,
+        'grant_type': 'authorization_code'
+    }
+    res = requests.post(token_url, data=payload)
+    
+    if res.status_code != 200:
+        return redirect('dashboard') # Erro de comunicação
+
+    token_data = res.json()
+    access_token = token_data.get('access_token')
+    # Pega o primeiro nome da pessoa cadastrado no Strava
+    athlete_nome = token_data.get('athlete', {}).get('firstname', 'Atleta Strava')
+
+    # 2. Ir na conta da pessoa e pegar a ÚLTIMA corrida registrada
+    activities_url = "https://www.strava.com/api/v3/athlete/activities?per_page=1"
+    headers = {'Authorization': f'Bearer {access_token}'}
+    act_res = requests.get(activities_url, headers=headers)
+
+    if act_res.status_code == 200 and len(act_res.json()) > 0:
+        atividade = act_res.json()[0]
+        strava_id = str(atividade['id'])
+        
+        # Só salva se essa corrida ainda não estiver no nosso Banco de Dados
+        if not Atividade.objects.filter(strava_id=strava_id).exists():
+            
+            # Converter metros para KM
+            distancia_metros = atividade['distance']
+            distancia_km = distancia_metros / 1000.0
+            
+            # Calcular o Pace (Tempo em movimento / Distancia)
+            moving_time = atividade['moving_time']
+            pace_str = ""
+            if distancia_km > 0:
+                pace_segundos = moving_time / distancia_km
+                m = int(pace_segundos // 60)
+                s = int(pace_segundos % 60)
+                pace_str = f"{m:02d}:{s:02d}"
+
+            # Salvar automaticamente no nosso Banco! (Sem precisar de foto)
+            if distancia_km > 0.1: # Só salva se tiver corrido mais de 100 metros
+                Atividade.objects.create(
+                    nome_usuario=athlete_nome,
+                    quantidade_km=round(distancia_km, 2),
+                    pace=pace_str,
+                    strava_id=strava_id
+                )
+
+    return redirect('dashboard')
