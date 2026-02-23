@@ -125,3 +125,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+# --- CONFIGURAÇÕES DO STRAVA ---
+STRAVA_CLIENT_ID = '205104'
+STRAVA_CLIENT_SECRET = '6af0db093628b29c8ebf122885595a228a402ef9'
+STRAVA_REDIRECT_URI = 'https://jullio.pythonanywhere.com/strava/callback/'
