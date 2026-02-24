@@ -144,13 +144,13 @@
         }
 
         /* --- BOTÕES INFERIORES (MODERN APP MENU) --- */
-        .btn-modern {
+.btn-modern {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
             color: #ccc;
             border-radius: 14px;
-            padding: 12px 10px;
-            font-size: 0.9rem;
+            padding: 10px 2px; /* Reduzimos o padding lateral */
+            font-size: 0.8rem; /* Fonte um pouco menor */
             font-weight: 600;
             display: flex;
             flex-direction: column;
@@ -160,8 +160,7 @@
             transition: all 0.2s ease;
             text-decoration: none;
             backdrop-filter: blur(10px);
-            flex: 1; /* Distribui a largura por igual */
-            min-width: 90px;
+            width: 100%;
         }
         .btn-modern:hover {
             background: rgba(255, 255, 255, 0.1);
@@ -239,24 +238,24 @@
                     </a>
                 </div>
 
-                <div class="d-flex justify-content-between gap-2 px-2">
-                    <a href="{% url 'historico' %}" class="btn-modern btn-history">
-                        <span class="icon-lg">📅</span>
-                        Histórico
-                    </a>
-                    <a href="{% url 'ranking_geral' %}" class="btn-modern btn-ranking">
-                        <span class="icon-lg">🏆</span>
-                        Ranking
-                    </a>
-                    <a href="{% url 'desempenho' %}" class="btn-modern btn-performance">
-                        <span class="icon-lg">📊</span>
-                        Coach
-                    </a>
-                    <a href="{% url 'feed' %}" class="btn-modern btn-performance">
-                        <span class="icon-lg">📱</span>
-                        Feed
-                    </a>
-                </div>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 15px;">
+                        <a href="{% url 'historico' %}" class="btn-modern btn-history">
+                            <span class="icon-lg">📅</span>
+                            Histórico
+                        </a>
+                        <a href="{% url 'ranking_geral' %}" class="btn-modern btn-ranking">
+                            <span class="icon-lg">🏆</span>
+                            Ranking
+                        </a>
+                        <a href="{% url 'desempenho' %}" class="btn-modern btn-performance">
+                            <span class="icon-lg">📊</span>
+                            Coach
+                        </a>
+                        <a href="{% url 'feed' %}" class="btn-modern btn-feed">
+                            <span class="icon-lg">📱</span>
+                            Feed
+                        </a>
+                    </div>
 
             </div>
         </div>
