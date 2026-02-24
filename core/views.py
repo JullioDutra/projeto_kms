@@ -284,35 +284,58 @@ def strava_callback(request):
     return redirect('dashboard')
 
 
-
 def feed_atividades(request):
     atividades_feed = Atividade.objects.all().order_by('-data_envio')
-    
-    # Lógica dos FOGUINHOS 🔥 (Conta tanto Bike quanto Corrida)
     atletas = Atividade.objects.values_list('nome_usuario', flat=True).distinct()
     ranking_foguinhos = []
-    
     hoje = timezone.now().date()
-    ontem = hoje - timedelta(days=1)
     
     for atleta in atletas:
-        datas_treinos = Atividade.objects.filter(nome_usuario=atleta).dates('data_envio', 'day', order='DESC')
+        # Pega as datas únicas, da mais recente para a mais antiga
+        datas_treinos = list(Atividade.objects.filter(nome_usuario=atleta).dates('data_envio', 'day', order='DESC'))
+        
         streak = 0
         if datas_treinos:
-            if datas_treinos[0] < ontem:
-                streak = 0
-            else:
-                data_esperada = datas_treinos[0]
-                for data in datas_treinos:
-                    if data == data_esperada:
+            # Tolerância de 3 dias: Se a diferença entre hoje e o último treino for <= 3, a ofensiva tá viva!
+            dias_sem_treino = (hoje - datas_treinos[0]).days
+            if dias_sem_treino <= 3:
+                streak = 1 # Já conta 1 ponto pela sequência viva
+                
+                # Conta o tamanho da corrente (se o intervalo entre os treinos não passar de 3 dias)
+                for i in range(len(datas_treinos) - 1):
+                    if (datas_treinos[i] - datas_treinos[i+1]).days <= 3:
                         streak += 1
-                        data_esperada -= timedelta(days=1)
                     else:
-                        break 
+                        break # A corrente quebrou no passado
+                        
         if streak > 0:
             ranking_foguinhos.append({'nome': atleta, 'fogo': streak})
             
+    # Ordena pelo maior fogo
     ranking_foguinhos = sorted(ranking_foguinhos, key=lambda x: x['fogo'], reverse=True)
+    
+    # Define as Cores e Animação do 1º Lugar
+    if ranking_foguinhos:
+        ranking_foguinhos[0]['is_first'] = True # O primeiro colocado ganha o fogo pulsante
+        
+    for rank in ranking_foguinhos:
+        fogo = rank['fogo']
+        if fogo <= 2: rank['cor'] = '#ffca28' # Amarelo (Iniciante)
+        elif fogo <= 5: rank['cor'] = '#ff7043' # Laranja (Esquentando)
+        elif fogo <= 10: rank['cor'] = '#e91e63' # Rosa/Vermelho (Pegando Fogo)
+        else: rank['cor'] = '#00e5ff' # Azul Cyan (Lendário)
 
-    context = {'atividades': atividades_feed, 'foguinhos': ranking_foguinhos}
+    # Lógica do DESTAQUE DO MÊS (Quem tem mais KM no mês atual)
+    destaque = Atividade.objects.filter(
+        data_envio__month=hoje.month, 
+        data_envio__year=hoje.year, 
+        tipo='corrida'
+    ).values('nome_usuario').annotate(total=Sum('quantidade_km')).order_by('-total').first()
+
+    context = {
+        'atividades': atividades_feed, 
+        'foguinhos': ranking_foguinhos,
+        'destaque': destaque
+    }
     return render(request, 'core/feed.html', context)
+
