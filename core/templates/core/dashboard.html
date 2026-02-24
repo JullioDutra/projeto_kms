@@ -198,6 +198,16 @@
     </div>
 </header>
 
+    {% if request.user.is_authenticated %}
+    <div class="d-flex align-items-center gap-3 mb-4 p-3 rounded-4" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+        <img src="{{ request.session.foto_strava }}" alt="Perfil" class="rounded-circle" style="width: 55px; height: 55px; border: 2px solid #fc4c02; object-fit: cover;">
+        <div>
+            <h5 class="mb-0 text-white fw-bold">Olá, {{ request.user.first_name }}! 🔥</h5>
+            <small class="text-muted fw-bold"><i class="bi bi-strava" style="color: #fc4c02;"></i> Conta Conectada</small>
+        </div>
+    </div>
+    {% endif %}
+
 <div class="container pb-5">
     <div class="row g-4 justify-content-center">
         
