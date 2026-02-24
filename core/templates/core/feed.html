@@ -102,8 +102,12 @@
         <div class="streak-item {% if atleta.is_first %}is-first{% endif %}">
             
             <div class="streak-ring" style="border-color: {{ atleta.cor }}; box-shadow: 0 0 15px {{ atleta.cor }}60;">
-                <i class="bi bi-fire" style="color: {{ atleta.cor }}; text-shadow: 0 0 15px {{ atleta.cor }};"></i>
-                <div class="streak-count" style="border-color: {{ atleta.cor }}; color: {{ atleta.cor }};">{{ atleta.fogo }}</div>
+                {% if atleta.avatar %}
+                    <img src="{{ atleta.avatar }}" alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; padding: 2px;">
+                {% else %}
+                    <i class="bi bi-fire" style="color: {{ atleta.cor }}; text-shadow: 0 0 15px {{ atleta.cor }};"></i>
+                {% endif %}
+                <div class="streak-count" style="border-color: {{ atleta.cor }}; color: {{ atleta.cor }}; background: #121212;">{{ atleta.fogo }}</div>
             </div>
             
             <div class="streak-name" {% if atleta.is_first %}style="color: {{ atleta.cor }};"{% endif %}>
@@ -125,7 +129,18 @@
     <div class="post-card">
         <div class="post-header">
             <div class="user-info">
-                <div class="avatar text-white">{{ post.nome_usuario|make_list|first|upper }}</div>
+                <div class="user-info">
+                {% if post.avatar_url %}
+                    <img src="{{ post.avatar_url }}" alt="Perfil" class="avatar" style="border: 2px solid #3a7bd5; object-fit: cover; background: transparent;">
+                {% else %}
+                    <div class="avatar text-white">{{ post.nome_usuario|make_list|first|upper }}</div>
+                {% endif %}
+                
+                <div class="post-meta">
+                    <h6>{{ post.nome_usuario }}</h6>
+                    <small><i class="bi bi-clock"></i> {{ post.data_envio|date:"d M, H:i" }}</small>
+                </div>
+            </div>
                 <div class="post-meta">
                     <h6>{{ post.nome_usuario }}</h6>
                     <small><i class="bi bi-clock"></i> {{ post.data_envio|date:"d M, H:i" }}</small>
