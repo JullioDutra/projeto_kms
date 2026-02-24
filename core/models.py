@@ -34,3 +34,19 @@ class Atividade(models.Model):
     class Meta:
         verbose_name = "Atividade"
         verbose_name_plural = "Atividades"
+
+
+class Rota(models.Model):
+    nome = models.CharField(max_length=100, verbose_name="Nome da Rota")
+    criador = models.CharField(max_length=100, verbose_name="Criador (Atleta)")
+    distancia_estimada = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="Distância (KM)")
+    # O JSONField vai guardar todas as coordenadas (Latitude e Longitude) que a pessoa clicou
+    coordenadas = models.JSONField(verbose_name="Coordenadas do Mapa")
+    data_criacao = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.nome} ({self.distancia_estimada}km) - {self.criador}"
+
+    class Meta:
+        verbose_name = "Rota da Comunidade"
+        verbose_name_plural = "Rotas da Comunidade"
