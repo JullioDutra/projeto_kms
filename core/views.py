@@ -13,6 +13,8 @@ from django.utils import timezone
 import calendar
 import json
 from django.http import JsonResponse
+from django.contrib.auth.models import User
+from django.contrib.auth import login
  
 
 # Helper para nomes dos meses
@@ -223,16 +225,11 @@ def strava_login(request):
     return redirect(url)
 
 def strava_callback(request):
-    """ O Strava devolve o usuário para cá após o login """
     error = request.GET.get('error')
-    if error:
-        return redirect('dashboard') # Se a pessoa clicar em "Cancelar" no Strava
-
+    if error: return redirect('dashboard')
     code = request.GET.get('code')
-    if not code:
-        return redirect('dashboard')
+    if not code: return redirect('dashboard')
 
-    # 1. Trocar o 'code' por um Token de Acesso Oficial
     token_url = "https://www.strava.com/oauth/token"
     payload = {
         'client_id': settings.STRAVA_CLIENT_ID,
@@ -241,49 +238,63 @@ def strava_callback(request):
         'grant_type': 'authorization_code'
     }
     res = requests.post(token_url, data=payload)
-    
-    if res.status_code != 200:
-        return redirect('dashboard') # Erro de comunicação
+    if res.status_code != 200: return redirect('dashboard')
 
     token_data = res.json()
     access_token = token_data.get('access_token')
-    # Pega o primeiro nome da pessoa cadastrado no Strava
-    athlete_nome = token_data.get('athlete', {}).get('firstname', 'Atleta Strava')
+    
+    # 1. PEGAR OS DADOS PESSOAIS DO ATLETA
+    athlete = token_data.get('athlete', {})
+    athlete_nome = athlete.get('firstname', 'Atleta Strava')
+    strava_id = str(athlete.get('id'))
+    foto_url = athlete.get('profile', 'https://cdn-icons-png.flaticon.com/512/149/149071.png')
 
-    # 2. Ir na conta da pessoa e pegar a ÚLTIMA corrida registrada
+    # 2. SISTEMA DE LOGIN (MÁGICA DO DJANGO)
+    # Procura se o atleta já existe no nosso banco. Se não, cria uma conta para ele!
+    user, created = User.objects.get_or_create(username=strava_id)
+    if created:
+        user.first_name = athlete_nome
+        user.save()
+
+    # Faz o login oficial (cria o cookie de sessão)
+    login(request, user)
+    
+    # Salva a foto na sessão para mostrarmos no site
+    request.session['foto_strava'] = foto_url
+    request.session['nome_strava'] = athlete_nome
+
+    # 3. PUXAR A ÚLTIMA CORRIDA (Código original mantido)
     activities_url = "https://www.strava.com/api/v3/athlete/activities?per_page=1"
     headers = {'Authorization': f'Bearer {access_token}'}
     act_res = requests.get(activities_url, headers=headers)
 
     if act_res.status_code == 200 and len(act_res.json()) > 0:
         atividade = act_res.json()[0]
-        strava_id = str(atividade['id'])
+        act_strava_id = str(atividade['id'])
         
-        # Só salva se essa corrida ainda não estiver no nosso Banco de Dados
-        if not Atividade.objects.filter(strava_id=strava_id).exists():
+        if not Atividade.objects.filter(strava_id=act_strava_id).exists():
+            distancia_km = atividade['distance'] / 1000.0
             
-            # Converter metros para KM
-            distancia_metros = atividade['distance']
-            distancia_km = distancia_metros / 1000.0
-            
-            # Calcular o Pace (Tempo em movimento / Distancia)
-            moving_time = atividade['moving_time']
-            pace_str = ""
-            if distancia_km > 0:
-                pace_segundos = moving_time / distancia_km
-                m = int(pace_segundos // 60)
-                s = int(pace_segundos % 60)
-                pace_str = f"{m:02d}:{s:02d}"
+            tipo_atividade = 'corrida'
+            if atividade.get('type') == 'Ride':
+                tipo_atividade = 'bike'
 
-            # Salvar automaticamente no nosso Banco! (Sem precisar de foto)
-            if distancia_km > 0.1: # Só salva se tiver corrido mais de 100 metros
+            if distancia_km > 0.1:
+                moving_time = atividade['moving_time']
+                pace_str = ""
+                if distancia_km > 0:
+                    pace_segundos = moving_time / distancia_km
+                    m = int(pace_segundos // 60)
+                    s = int(pace_segundos % 60)
+                    pace_str = f"{m:02d}:{s:02d}"
+
                 Atividade.objects.create(
                     nome_usuario=athlete_nome,
                     quantidade_km=round(distancia_km, 2),
                     pace=pace_str,
-                    strava_id=strava_id
+                    strava_id=act_strava_id,
+                    tipo=tipo_atividade
                 )
-
     return redirect('dashboard')
 
 
