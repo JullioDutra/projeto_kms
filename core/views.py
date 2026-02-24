@@ -359,10 +359,11 @@ def feed_atividades(request):
         tipo='corrida'
     ).values('nome_usuario').annotate(total=Sum('quantidade_km')).order_by('-total').first()
 
-    # 2. MÁGICA RETROATIVA: Aplica a foto a TODOS os posts antigos que estavam sem foto
+    # 2.RETROATIVA: Aplica a foto a TODOS os posts antigos que estavam sem foto
     for post in atividades_feed:
         if not post.avatar_url and post.nome_usuario in avatares:
             post.avatar_url = avatares[post.nome_usuario]
+            post.save()
 
     context = {
         'atividades': atividades_feed, 
