@@ -62,9 +62,9 @@
         
         <div class="footer-card">
             <small class="text-muted"><i class="bi bi-calendar3"></i> {{ rota.data_criacao|date:"d/m/Y" }}</small>
-            <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-bold disabled">
-                Ver Mapa (Em Breve)
-            </button>
+            <a href="{% url 'ver_rota' rota.id %}" class="btn btn-sm btn-outline-info rounded-pill px-3 fw-bold">
+                <i class="bi bi-map"></i> Ver Mapa
+            </a>
         </div>
     </div>
     {% empty %}
