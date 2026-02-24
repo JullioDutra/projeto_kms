@@ -367,6 +367,39 @@ def listar_rotas(request):
     return render(request, 'core/listar_rotas.html', {'rotas': rotas})
 
 def ver_rota(request, id):
-    # Procura a rota no banco de dados. Se não achar, dá erro 404 (Página não encontrada)
     rota = get_object_or_404(Rota, id=id)
-    return render(request, 'core/ver_rota.html', {'rota': rota})
+    
+    # 1. Se a pessoa enviar um tempo novo pelo formulário:
+    if request.method == 'POST':
+        from .models import TempoRota # Importação local rápida
+        atleta = request.POST.get('atleta')
+        minutos = int(request.POST.get('minutos', 0) or 0)
+        segundos = int(request.POST.get('segundos', 0) or 0)
+        
+        if atleta and (minutos > 0 or segundos > 0):
+            TempoRota.objects.create(
+                rota=rota,
+                nome_atleta=atleta,
+                tempo_minutos=minutos,
+                tempo_segundos=segundos
+            )
+            return redirect('ver_rota', id=rota.id)
+
+    # 2. Montar o Ranking (Rei da Rota)
+    # Pega todos os tempos e ordena do mais rápido para o mais devagar
+    tempos_brutos = list(rota.tempos.all())
+    tempos_brutos.sort(key=lambda x: x.tempo_total_segundos)
+    
+    ranking_tempos = []
+    atletas_vistos = set()
+    
+    # Filtra para mostrar apenas o melhor tempo de cada atleta (Recorde Pessoal)
+    for t in tempos_brutos:
+        if t.nome_atleta not in atletas_vistos:
+            ranking_tempos.append(t)
+            atletas_vistos.add(t.nome_atleta)
+
+    return render(request, 'core/ver_rota.html', {
+        'rota': rota, 
+        'ranking_tempos': ranking_tempos
+    })
