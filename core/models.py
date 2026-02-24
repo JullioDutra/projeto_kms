@@ -50,3 +50,26 @@ class Rota(models.Model):
     class Meta:
         verbose_name = "Rota da Comunidade"
         verbose_name_plural = "Rotas da Comunidade"
+
+
+class TempoRota(models.Model):
+    rota = models.ForeignKey(Rota, on_delete=models.CASCADE, related_name='tempos')
+    nome_atleta = models.CharField(max_length=100, verbose_name="Atleta")
+    tempo_minutos = models.PositiveIntegerField(verbose_name="Minutos")
+    tempo_segundos = models.PositiveIntegerField(verbose_name="Segundos")
+    data_registro = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def tempo_total_segundos(self):
+        return (self.tempo_minutos * 60) + self.tempo_segundos
+
+    @property
+    def tempo_formatado(self):
+        return f"{self.tempo_minutos:02d}:{self.tempo_segundos:02d}"
+
+    def __str__(self):
+        return f"{self.nome_atleta} - {self.tempo_formatado} em {self.rota.nome}"
+
+    class Meta:
+        verbose_name = "Tempo na Rota"
+        verbose_name_plural = "Tempos nas Rotas"
