@@ -5,104 +5,120 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hall da Fama - Geral</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #121212; color: #fff; font-family: 'Inter', sans-serif; }
+        body { background-color: #121212; color: #fff; font-family: 'Inter', sans-serif; padding-bottom: 40px; }
         
-        .glass-card {
-            background: #1e1e1e;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 1.5rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        /* Tabela Transparente e Dark */
-        .table-custom {
-            --bs-table-bg: transparent;
-            --bs-table-color: #fff;
-            --bs-table-border-color: rgba(255,255,255,0.1);
-            --bs-table-hover-bg: rgba(255,255,255,0.05);
-        }
-        
-        .table-custom th {
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #aaa;
-            border-bottom-width: 2px;
-        }
-
-        .back-link { color: #aaa; text-decoration: none; display: inline-block; margin-bottom: 20px; }
+        .back-link { color: #888; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-weight: 600; margin-bottom: 25px; transition: 0.2s; }
         .back-link:hover { color: #fff; }
 
-        /* Badge Dias Ativos mais compacto */
+        .glass-card {
+            background: #1e1e1e;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        /* --- TABELA PREMIUM --- */
+        .table-responsive { overflow-x: auto; }
+        .table { color: #fff; border-collapse: separate; border-spacing: 0 8px; margin-top: -8px; }
+        .table thead th { border-bottom: none; color: #888; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; padding: 0 15px; }
+        .table tbody tr { background: rgba(255,255,255,0.03); transition: transform 0.2s, background 0.2s; }
+        .table tbody tr:hover { transform: translateY(-2px); background: rgba(255,255,255,0.06); }
+        .table td { border: none; padding: 15px; vertical-align: middle; }
+        .table td:first-child { border-radius: 12px 0 0 12px; }
+        .table td:last-child { border-radius: 0 12px 12px 0; }
+
+        /* Estilo do Top 3 */
+        .rank-icon { font-size: 1.3rem; }
+        .rank-1 { color: #ffd700; filter: drop-shadow(0 0 5px rgba(255,215,0,0.5)); }
+        .rank-2 { color: #c0c0c0; }
+        .rank-3 { color: #cd7f32; }
+
+        /* Badge Dias Ativos */
         .badge-dias { 
-            background: rgba(255, 255, 255, 0.1); 
-            padding: 6px 10px; 
-            border-radius: 8px; 
-            font-size: 0.85em;
-            white-space: nowrap; /* Não quebra linha */
+            background: rgba(255, 255, 255, 0.05); 
+            padding: 6px 12px; 
+            border-radius: 20px; 
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #ccc;
+            white-space: nowrap;
             border: 1px solid rgba(255,255,255,0.1);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
 
         /* Ajustes Mobile */
         @media (max-width: 576px) {
-            .glass-card { padding: 1rem; }
+            .glass-card { padding: 1.2rem; }
             h2 { font-size: 1.5rem; }
-            .badge-dias { font-size: 0.75em; padding: 4px 6px; }
-            .table-custom td, .table-custom th { padding: 0.5rem; font-size: 0.9rem; }
+            .badge-dias { font-size: 0.75em; padding: 5px 8px; }
+            .table td, .table th { padding: 10px; font-size: 0.9rem; }
         }
     </style>
 </head>
 <body>
-<div class="container py-5">
-    <a href="{% url 'dashboard' %}" class="back-link">← Voltar para o Dashboard</a>
+<div class="container py-4" style="max-width: 800px;">
+    
+    <a href="{% url 'dashboard' %}" class="back-link">
+        <i class="bi bi-arrow-left"></i> Voltar para o Dashboard
+    </a>
     
     <div class="glass-card">
         <div class="text-center mb-4">
-            <h2 class="mb-2">🏆 Hall da Fama Geral</h2>
-            <p class="text-muted small">Somatório de todos os tempos</p>
+            <h2 class="mb-2 fw-bold"><i class="bi bi-stars text-warning"></i> Hall da Fama Geral</h2>
+            <p class="text-muted small fw-bold">Somatório de todos os tempos</p>
         </div>
         
         <div class="table-responsive">
-            <table class="table table-custom table-hover align-middle">
+            <table class="table align-middle">
                 <thead>
                     <tr>
-                        <th style="width: 50px;">#</th>
+                        <th class="text-center" style="width: 50px;">Pos</th>
                         <th>Atleta</th>
-                        <th>Nível</th>
-                        <th class="text-center">Atividade</th>
-                        <th class="text-end">Total</th>
+                        <th class="text-center">Dias Ativos</th>
+                        <th class="text-end">Total KM</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for corredor in ranking %}
                     <tr>
-                        <td class="fw-bold text-secondary">{{ forloop.counter }}</td>
-                        
-                        <td class="fw-bold">
-                            {{ corredor.nome_usuario }}
+                        <td class="text-center">
+                            {% if forloop.counter == 1 %} <i class="bi bi-trophy-fill rank-icon rank-1"></i>
+                            {% elif forloop.counter == 2 %} <i class="bi bi-award-fill rank-icon rank-2"></i>
+                            {% elif forloop.counter == 3 %} <i class="bi bi-award-fill rank-icon rank-3"></i>
+                            {% else %} <span class="fw-bold text-muted">{{ forloop.counter }}º</span>
+                            {% endif %}
                         </td>
                         
                         <td>
-                            <small class="{{ corredor.classe_nivel }} fw-bold" style="font-size: 0.8rem;">
+                            <div class="fw-bold text-white">{{ corredor.nome_usuario }}</div>
+                            <small class="{{ corredor.classe_nivel }} fw-bold" style="font-size: 0.75rem;">
                                 {{ corredor.nivel }}
                             </small>
                         </td>
                         
                         <td class="text-center">
                             <span class="badge-dias">
-                                📅 {{ corredor.dias_ativos }} dias
+                                <i class="bi bi-calendar2-check text-info"></i> {{ corredor.dias_ativos }}
                             </span>
                         </td>
                         
-                        <td class="text-end fw-bold text-warning">
-                            {{ corredor.total_km_geral|floatformat:1 }} km
+                        <td class="text-end fw-bold text-warning fs-5">
+                            {{ corredor.total_km_geral|floatformat:1 }} <span class="fs-6 text-muted">km</span>
                         </td>
                     </tr>
                     {% empty %}
-                    <tr><td colspan="5" class="text-center text-muted py-4">Ainda sem dados.</td></tr>
+                    <tr>
+                        <td colspan="4" class="text-center py-5">
+                            <i class="bi bi-inbox text-muted fs-1 d-block mb-3"></i>
+                            <span class="text-muted fw-bold">Ainda sem dados registrados.</span>
+                        </td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
