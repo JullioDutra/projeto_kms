@@ -20,11 +20,46 @@
         .painel-info { background: #1a1d20; padding: 25px; border-radius: 20px; margin-top: -20px; position: relative; z-index: 10; box-shadow: 0 -10px 25px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.05); }
         .distancia-display { font-size: 2.5rem; font-weight: 900; color: #00d2ff; line-height: 1; }
         
-        .btn-desafio { background: linear-gradient(135deg, #ffca28, #ff6b00); color: black; font-weight: 900; border: none; box-shadow: 0 5px 15px rgba(255, 107, 0, 0.4); transition: transform 0.2s; }
-        .btn-desafio:hover { transform: scale(1.02); color: black; }
+        /* Botão Iniciar Desafio (Gradiente Premium) */
+        .btn-desafio { 
+            background: linear-gradient(135deg, #ffca28, #ff6b00); 
+            color: #000 !important; 
+            font-weight: 900; border: none; 
+            box-shadow: 0 5px 15px rgba(255, 107, 0, 0.3); 
+            transition: transform 0.2s; 
+        }
+        .btn-desafio:hover { transform: scale(1.02); }
 
-        .form-control { background-color: #2b2b2b !important; border: 1px solid #444 !important; color: white !important; }
-        .form-control:focus { border-color: #ffca28 !important; box-shadow: 0 0 0 3px rgba(255, 202, 40, 0.2) !important; }
+        /* --- ESTILOS DO MODAL (CORREÇÃO DE CORES) --- */
+        .modal-content {
+            background-color: #1a1d20; /* Fundo escuro padrão do site */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+        }
+        .modal-header { border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        .modal-title { color: #fff; font-weight: 800; }
+        .btn-close-white { filter: invert(1) grayscale(100%) brightness(200%); } /* X branco */
+        
+        /* Labels (Rótulos) claros */
+        .form-label { color: #ccc !important; font-weight: 600; font-size: 0.85rem; }
+        
+        /* Inputs escuros com texto claro */
+        .form-control {
+            background-color: #2b2b2b !important;
+            border: 1px solid #444 !important;
+            color: #fff !important; /* Cor do texto digitado */
+            padding: 12px;
+            border-radius: 10px;
+        }
+        /* Cor do Placeholder (Ex: 15) */
+        .form-control::placeholder { color: #888 !important; opacity: 1; }
+        
+        /* Foco no input (Borda Dourada) */
+        .form-control:focus {
+            border-color: #ffca28 !important;
+            box-shadow: 0 0 0 3px rgba(255, 202, 40, 0.2) !important;
+            outline: none;
+        }
     </style>
 </head>
 <body>
@@ -54,9 +89,9 @@
         </div>
         
         <button class="btn btn-desafio w-100 py-3 mt-4 rounded-pill" data-bs-toggle="modal" data-bs-target="#modalTempo">
-            <i class="bi bi-stopwatch-fill fs-5"></i> INICIAR DESAFIO
+            <i class="bi bi-stopwatch-fill fs-5 me-2"></i> INICIAR DESAFIO
         </button>
-        <p class="text-center text-muted small mt-2 mb-0">Seu tempo será avaliado mediante envio de comprovante.</p>
+        <p class="text-center text-muted small mt-2 mb-0" style="opacity: 0.7;">Seu tempo será avaliado mediante envio de comprovante.</p>
     </div>
 
     <h4 class="text-white mt-5 mb-3 fw-bold d-flex align-items-center gap-2">
@@ -65,7 +100,7 @@
     
     <div class="d-flex flex-column gap-2 mb-4">
         {% for tempo in ranking_tempos %}
-        <div class="d-flex justify-content-between align-items-center p-3 rounded-4" style="background: #1a1d20; border: 1px solid rgba(255,255,255,0.05);">
+        <div class="d-flex justify-content-between align-items-center p-3 rounded-4" style="background: #1a1d20; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
             <div class="d-flex align-items-center gap-3">
                 <span style="width: 30px; text-align: center;">
                     {% if forloop.counter == 1 %}
@@ -96,48 +131,50 @@
 
 <div class="modal fade" id="modalTempo" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content" style="background-color: #1a1d20; border: 1px solid #444; border-radius: 20px;">
+    <div class="modal-content">
       
-      <div class="modal-header border-0 pb-0">
-        <h5 class="modal-title text-white fw-bold"><i class="bi bi-flag-fill text-warning"></i> Registrar Tempo</h5>
+      <div class="modal-header pb-3">
+        <h5 class="modal-title"><i class="bi bi-flag-fill text-warning me-2"></i>Registrar Tempo</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       
-      <div class="modal-body">
+      <div class="modal-body pt-2">
         <p class="text-muted small mb-4">Insira o seu tempo e anexe a foto do seu relógio ou Strava para validar a sua marca no placar.</p>
         
         <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             
             <div class="mb-3">
-                <label class="text-muted fw-bold mb-1 small">Nome do Atleta</label>
+                <label class="form-label">Nome do Atleta</label>
                 <input type="text" name="atleta" class="form-control" required placeholder="Seu nome">
             </div>
             
             <div class="row">
                 <div class="col-6 mb-3">
-                    <label class="text-muted fw-bold mb-1 small">Minutos</label>
+                    <label class="form-label">Minutos</label>
                     <input type="number" name="minutos" class="form-control" required min="0" placeholder="Ex: 15">
                 </div>
                 <div class="col-6 mb-3">
-                    <label class="text-muted fw-bold mb-1 small">Segundos</label>
+                    <label class="form-label">Segundos</label>
                     <input type="number" name="segundos" class="form-control" required min="0" max="59" placeholder="Ex: 30">
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-6 mb-3">
-                    <label class="text-muted fw-bold mb-1 small">Pace (Min/Km)</label>
+                    <label class="form-label">Pace (Min/Km)</label>
                     <input type="text" name="pace" class="form-control" placeholder="Ex: 05:30">
                 </div>
             </div>
 
             <div class="mb-4">
-                <label class="text-muted fw-bold mb-1 small">Foto do Comprovante</label>
+                <label class="form-label">Foto do Comprovante</label>
                 <input type="file" name="foto_comprovante" class="form-control" accept="image/*" required>
             </div>
             
-            <button type="submit" class="btn btn-warning w-100 fw-bold py-3 rounded-pill">ENVIAR MARCA OFICIAL</button>
+            <button type="submit" class="btn btn-desafio w-100 fw-bold py-3 rounded-pill">
+                ENVIAR MARCA OFICIAL
+            </button>
         </form>
       </div>
     </div>
