@@ -1,6 +1,6 @@
 import requests
 from django.conf import settings
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import Atividade, MetaMensal, Rota
 from django.db.models import Sum, Count
 from django.db.models.functions import TruncDate
@@ -365,3 +365,8 @@ def criar_rota(request):
 def listar_rotas(request):
     rotas = Rota.objects.all().order_by('-data_criacao')
     return render(request, 'core/listar_rotas.html', {'rotas': rotas})
+
+def ver_rota(request, id):
+    # Procura a rota no banco de dados. Se não achar, dá erro 404 (Página não encontrada)
+    rota = get_object_or_404(Rota, id=id)
+    return render(request, 'core/ver_rota.html', {'rota': rota})
