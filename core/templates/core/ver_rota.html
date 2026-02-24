@@ -11,11 +11,20 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
     <style>
-        body { background-color: #121212; color: #fff; font-family: sans-serif; }
-        .back-link { color: #888; text-decoration: none; display: block; margin-bottom: 15px; }
-        #map { height: 50vh; width: 100%; border-radius: 15px; border: 2px solid #333; z-index: 1; }
-        .painel-info { background: #1a1d20; padding: 20px; border-radius: 15px; margin-top: -20px; position: relative; z-index: 10; box-shadow: 0 -10px 20px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); }
+        body { background-color: #121212; color: #fff; font-family: sans-serif; padding-bottom: 50px; }
+        .back-link { color: #888; text-decoration: none; display: flex; align-items: center; gap: 8px; margin-bottom: 15px; font-weight: 600; }
+        .back-link:hover { color: #fff; }
+        
+        #map { height: 45vh; width: 100%; border-radius: 15px; border: 2px solid #333; z-index: 1; }
+        
+        .painel-info { background: #1a1d20; padding: 25px; border-radius: 20px; margin-top: -20px; position: relative; z-index: 10; box-shadow: 0 -10px 25px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.05); }
         .distancia-display { font-size: 2.5rem; font-weight: 900; color: #00d2ff; line-height: 1; }
+        
+        .btn-desafio { background: linear-gradient(135deg, #ffca28, #ff6b00); color: black; font-weight: 900; border: none; box-shadow: 0 5px 15px rgba(255, 107, 0, 0.4); transition: transform 0.2s; }
+        .btn-desafio:hover { transform: scale(1.02); color: black; }
+
+        .form-control { background-color: #2b2b2b !important; border: 1px solid #444 !important; color: white !important; }
+        .form-control:focus { border-color: #ffca28 !important; box-shadow: 0 0 0 3px rgba(255, 202, 40, 0.2) !important; }
     </style>
 </head>
 <body>
@@ -39,45 +48,125 @@
                 <div class="distancia-display">{{ rota.distancia_estimada|floatformat:2 }} <span style="font-size: 1rem; color:#888;">km</span></div>
             </div>
             <div class="text-end">
-                <small class="text-muted d-block"><i class="bi bi-calendar3"></i> Data de Criação</small>
+                <small class="text-muted d-block"><i class="bi bi-calendar3"></i> Adicionada em</small>
                 <span class="fw-bold text-white">{{ rota.data_criacao|date:"d/m/Y" }}</span>
             </div>
         </div>
         
-        <button class="btn w-100 fw-bold py-3 mt-4 rounded-pill btn-outline-warning disabled">
-            <i class="bi bi-play-fill"></i> INICIAR DESAFIO (Em Breve)
+        <button class="btn btn-desafio w-100 py-3 mt-4 rounded-pill" data-bs-toggle="modal" data-bs-target="#modalTempo">
+            <i class="bi bi-stopwatch-fill fs-5"></i> INICIAR DESAFIO
         </button>
+        <p class="text-center text-muted small mt-2 mb-0">Seu tempo será avaliado mediante envio de comprovante.</p>
     </div>
+
+    <h4 class="text-white mt-5 mb-3 fw-bold d-flex align-items-center gap-2">
+        <i class="bi bi-trophy-fill text-warning"></i> Leaderboard Oficial
+    </h4>
+    
+    <div class="d-flex flex-column gap-2 mb-4">
+        {% for tempo in ranking_tempos %}
+        <div class="d-flex justify-content-between align-items-center p-3 rounded-4" style="background: #1a1d20; border: 1px solid rgba(255,255,255,0.05);">
+            <div class="d-flex align-items-center gap-3">
+                <span style="width: 30px; text-align: center;">
+                    {% if forloop.counter == 1 %}
+                        <i class="bi bi-trophy-fill fs-4" style="color: #ffd700; filter: drop-shadow(0 0 5px rgba(255,215,0,0.5));"></i>
+                    {% elif forloop.counter == 2 %}
+                        <i class="bi bi-award-fill fs-4" style="color: #c0c0c0;"></i>
+                    {% elif forloop.counter == 3 %}
+                        <i class="bi bi-award-fill fs-4" style="color: #cd7f32;"></i>
+                    {% else %}
+                        <span class="fw-bold text-muted fs-5">{{ forloop.counter }}º</span>
+                    {% endif %}
+                </span>
+                <span class="text-white fw-bold fs-5">{{ tempo.nome_atleta }}</span>
+            </div>
+            <div class="fs-4 fw-900" style="color: {% if forloop.counter == 1 %}#ffd700{% else %}#00d2ff{% endif %};">
+                {{ tempo.tempo_formatado }} <small class="text-muted fs-6 fw-normal">min</small>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-4 rounded-4" style="background: rgba(255,255,255,0.03); border: 1px dashed #444;">
+            <i class="bi bi-stopwatch text-muted fs-1 mb-2"></i>
+            <p class="text-muted fw-bold mb-0">Nenhum tempo registrado.<br>Seja o primeiro a dominar esta rota!</p>
+        </div>
+        {% endfor %}
+    </div>
+
 </div>
 
+<div class="modal fade" id="modalTempo" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="background-color: #1a1d20; border: 1px solid #444; border-radius: 20px;">
+      
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title text-white fw-bold"><i class="bi bi-flag-fill text-warning"></i> Registrar Tempo</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      
+      <div class="modal-body">
+        <p class="text-muted small mb-4">Insira o seu tempo e anexe a foto do seu relógio ou Strava para validar a sua marca no placar.</p>
+        
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                <label class="text-muted fw-bold mb-1 small">Nome do Atleta</label>
+                <input type="text" name="atleta" class="form-control" required placeholder="Seu nome">
+            </div>
+            
+            <div class="row">
+                <div class="col-6 mb-3">
+                    <label class="text-muted fw-bold mb-1 small">Minutos</label>
+                    <input type="number" name="minutos" class="form-control" required min="0" placeholder="Ex: 15">
+                </div>
+                <div class="col-6 mb-3">
+                    <label class="text-muted fw-bold mb-1 small">Segundos</label>
+                    <input type="number" name="segundos" class="form-control" required min="0" max="59" placeholder="Ex: 30">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-6 mb-3">
+                    <label class="text-muted fw-bold mb-1 small">Pace (Min/Km)</label>
+                    <input type="text" name="pace" class="form-control" placeholder="Ex: 05:30">
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="text-muted fw-bold mb-1 small">Foto do Comprovante</label>
+                <input type="file" name="foto_comprovante" class="form-control" accept="image/*" required>
+            </div>
+            
+            <button type="submit" class="btn btn-warning w-100 fw-bold py-3 rounded-pill">ENVIAR MARCA OFICIAL</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
-    // 1. Inicia o mapa (O zoom e o centro serão ajustados automaticamente depois)
     var map = L.map('map');
 
-    // 2. Coloca as imagens das ruas
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',
         maxZoom: 19
     }).addTo(map);
 
-    // 3. Carrega as coordenadas do Python (Django) e converte para Javascript
     var coordenadas = {{ rota.coordenadas|safe }};
 
     if (coordenadas && coordenadas.length > 0) {
-        // Desenha a linha no mapa
         var polyline = L.polyline(coordenadas, {color: '#00d2ff', weight: 6, opacity: 0.9}).addTo(map);
         
-        // Adiciona um marcador de INÍCIO (Verde) e FIM (Vermelho)
         var inicio = coordenadas[0];
         var fim = coordenadas[coordenadas.length - 1];
         
         L.circleMarker(inicio, {radius: 6, color: '#fff', fillColor: '#2ecc71', fillOpacity: 1}).addTo(map).bindPopup("<b>Início</b>");
         L.circleMarker(fim, {radius: 6, color: '#fff', fillColor: '#e74c3c', fillOpacity: 1}).addTo(map).bindPopup("<b>Fim</b>");
 
-        // Dá o Zoom e ajusta a câmera perfeitamente para caber a rota inteira na tela
         map.fitBounds(polyline.getBounds(), {padding: [20, 20]});
     } else {
-        // Se der algum erro e não tiver coordenadas, centraliza no padrão
         map.setView([-16.3267, -48.9528], 14);
     }
 </script>
