@@ -308,17 +308,26 @@ def feed_atividades(request):
     ranking_foguinhos = []
     hoje = timezone.now().date()
     
+    # 1. CRIAMOS UM DICIONÁRIO DE ROSTOS
+    avatares = {}
+
+    # Se você (ou qualquer um) estiver logado, já garantimos a foto no dicionário!
+    if request.user.is_authenticated and 'foto_strava' in request.session:
+        avatares[request.user.first_name] = request.session['foto_strava']
+    
     for atleta in atletas:
         atividades_atleta = Atividade.objects.filter(nome_usuario=atleta).order_by('-data_envio')
         datas_treinos = list(atividades_atleta.dates('data_envio', 'day', order='DESC'))
         
-        # Procura a foto mais recente deste atleta (se existir)
-        avatar = None
-        for ativ in atividades_atleta:
-            if ativ.avatar_url:
-                avatar = ativ.avatar_url
-                break
-                
+        # Procura a foto deste atleta (pega da sessão se já tiver, ou busca no banco)
+        avatar = avatares.get(atleta) 
+        if not avatar:
+            for ativ in atividades_atleta:
+                if ativ.avatar_url:
+                    avatar = ativ.avatar_url
+                    avatares[atleta] = avatar # Salva no dicionário para usar depois
+                    break
+                    
         streak = 0
         if datas_treinos:
             dias_sem_treino = (hoje - datas_treinos[0]).days
@@ -331,29 +340,29 @@ def feed_atividades(request):
                         break 
                         
         if streak > 0:
-            # AGORA O FOGUINHO TAMBÉM LEVA O AVATAR!
             ranking_foguinhos.append({'nome': atleta, 'fogo': streak, 'avatar': avatar})
             
-    # Ordena pelo maior fogo
     ranking_foguinhos = sorted(ranking_foguinhos, key=lambda x: x['fogo'], reverse=True)
-    
-    # Define as Cores e Animação do 1º Lugar
     if ranking_foguinhos:
-        ranking_foguinhos[0]['is_first'] = True # O primeiro colocado ganha o fogo pulsante
+        ranking_foguinhos[0]['is_first'] = True 
         
     for rank in ranking_foguinhos:
         fogo = rank['fogo']
-        if fogo <= 2: rank['cor'] = '#ffca28' # Amarelo (Iniciante)
-        elif fogo <= 5: rank['cor'] = '#ff7043' # Laranja (Esquentando)
-        elif fogo <= 10: rank['cor'] = '#e91e63' # Rosa/Vermelho (Pegando Fogo)
-        else: rank['cor'] = '#00e5ff' # Azul Cyan (Lendário)
+        if fogo <= 2: rank['cor'] = '#ffca28' 
+        elif fogo <= 5: rank['cor'] = '#ff7043' 
+        elif fogo <= 10: rank['cor'] = '#e91e63' 
+        else: rank['cor'] = '#00e5ff' 
 
-    # Lógica do DESTAQUE DO MÊS (Quem tem mais KM no mês atual)
     destaque = Atividade.objects.filter(
         data_envio__month=hoje.month, 
         data_envio__year=hoje.year, 
         tipo='corrida'
     ).values('nome_usuario').annotate(total=Sum('quantidade_km')).order_by('-total').first()
+
+    # 2. MÁGICA RETROATIVA: Aplica a foto a TODOS os posts antigos que estavam sem foto
+    for post in atividades_feed:
+        if not post.avatar_url and post.nome_usuario in avatares:
+            post.avatar_url = avatares[post.nome_usuario]
 
     context = {
         'atividades': atividades_feed, 
