@@ -10,6 +10,7 @@ urlpatterns = [
     path('feed/', views.feed_atividades, name='feed'),
     path('rotas/', views.listar_rotas, name='listar_rotas'),
     path('rotas/criar/', views.criar_rota, name='criar_rota'),
+    path('rotas/<int:id>/', views.ver_rota, name='ver_rota'),
     # NOVAS ROTAS DO STRAVA
     path('strava/login/', views.strava_login, name='strava_login'),
     path('strava/callback/', views.strava_callback, name='strava_callback'),
