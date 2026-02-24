@@ -28,7 +28,12 @@
             
             <div class="mb-3">
                 <label class="form-label">Nome do Atleta</label>
-                {{ form.nome_usuario }}
+                {% if request.user.is_authenticated %}
+                    <input type="text" name="nome_usuario" class="form-control fw-bold" value="{{ request.user.first_name }}" readonly style="background-color: #1a1a1a !important; color: #888 !important; border-color: #333 !important; opacity: 0.8;">
+                    <small class="text-muted"><i class="bi bi-strava" style="color:#fc4c02;"></i> Preenchido pelo Strava</small>
+                {% else %}
+                    {{ form.nome_usuario }}
+                {% endif %}
             </div>
 
             <div class="mb-3">
