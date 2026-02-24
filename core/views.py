@@ -1,7 +1,7 @@
 import requests
 from django.conf import settings
 from django.shortcuts import render, redirect
-from .models import Atividade, MetaMensal
+from .models import Atividade, MetaMensal, Rota
 from django.db.models import Sum, Count
 from django.db.models.functions import TruncDate
 from datetime import datetime
@@ -11,6 +11,9 @@ from django.db.models import Sum, Avg, Count, Max, Q
 from datetime import timedelta
 from django.utils import timezone
 import calendar
+import json
+from django.http import JsonResponse
+ 
 
 # Helper para nomes dos meses
 MESES_NOME = {
@@ -339,3 +342,26 @@ def feed_atividades(request):
     }
     return render(request, 'core/feed.html', context)
 
+# ==========================================
+# PLANEJADOR DE ROTAS (MAPAS)
+# ==========================================
+def criar_rota(request):
+    if request.method == 'POST':
+        try:
+            # Recebe os dados invisíveis do mapa em JavaScript
+            data = json.loads(request.body)
+            Rota.objects.create(
+                nome=data.get('nome'),
+                criador=data.get('criador'),
+                distancia_estimada=data.get('distancia'),
+                coordenadas=data.get('coordenadas')
+            )
+            return JsonResponse({'status': 'sucesso'})
+        except Exception as e:
+            return JsonResponse({'status': 'erro', 'mensagem': str(e)})
+
+    return render(request, 'core/criar_rota.html')
+
+def listar_rotas(request):
+    rotas = Rota.objects.all().order_by('-data_criacao')
+    return render(request, 'core/listar_rotas.html', {'rotas': rotas})
