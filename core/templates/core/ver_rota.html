@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ rota.nome }} - Detalhes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <style>
+        body { background-color: #121212; color: #fff; font-family: sans-serif; }
+        .back-link { color: #888; text-decoration: none; display: block; margin-bottom: 15px; }
+        #map { height: 50vh; width: 100%; border-radius: 15px; border: 2px solid #333; z-index: 1; }
+        .painel-info { background: #1a1d20; padding: 20px; border-radius: 15px; margin-top: -20px; position: relative; z-index: 10; box-shadow: 0 -10px 20px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); }
+        .distancia-display { font-size: 2.5rem; font-weight: 900; color: #00d2ff; line-height: 1; }
+    </style>
+</head>
+<body>
+
+<div class="container py-3" style="max-width: 600px;">
+    <a href="{% url 'listar_rotas' %}" class="back-link"><i class="bi bi-arrow-left"></i> Voltar à Biblioteca</a>
+    
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3 class="fw-bold mb-0 text-white">{{ rota.nome }}</h3>
+            <small class="text-muted"><i class="bi bi-person-circle"></i> Criado por {{ rota.criador }}</small>
+        </div>
+    </div>
+
+    <div id="map"></div>
+
+    <div class="painel-info">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <small class="text-muted text-uppercase fw-bold">Distância do Percurso</small>
+                <div class="distancia-display">{{ rota.distancia_estimada|floatformat:2 }} <span style="font-size: 1rem; color:#888;">km</span></div>
+            </div>
+            <div class="text-end">
+                <small class="text-muted d-block"><i class="bi bi-calendar3"></i> Data de Criação</small>
+                <span class="fw-bold text-white">{{ rota.data_criacao|date:"d/m/Y" }}</span>
+            </div>
+        </div>
+        
+        <button class="btn w-100 fw-bold py-3 mt-4 rounded-pill btn-outline-warning disabled">
+            <i class="bi bi-play-fill"></i> INICIAR DESAFIO (Em Breve)
+        </button>
+    </div>
+</div>
+
+<script>
+    // 1. Inicia o mapa (O zoom e o centro serão ajustados automaticamente depois)
+    var map = L.map('map');
+
+    // 2. Coloca as imagens das ruas
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(map);
+
+    // 3. Carrega as coordenadas do Python (Django) e converte para Javascript
+    var coordenadas = {{ rota.coordenadas|safe }};
+
+    if (coordenadas && coordenadas.length > 0) {
+        // Desenha a linha no mapa
+        var polyline = L.polyline(coordenadas, {color: '#00d2ff', weight: 6, opacity: 0.9}).addTo(map);
+        
+        // Adiciona um marcador de INÍCIO (Verde) e FIM (Vermelho)
+        var inicio = coordenadas[0];
+        var fim = coordenadas[coordenadas.length - 1];
+        
+        L.circleMarker(inicio, {radius: 6, color: '#fff', fillColor: '#2ecc71', fillOpacity: 1}).addTo(map).bindPopup("<b>Início</b>");
+        L.circleMarker(fim, {radius: 6, color: '#fff', fillColor: '#e74c3c', fillOpacity: 1}).addTo(map).bindPopup("<b>Fim</b>");
+
+        // Dá o Zoom e ajusta a câmera perfeitamente para caber a rota inteira na tela
+        map.fitBounds(polyline.getBounds(), {padding: [20, 20]});
+    } else {
+        // Se der algum erro e não tiver coordenadas, centraliza no padrão
+        map.setView([-16.3267, -48.9528], 14);
+    }
+</script>
+
+</body>
+</html>
