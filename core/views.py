@@ -33,8 +33,7 @@ def dashboard(request):
     porcentagem_visual = min(porcentagem, 100) # Trava em 100 para o CSS do tanque não quebrar
 
     ranking = Atividade.objects.filter(
-        data_envio__month=hoje.month,
-        data_envio__year=hoje.year
+        data_envio__month=hoje.month, data_envio__year=hoje.year, tipo='corrida'
     ).values('nome_usuario').annotate(total=Sum('quantidade_km')).order_by('-total')
 
     context = {
@@ -88,7 +87,7 @@ def ranking_geral(request):
     stats = Atividade.objects.annotate(
         data_truncada=TruncDate('data_envio')
     ).values('nome_usuario').annotate(
-        total_km_geral=Sum('quantidade_km'),
+        total_km_geral=Sum('quantidade_km', filter=Q(tipo='corrida')),
         dias_ativos=Count('data_truncada', distinct=True)
     ).order_by('-total_km_geral')
     
@@ -127,7 +126,7 @@ def desempenho(request):
     context = {'atletas': atletas, 'atleta_selecionado': atleta_selecionado}
 
     if atleta_selecionado:
-        atividades = Atividade.objects.filter(nome_usuario=atleta_selecionado).order_by('-data_envio')
+        atividades = Atividade.objects.filter(nome_usuario=atleta_selecionado, tipo='corrida').order_by('-data_envio')
         
         if atividades.exists():
             hoje = datetime.now()
@@ -282,3 +281,37 @@ def strava_callback(request):
                 )
 
     return redirect('dashboard')
+
+
+
+def feed_atividades(request):
+    atividades_feed = Atividade.objects.all().order_by('-data_envio')
+    
+    # Lógica dos FOGUINHOS 🔥 (Conta tanto Bike quanto Corrida)
+    atletas = Atividade.objects.values_list('nome_usuario', flat=True).distinct()
+    ranking_foguinhos = []
+    
+    hoje = timezone.now().date()
+    ontem = hoje - timedelta(days=1)
+    
+    for atleta in atletas:
+        datas_treinos = Atividade.objects.filter(nome_usuario=atleta).dates('data_envio', 'day', order='DESC')
+        streak = 0
+        if datas_treinos:
+            if datas_treinos[0] < ontem:
+                streak = 0
+            else:
+                data_esperada = datas_treinos[0]
+                for data in datas_treinos:
+                    if data == data_esperada:
+                        streak += 1
+                        data_esperada -= timedelta(days=1)
+                    else:
+                        break 
+        if streak > 0:
+            ranking_foguinhos.append({'nome': atleta, 'fogo': streak})
+            
+    ranking_foguinhos = sorted(ranking_foguinhos, key=lambda x: x['fogo'], reverse=True)
+
+    context = {'atividades': atividades_feed, 'foguinhos': ranking_foguinhos}
+    return render(request, 'core/feed.html', context)
