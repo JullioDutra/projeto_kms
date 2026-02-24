@@ -5,96 +5,169 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Feed - Comunidade</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
     <style>
-        body { background-color: #121212; color: #fff; font-family: 'Inter', sans-serif; }
-        .glass-card { background: #1e1e1e; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 20px rgba(0,0,0,0.3); margin-bottom: 20px;}
-        .back-link { color: #aaa; text-decoration: none; display: inline-block; margin-bottom: 20px; }
+        body { background-color: #121212; color: #fff; font-family: 'Inter', sans-serif; padding-bottom: 40px; }
+        .back-link { color: #888; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-weight: 600; margin-bottom: 25px; transition: 0.2s; }
         .back-link:hover { color: #fff; }
         
-        /* Foguinhos (Streaks) */
-        .streak-container { display: flex; overflow-x: auto; gap: 15px; padding-bottom: 10px; }
-        .streak-card { background: #2a2a2a; border-radius: 12px; padding: 10px 15px; text-align: center; min-width: 90px; border: 1px solid #ff9f43; }
-        .fire-icon { font-size: 1.8rem; color: #ff9f43; text-shadow: 0 0 10px rgba(255, 159, 67, 0.5); }
-        .streak-number { font-size: 1.2rem; font-weight: 900; margin-top: -5px; }
+        .section-title { font-weight: 900; font-size: 1.4rem; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        
+        /* --- FOGUINHOS (STREAKS STYLE DUOLINGO/STORIES) --- */
+        .streak-container { display: flex; overflow-x: auto; gap: 20px; padding: 10px 5px 20px 5px; scrollbar-width: none; }
+        .streak-container::-webkit-scrollbar { display: none; }
+        .streak-item { display: flex; flex-direction: column; align-items: center; min-width: 70px; }
+        
+        .streak-ring {
+            width: 65px; height: 65px; border-radius: 50%;
+            background: #1a1c1e;
+            border: 2px solid #ff6b00; /* Laranja vibrante */
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 15px rgba(255, 107, 0, 0.2);
+            position: relative;
+        }
+        /* Ícone de Fogo com Gradiente */
+        .streak-ring .bi-fire {
+            font-size: 2rem;
+            background: -webkit-linear-gradient(#ffc107, #ff3d00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 2px 4px rgba(255,0,0,0.3));
+        }
+        /* Selo numérico sobreposto */
+        .streak-count {
+            position: absolute; bottom: -6px;
+            background: linear-gradient(135deg, #ff6b00, #ff3d00);
+            color: #fff; font-size: 0.75rem; font-weight: 900;
+            padding: 2px 10px; border-radius: 12px;
+            border: 2px solid #121212;
+        }
+        .streak-name { font-size: 0.8rem; color: #aaa; margin-top: 10px; font-weight: 600; text-transform: capitalize; }
 
-        /* Estilo do Post */
-        .post-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px; }
-        .avatar-placeholder { width: 45px; height: 45px; background: linear-gradient(135deg, #00d2ff, #3a7bd5); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; }
+        /* --- POSTS DA COMUNIDADE --- */
+        .post-card { background-color: #1a1d20; border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid #282a2d; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+        .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         
-        /* MEDALHA DOURADA BRILHANTE */
-        .medal-badge { background: linear-gradient(45deg, #ffd700, #f39c12); color: #000; padding: 6px 15px; border-radius: 20px; font-weight: 900; font-size: 0.95rem; box-shadow: 0 0 15px rgba(255, 215, 0, 0.5); display: inline-block; margin-bottom: 10px; border: 1px solid #fff;}
+        .user-info { display: flex; align-items: center; gap: 12px; }
+        .avatar { width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, #00d2ff, #3a7bd5); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.2rem; color: white; box-shadow: 0 4px 10px rgba(0, 210, 255, 0.2); }
         
-        .post-stats { display: flex; gap: 20px; margin-top: 15px; }
-        .stat-item { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; text-align: center; flex: 1; }
-        .stat-value { font-size: 1.5rem; font-weight: 900; color: #00d2ff; }
+        .post-meta h6 { margin: 0; font-weight: 800; color: #fff; font-size: 1.05rem; letter-spacing: -0.3px; }
+        .post-meta small { color: #888; font-size: 0.8rem; font-weight: 500; }
+        
+        .activity-icon { font-size: 1.4rem; padding: 8px 12px; border-radius: 12px; }
+        .icon-run { color: #00d2ff; background: rgba(0, 210, 255, 0.1); }
+        .icon-bike { color: #2ecc71; background: rgba(46, 204, 113, 0.1); }
+
+        /* --- MEDALHA PREMIUM --- */
+        .medal-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.15), rgba(255, 152, 0, 0.15));
+            color: #ffc107; border: 1px solid rgba(255, 193, 7, 0.3);
+            padding: 6px 14px; border-radius: 20px;
+            font-size: 0.85rem; font-weight: 800; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+
+        /* --- GRID DE DADOS (DASHBOARD INTERNO) --- */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: rgba(255,255,255,0.03); border-radius: 14px; padding: 15px; border: 1px solid rgba(255,255,255,0.05); }
+        .stat-box { display: flex; flex-direction: column; }
+        .stat-label { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 4px; }
+        .stat-value { font-size: 1.5rem; font-weight: 900; color: #fff; line-height: 1; }
+        .stat-unit { font-size: 0.9rem; font-weight: 600; color: #aaa; margin-left: 2px; text-transform: lowercase; }
+        
+        .text-accent-run { color: #00d2ff !important; }
+        .text-accent-bike { color: #2ecc71 !important; }
     </style>
 </head>
 <body>
 <div class="container py-4" style="max-width: 600px;">
-    <a href="{% url 'dashboard' %}" class="back-link">← Voltar para Dashboard</a>
     
-    <h3 class="mb-3 text-white fw-bold">🔥 Ofensivas (Dias Ativos)</h3>
+    <a href="{% url 'dashboard' %}" class="back-link">
+        <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+    
+    <h3 class="section-title text-white">
+        <i class="bi bi-fire" style="color: #ff6b00;"></i> Ofensivas Ativas
+    </h3>
+    
     <div class="streak-container mb-4">
         {% for atleta in foguinhos %}
-        <div class="streak-card">
-            <div class="fire-icon">🔥</div>
-            <div class="streak-number text-white">{{ atleta.fogo }}</div>
-            <small class="text-white-50 fw-bold">{{ atleta.nome }}</small>
+        <div class="streak-item">
+            <div class="streak-ring">
+                <i class="bi bi-fire"></i>
+                <div class="streak-count">{{ atleta.fogo }}</div>
+            </div>
+            <div class="streak-name">{{ atleta.nome }}</div>
         </div>
         {% empty %}
-        <p class="text-muted">Nenhuma ofensiva ativa. Corram hoje!</p>
+        <div class="w-100 text-center py-3">
+            <p class="text-muted fw-bold mb-0">Nenhuma ofensiva ativa no momento. Inicie uma hoje!</p>
+        </div>
         {% endfor %}
     </div>
 
-    <h3 class="mb-3 text-white fw-bold">📱 Feed da Comunidade</h3>
+    <h3 class="section-title text-white mt-4">
+        <i class="bi bi-activity text-primary"></i> Atividades Recentes
+    </h3>
     
     {% for post in atividades %}
-    <div class="glass-card" {% if post.tipo == 'bike' %}style="border-left: 4px solid #2ecc71;"{% endif %}>
+    <div class="post-card">
         <div class="post-header">
-            <div class="d-flex align-items-center gap-3">
-                <div class="avatar-placeholder text-white">{{ post.nome_usuario|make_list|first|upper }}</div>
-                <div>
-                    <h5 class="mb-0 text-white fw-bold">{{ post.nome_usuario }}</h5>
-                    <small class="text-white-50">{{ post.data_envio|date:"d M, Y - H:i" }}</small>
+            <div class="user-info">
+                <div class="avatar text-white">{{ post.nome_usuario|make_list|first|upper }}</div>
+                <div class="post-meta">
+                    <h6>{{ post.nome_usuario }}</h6>
+                    <small><i class="bi bi-clock"></i> {{ post.data_envio|date:"d M, H:i" }}</small>
                 </div>
             </div>
-            <div class="text-white fs-3">
-                {% if post.tipo == 'bike' %}🚴{% else %}🏃{% endif %}
+            <div class="activity-icon {% if post.tipo == 'bike' %}icon-bike{% else %}icon-run{% endif %}">
+                {% if post.tipo == 'bike' %}
+                    <i class="bi bi-bicycle"></i>
+                {% else %}
+                    <i class="bi bi-lightning-charge-fill"></i>
+                {% endif %}
             </div>
         </div>
 
         {% if post.medalha %}
         <div class="medal-badge">
-            🏆 {{ post.medalha }}
+            <i class="bi bi-trophy-fill"></i> {{ post.medalha }}
         </div>
         {% endif %}
 
-        {% if post.tipo == 'bike' %}
-            <h4 class="text-white mt-2">Pedal Concluído 🚴💨</h4>
-            <div class="post-stats">
-                <div class="stat-item">
-                    <small class="text-white-50 d-block fw-bold">Distância</small>
-                    <span class="stat-value text-success">{{ post.quantidade_km|floatformat:2 }}<span class="fs-6">km</span></span>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <span class="stat-label">Distância</span>
+                <div>
+                    <span class="stat-value {% if post.tipo == 'bike' %}text-accent-bike{% else %}text-accent-run{% endif %}">
+                        {{ post.quantidade_km|floatformat:2 }}
+                    </span>
+                    <span class="stat-unit">km</span>
                 </div>
             </div>
-            <p class="text-white-50 mt-3 small">* Este pedal salvou a ofensiva 🔥 do dia, mas não conta para o tanque.</p>
-        {% else %}
-            <h4 class="text-white mt-2">Corrida Concluída 🏃💨</h4>
-            <div class="post-stats">
-                <div class="stat-item">
-                    <small class="text-white-50 d-block fw-bold">Distância</small>
-                    <span class="stat-value">{{ post.quantidade_km|floatformat:2 }}<span class="fs-6">km</span></span>
-                </div>
-                <div class="stat-item">
-                    <small class="text-white-50 d-block fw-bold">Pace</small>
-                    <span class="stat-value text-warning">{{ post.pace|default:"-" }}</span>
+            
+            {% if post.tipo == 'corrida' %}
+            <div class="stat-box">
+                <span class="stat-label">Pace</span>
+                <div>
+                    <span class="stat-value text-white">{{ post.pace|default:"-" }}</span>
+                    {% if post.pace %}<span class="stat-unit">/km</span>{% endif %}
                 </div>
             </div>
-        {% endif %}
+            {% else %}
+            <div class="stat-box justify-content-center">
+                <span class="badge bg-dark text-muted border border-secondary" style="width: max-content;">Apenas Ofensiva</span>
+            </div>
+            {% endif %}
+        </div>
     </div>
     {% empty %}
-    <div class="glass-card text-center"><p class="text-white-50 mb-0">Nenhum treino registrado ainda.</p></div>
+    <div class="post-card text-center py-5">
+        <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+        <h5 class="text-white mt-3">Feed Vazio</h5>
+        <p class="text-muted mb-0">Seja o primeiro a registrar uma atividade!</p>
+    </div>
     {% endfor %}
 
 </div>
