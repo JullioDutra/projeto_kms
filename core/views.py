@@ -7,7 +7,7 @@ from django.db.models.functions import TruncDate
 from datetime import datetime
 from .forms import AtividadeForm
 from django.db.models.functions import ExtractWeekDay
-from django.db.models import Sum, Avg, Count, Max
+from django.db.models import Sum, Avg, Count, Max, Q
 from datetime import timedelta
 from django.utils import timezone
 import calendar
