@@ -28,6 +28,8 @@ class Atividade(models.Model):
     # NOVO: Sistema de Medalhas para o Feed
     medalha = models.CharField(max_length=100, blank=True, null=True, verbose_name="Medalha de Superação", help_text="Adicione pelo painel Admin")
 
+    avatar_url = models.URLField(max_length=500, blank=True, null=True, verbose_name="Foto de Perfil (Strava)")
+    
     def __str__(self):
         return f"[{self.tipo.upper()}] {self.nome_usuario} - {self.quantidade_km}km"
 
