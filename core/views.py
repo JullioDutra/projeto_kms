@@ -369,31 +369,46 @@ def listar_rotas(request):
 def ver_rota(request, id):
     rota = get_object_or_404(Rota, id=id)
     
-    # 1. Se a pessoa enviar um tempo novo pelo formulário:
+    # 1. Se a pessoa enviar um tempo novo pelo formulário do Modal:
     if request.method == 'POST':
-        from .models import TempoRota # Importação local rápida
+        # Importamos a Atividade aqui para poder salvar no Tanque também
+        from .models import TempoRota, Atividade 
+        
         atleta = request.POST.get('atleta')
         minutos = int(request.POST.get('minutos', 0) or 0)
         segundos = int(request.POST.get('segundos', 0) or 0)
+        pace = request.POST.get('pace', '')
+        foto = request.FILES.get('foto_comprovante') # Pega a foto que a pessoa subiu
         
-        if atleta and (minutos > 0 or segundos > 0):
+        if atleta and (minutos > 0 or segundos > 0) and foto:
+            # AÇÃO 1: Registra o tempo para o Leaderboard (Rei da Rota)
             TempoRota.objects.create(
                 rota=rota,
                 nome_atleta=atleta,
                 tempo_minutos=minutos,
                 tempo_segundos=segundos
             )
+            
+            # AÇÃO 2: Envia para o Tanque/Feed como uma atividade normal!
+            Atividade.objects.create(
+                nome_usuario=atleta,
+                tipo='corrida', # O desafio da rota conta como corrida
+                quantidade_km=rota.distancia_estimada, # Puxa os KMs automáticos da Rota!
+                pace=pace,
+                foto_comprovante=foto,
+                # Podemos até colocar uma medalhinha automática no feed!
+                medalha=f"Desbravou: {rota.nome}" 
+            )
+            
             return redirect('ver_rota', id=rota.id)
 
     # 2. Montar o Ranking (Rei da Rota)
-    # Pega todos os tempos e ordena do mais rápido para o mais devagar
     tempos_brutos = list(rota.tempos.all())
     tempos_brutos.sort(key=lambda x: x.tempo_total_segundos)
     
     ranking_tempos = []
     atletas_vistos = set()
     
-    # Filtra para mostrar apenas o melhor tempo de cada atleta (Recorde Pessoal)
     for t in tempos_brutos:
         if t.nome_atleta not in atletas_vistos:
             ranking_tempos.append(t)
