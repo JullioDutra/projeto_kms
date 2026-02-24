@@ -296,7 +296,8 @@ def strava_callback(request):
                     quantidade_km=round(distancia_km, 2),
                     pace=pace_str,
                     strava_id=act_strava_id,
-                    tipo=tipo_atividade
+                    tipo=tipo_atividade,
+                    avatar_url=foto_url
                 )
     return redirect('dashboard')
 
@@ -308,25 +309,30 @@ def feed_atividades(request):
     hoje = timezone.now().date()
     
     for atleta in atletas:
-        # Pega as datas únicas, da mais recente para a mais antiga
-        datas_treinos = list(Atividade.objects.filter(nome_usuario=atleta).dates('data_envio', 'day', order='DESC'))
+        atividades_atleta = Atividade.objects.filter(nome_usuario=atleta).order_by('-data_envio')
+        datas_treinos = list(atividades_atleta.dates('data_envio', 'day', order='DESC'))
         
+        # Procura a foto mais recente deste atleta (se existir)
+        avatar = None
+        for ativ in atividades_atleta:
+            if ativ.avatar_url:
+                avatar = ativ.avatar_url
+                break
+                
         streak = 0
         if datas_treinos:
-            # Tolerância de 3 dias: Se a diferença entre hoje e o último treino for <= 3, a ofensiva tá viva!
             dias_sem_treino = (hoje - datas_treinos[0]).days
             if dias_sem_treino <= 3:
-                streak = 1 # Já conta 1 ponto pela sequência viva
-                
-                # Conta o tamanho da corrente (se o intervalo entre os treinos não passar de 3 dias)
+                streak = 1 
                 for i in range(len(datas_treinos) - 1):
                     if (datas_treinos[i] - datas_treinos[i+1]).days <= 3:
                         streak += 1
                     else:
-                        break # A corrente quebrou no passado
+                        break 
                         
         if streak > 0:
-            ranking_foguinhos.append({'nome': atleta, 'fogo': streak})
+            # AGORA O FOGUINHO TAMBÉM LEVA O AVATAR!
+            ranking_foguinhos.append({'nome': atleta, 'fogo': streak, 'avatar': avatar})
             
     # Ordena pelo maior fogo
     ranking_foguinhos = sorted(ranking_foguinhos, key=lambda x: x['fogo'], reverse=True)
