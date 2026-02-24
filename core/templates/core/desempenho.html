@@ -5,49 +5,76 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meu Desempenho - Smart Coach</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #121212; color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
-        .glass-card { background: #1e1e1e; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
-        .stat-value { font-size: 2.2rem; font-weight: 900; }
+        body { background-color: #121212; color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; padding-bottom: 40px; }
+        
+        .back-link { color: #888; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-weight: 600; margin-bottom: 25px; transition: 0.2s; }
+        .back-link:hover { color: #fff; }
+
+        .glass-card { 
+            background: #1e1e1e; 
+            border: 1px solid rgba(255, 255, 255, 0.05); 
+            border-radius: 20px; 
+            padding: 1.5rem; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); 
+            transition: transform 0.3s ease;
+        }
+        .glass-card:hover { transform: translateY(-3px); }
+
+        .stat-value { font-size: 2.2rem; font-weight: 900; line-height: 1.1; }
         .text-green { color: #2ecc71; }
         .text-red { color: #e74c3c; }
         
         /* Box do Coach e Pace */
-        .coach-box { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); border-left: 5px solid #00d2ff; }
-        .pace-lab-box { background: linear-gradient(135deg, #111 0%, #222 100%); border-left: 5px solid #f39c12; }
+        .coach-box { background: linear-gradient(135deg, #1a2a40 0%, #111a2a 100%); border-left: 5px solid #00d2ff; }
+        .pace-lab-box { background: linear-gradient(135deg, #1e1e1e 0%, #111 100%); border-left: 5px solid #f39c12; }
         
         /* Calendário Scroll */
-        .calendar-scroll { display: flex; overflow-x: auto; gap: 15px; padding-bottom: 10px; scrollbar-width: thin; scrollbar-color: #555 #1e1e1e; }
-        .calendar-scroll::-webkit-scrollbar { height: 8px; }
-        .calendar-scroll::-webkit-scrollbar-thumb { background-color: #555; border-radius: 10px; }
-        .day-card { min-width: 140px; background: #2a2a2a; border-radius: 12px; text-align: center; padding: 15px 10px; border: 1px solid #444; }
-        .day-card.hoje { border: 2px solid #00d2ff; background: #1a2a3a; }
+        .calendar-scroll { display: flex; overflow-x: auto; gap: 15px; padding-bottom: 10px; scrollbar-width: thin; scrollbar-color: #444 #1e1e1e; }
+        .calendar-scroll::-webkit-scrollbar { height: 6px; }
+        .calendar-scroll::-webkit-scrollbar-thumb { background-color: #444; border-radius: 10px; }
+        .day-card { min-width: 140px; background: rgba(255,255,255,0.03); border-radius: 16px; text-align: center; padding: 15px 10px; border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; }
+        .day-card:hover { background: rgba(255,255,255,0.08); }
+        .day-card.hoje { border: 2px solid #00d2ff; background: rgba(0, 210, 255, 0.05); }
 
-        /* Estilos Globais */
-        .accordion-item { background-color: #1e1e1e; border: 1px solid #333; }
-        .accordion-button { background-color: #2b2b2b; color: #fff; font-weight: bold; }
-        .accordion-button:not(.collapsed) { background-color: #3a7bd5; color: #fff; box-shadow: none; }
+        /* Acordeão do Simulador Premium */
+        .accordion-item { background-color: transparent; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px !important; margin-bottom: 10px; overflow: hidden; }
+        .accordion-button { background-color: rgba(255,255,255,0.05); color: #fff; font-weight: 700; box-shadow: none !important; }
+        .accordion-button:not(.collapsed) { background-color: rgba(0, 210, 255, 0.1); color: #00d2ff; }
         .accordion-button::after { filter: invert(1); }
-        .accordion-body { color: #ccc; background-color: #1a1a1a; }
-        .form-select, .form-control { background-color: #2b2b2b; color: white; border: 1px solid #444; }
-        .form-select:focus, .form-control:focus { background-color: #333; color: white; border-color: #00d2ff; box-shadow: none; }
-        .back-link { color: #aaa; text-decoration: none; display: inline-block; margin-bottom: 20px; }
-        .back-link:hover { color: #fff; }
-        .time-box { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; text-align: center; }
-        .time-box h5 { margin: 0; font-weight: 900; color: #f39c12; }
+        .accordion-body { color: #ccc; background-color: rgba(0,0,0,0.2); font-size: 0.95rem; line-height: 1.5; }
+        
+        /* Formulários Customizados */
+        .form-select, .form-control { background-color: #2b2b2b; color: white; border: 1px solid #444; border-radius: 12px; padding: 12px 15px; }
+        .form-select:focus, .form-control:focus { background-color: #333; color: white; border-color: #00d2ff; box-shadow: 0 0 0 4px rgba(0, 210, 255, 0.1); }
+        
+        /* Caixas de Tempo (Pace Lab) */
+        .time-box { background: rgba(255,255,255,0.03); padding: 12px 10px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
+        .time-box h5 { margin: 0; font-weight: 900; color: #f39c12; letter-spacing: 1px; }
+        
+        /* Titulos de Sessão */
+        .section-icon { margin-right: 6px; font-size: 1.1em; }
     </style>
 </head>
 <body>
-<div class="container py-5">
-    <a href="{% url 'dashboard' %}" class="back-link">← Voltar para o Dashboard</a>
+<div class="container py-4" style="max-width: 900px;">
+    <a href="{% url 'dashboard' %}" class="back-link">
+        <i class="bi bi-arrow-left"></i> Voltar para o Dashboard
+    </a>
     
-    <h2 class="mb-4 text-white fw-bold">📊 Análise de Desempenho</h2>
+    <div class="mb-4">
+        <h2 class="fw-bold text-white mb-1">
+            <i class="bi bi-bar-chart-line-fill text-primary section-icon"></i> Análise de Desempenho
+        </h2>
+        <p class="text-muted small fw-bold">Inteligência e estatísticas do seu progresso</p>
+    </div>
 
-    <div class="glass-card mb-4">
-        <form method="GET" class="row align-items-center">
-            <div class="col-md-8 col-sm-12 mb-2 mb-md-0">
-                <select name="atleta" class="form-select form-select-lg fw-bold">
+    <div class="glass-card mb-4" style="padding: 1.2rem;">
+        <form method="GET" class="row align-items-center g-2">
+            <div class="col-md-8 col-sm-12">
+                <select name="atleta" class="form-select fw-bold">
                     <option value="">-- Selecione o Atleta --</option>
                     {% for atleta in atletas %}
                         <option value="{{ atleta }}" {% if atleta_selecionado == atleta %}selected{% endif %}>{{ atleta }}</option>
@@ -55,7 +82,9 @@
                 </select>
             </div>
             <div class="col-md-4 col-sm-12">
-                <button type="submit" class="btn btn-primary w-100 btn-lg fw-bold text-white">Analisar</button>
+                <button type="submit" class="btn btn-primary w-100 fw-bold text-white" style="border-radius: 12px; padding: 12px;">
+                    <i class="bi bi-search"></i> Analisar
+                </button>
             </div>
         </form>
     </div>
@@ -64,137 +93,178 @@
         <div class="row g-4">
             
             <div class="col-md-4">
-                <div class="glass-card text-center h-100">
-                    <h6 class="text-white text-uppercase fw-bold">Mês Atual vs Passado</h6>
-                    <div class="stat-value text-white mt-2">{{ km_atual|floatformat:1 }} <small class="fs-6 text-white">km</small></div>
+                <div class="glass-card text-center h-100 d-flex flex-column justify-content-center">
+                    <h6 class="text-muted text-uppercase fw-bold mb-3"><i class="bi bi-arrow-left-right"></i> Mês Atual vs Passado</h6>
+                    <div class="stat-value text-white">{{ km_atual|floatformat:1 }} <small class="fs-6 text-white-50">km</small></div>
                     {% if variacao_pct > 0 %}
-                        <div class="text-green fw-bold mt-2">▲ +{{ variacao_pct }}% (Cresceu!)</div>
+                        <div class="text-green fw-bold mt-2"><i class="bi bi-graph-up-arrow"></i> +{{ variacao_pct }}% (Cresceu!)</div>
                     {% elif variacao_pct < 0 %}
-                        <div class="text-red fw-bold mt-2">▼ {{ variacao_pct }}% (Caiu)</div>
+                        <div class="text-red fw-bold mt-2"><i class="bi bi-graph-down-arrow"></i> {{ variacao_pct }}% (Caiu)</div>
                     {% else %}
-                        <div class="text-warning fw-bold mt-2">Estável</div>
+                        <div class="text-warning fw-bold mt-2"><i class="bi bi-dash"></i> Estável</div>
                     {% endif %}
-                    <small class="text-white-50">Mês passado: {{ km_passado|floatformat:1 }} km</small>
+                    <small class="text-white-50 mt-2 d-block">Mês passado: {{ km_passado|floatformat:1 }} km</small>
                 </div>
             </div>
 
             <div class="col-md-4">
-                <div class="glass-card text-center h-100">
-                    <h6 class="text-white text-uppercase fw-bold">Estatísticas Vitais</h6>
-                    <ul class="list-unstyled mt-3 mb-0 text-start text-white">
-                        <li class="mb-2">👟 <strong>Média p/ corrida:</strong> {{ media_km|floatformat:2 }} km</li>
-                        <li class="mb-2">🏆 <strong>Total Corridas:</strong> {{ total_corridas }}</li>
-                        <li>📅 <strong>Dia Favorito:</strong> <span class="text-white fw-bold">{{ dia_favorito }}</span></li>
+                <div class="glass-card h-100 d-flex flex-column justify-content-center">
+                    <h6 class="text-muted text-uppercase text-center fw-bold mb-3"><i class="bi bi-heart-pulse"></i> Estatísticas Vitais</h6>
+                    <ul class="list-unstyled mb-0 text-white" style="font-size: 0.95rem;">
+                        <li class="mb-2 d-flex justify-content-between border-bottom border-secondary pb-2">
+                            <span><i class="bi bi-lightning-charge text-warning"></i> Média/corrida:</span> 
+                            <strong>{{ media_km|floatformat:2 }} km</strong>
+                        </li>
+                        <li class="mb-2 d-flex justify-content-between border-bottom border-secondary pb-2">
+                            <span><i class="bi bi-trophy text-info"></i> Total Corridas:</span> 
+                            <strong>{{ total_corridas }}</strong>
+                        </li>
+                        <li class="d-flex justify-content-between">
+                            <span><i class="bi bi-calendar-star text-success"></i> Dia Favorito:</span> 
+                            <strong class="text-white">{{ dia_favorito }}</strong>
+                        </li>
                     </ul>
                 </div>
             </div>
 
             <div class="col-md-4">
-                <div class="glass-card text-center h-100">
-                    <h6 class="text-white text-uppercase fw-bold">Último Registro</h6>
-                    <div class="stat-value text-white mt-2">{{ ultima.quantidade_km|floatformat:1 }} <small class="fs-6 text-white">km</small></div>
-                    <div class="mt-2 text-white">
-                        Pace: <strong class="text-white">{{ ultima.pace|default:"Não informado" }}</strong><br>
-                        Feito em: <span class="text-white-50">{{ ultima.data_envio|date:"d/m/Y" }}</span>
+                <div class="glass-card text-center h-100 d-flex flex-column justify-content-center">
+                    <h6 class="text-muted text-uppercase fw-bold mb-3"><i class="bi bi-clock-history"></i> Último Registro</h6>
+                    <div class="stat-value text-info">{{ ultima.quantidade_km|floatformat:1 }} <small class="fs-6 text-white-50">km</small></div>
+                    <div class="mt-2 text-white-50">
+                        <span class="d-block mb-1">Pace: <strong class="text-white">{{ ultima.pace|default:"Não informado" }}</strong></span>
+                        <span class="d-block small"><i class="bi bi-calendar-event"></i> {{ ultima.data_envio|date:"d M, Y" }}</span>
                     </div>
                 </div>
             </div>
 
-            <div class="col-12 mt-4">
+            <div class="col-12 mt-2">
                 <div class="glass-card coach-box">
-                    <h4 class="mb-3 text-white fw-bold">🤖 Recomendação Direta</h4>
+                    <h4 class="mb-3 text-white fw-bold"><i class="bi bi-robot text-info section-icon"></i> Recomendação Direta</h4>
                     <div class="row mt-3">
-                        <div class="col-md-4 mb-3">
-                            <h6 class="text-white fw-bold">Quando correr de novo?</h6>
-                            <h5 class="text-white">⏱️ {{ mensagem_data }}</h5>
+                        <div class="col-md-4 mb-3 mb-md-0 border-end border-secondary border-opacity-25">
+                            <h6 class="text-info fw-bold text-uppercase" style="font-size: 0.8rem;">Quando correr de novo?</h6>
+                            <h5 class="text-white mb-0"><i class="bi bi-stopwatch text-white-50"></i> {{ mensagem_data }}</h5>
                         </div>
-                        <div class="col-md-4 mb-3">
-                            <h6 class="text-white fw-bold">Meta de Distância Máxima</h6>
-                            <h5 class="text-white">📏 Não passe de {{ km_recomendado|floatformat:1 }} km</h5>
+                        <div class="col-md-4 mb-3 mb-md-0 border-end border-secondary border-opacity-25">
+                            <h6 class="text-info fw-bold text-uppercase" style="font-size: 0.8rem;">Distância Máxima</h6>
+                            <h5 class="text-white mb-0"><i class="bi bi-rulers text-white-50"></i> Até {{ km_recomendado|floatformat:1 }} km</h5>
                         </div>
-                        <div class="col-md-4 mb-3">
-                            <h6 class="text-white fw-bold">Estatística Mágica</h6>
-                            <h5 class="text-white">📅 Você rende mais nas <strong>{{ dia_favorito }}s</strong>!</h5>
+                        <div class="col-md-4">
+                            <h6 class="text-info fw-bold text-uppercase" style="font-size: 0.8rem;">Estatística Mágica</h6>
+                            <h5 class="text-white mb-0"><i class="bi bi-magic text-white-50"></i> Rende mais aos <strong>{{ dia_favorito }}s</strong>!</h5>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-12 mt-4">
+            <div class="col-12 mt-2">
                 <div class="glass-card pace-lab-box">
-                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
-                        <h4 class="mb-0 text-white fw-bold">🔬 Laboratório de Pace & Zonas</h4>
-                        <div class="d-flex align-items-center mt-2 mt-md-0">
-                            <label class="me-2 text-white fw-bold text-nowrap">Simular Pace:</label>
-                            <input type="text" id="inputPace" class="form-control text-center fw-bold text-warning" value="{{ default_pace }}" style="width: 100px; font-size: 1.2rem;" placeholder="Ex: 05:30">
+                    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                        <div>
+                            <h4 class="mb-1 text-white fw-bold"><i class="bi bi-speedometer2 text-warning section-icon"></i> Laboratório de Pace & Zonas</h4>
+                            <p class="text-white-50 small mb-0">Altere o pace abaixo para calcular suas zonas e projeções</p>
+                        </div>
+                        <div class="d-flex align-items-center bg-dark rounded-pill p-1 border border-secondary">
+                            <label class="ms-3 me-2 text-white-50 fw-bold small text-uppercase">Simular:</label>
+                            <input type="text" id="inputPace" class="form-control text-center fw-bold text-warning border-0 bg-transparent" value="{{ default_pace }}" style="width: 90px; font-size: 1.1rem; box-shadow: none;" placeholder="05:30">
                         </div>
                     </div>
-                    <p class="text-white-50">Altere o campo temporário de pace acima para calcular na hora seus ritmos recomendados e previsão de prova!</p>
                     
-                    <div class="row g-3 mt-2">
-                        <div class="col-md-4">
-                            <h6 class="text-white fw-bold">Paces Recomendados (Zonas)</h6>
-                            <ul class="list-unstyled mt-3 text-white">
-                                <li class="mb-2">🟢 <strong>Treino Leve:</strong> <span id="paceLeve" class="fw-bold fs-5 text-white"></span> min/km</li>
-                                <li class="mb-2">🔴 <strong>Treino Forte:</strong> <span id="paceForte" class="fw-bold fs-5 text-white"></span> min/km</li>
+                    <div class="row g-4 mt-2 border-top border-secondary border-opacity-25 pt-2">
+                        <div class="col-md-4 border-end border-secondary border-opacity-25">
+                            <h6 class="text-white fw-bold text-uppercase" style="font-size: 0.85rem;">Ritmos de Treino</h6>
+                            <ul class="list-unstyled mt-3 text-white mb-0">
+                                <li class="mb-3 d-flex align-items-center gap-2">
+                                    <i class="bi bi-circle-fill text-success" style="font-size: 0.6rem;"></i> 
+                                    <span class="text-white-50">Treino Leve:</span> 
+                                    <strong id="paceLeve" class="fs-5 text-white ms-auto"></strong>
+                                </li>
+                                <li class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-circle-fill text-danger" style="font-size: 0.6rem;"></i> 
+                                    <span class="text-white-50">Treino Forte:</span> 
+                                    <strong id="paceForte" class="fs-5 text-white ms-auto"></strong>
+                                </li>
                             </ul>
                         </div>
                         <div class="col-md-8">
-                            <h6 class="text-warning fw-bold">🏆 Previsão de Provas com este Pace</h6>
-                            <div class="row g-2 mt-1">
-                                <div class="col-6 col-md-3"><div class="time-box"><small class="text-white-50 d-block mb-1">5 KM</small><h5 id="time5k" class="text-white">--:--</h5></div></div>
-                                <div class="col-6 col-md-3"><div class="time-box"><small class="text-white-50 d-block mb-1">10 KM</small><h5 id="time10k" class="text-white">--:--</h5></div></div>
-                                <div class="col-6 col-md-3"><div class="time-box"><small class="text-white-50 d-block mb-1">Meia (21k)</small><h5 id="time21k" class="text-white">--:--</h5></div></div>
-                                <div class="col-6 col-md-3"><div class="time-box"><small class="text-white-50 d-block mb-1">Maratona</small><h5 id="time42k" class="text-white">--:--</h5></div></div>
+                            <h6 class="text-warning fw-bold text-uppercase" style="font-size: 0.85rem;">Previsão de Provas</h6>
+                            <div class="row g-2 mt-2">
+                                <div class="col-6 col-md-3"><div class="time-box"><small class="text-white-50 d-block mb-1 fw-bold">5 KM</small><h5 id="time5k" class="text-white">--:--</h5></div></div>
+                                <div class="col-6 col-md-3"><div class="time-box"><small class="text-white-50 d-block mb-1 fw-bold">10 KM</small><h5 id="time10k" class="text-white">--:--</h5></div></div>
+                                <div class="col-6 col-md-3"><div class="time-box"><small class="text-white-50 d-block mb-1 fw-bold">21 KM (Meia)</small><h5 id="time21k" class="text-white">--:--</h5></div></div>
+                                <div class="col-6 col-md-3"><div class="time-box"><small class="text-white-50 d-block mb-1 fw-bold">42 KM (Full)</small><h5 id="time42k" class="text-white">--:--</h5></div></div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-4 mt-4">
-                <div class="glass-card text-center h-100">
-                    <h6 class="text-white text-uppercase fw-bold">📈 Projeção Fim do Mês</h6>
-                    <div class="stat-value text-white mt-2">{{ projecao_mensal|floatformat:1 }} <small class="fs-6 text-white">km</small></div>
+            <div class="col-md-4 mt-2">
+                <div class="glass-card text-center h-100 d-flex flex-column justify-content-center">
+                    <h6 class="text-white-50 text-uppercase fw-bold"><i class="bi bi-graph-up text-primary"></i> Projeção Fim do Mês</h6>
+                    <div class="stat-value text-primary mt-2">{{ projecao_mensal|floatformat:1 }} <small class="fs-6">km</small></div>
                 </div>
             </div>
-            <div class="col-md-4 mt-4">
-                <div class="glass-card text-center h-100">
-                    <h6 class="text-white text-uppercase fw-bold">🥇 Recorde Pessoal</h6>
+            <div class="col-md-4 mt-2">
+                <div class="glass-card text-center h-100 d-flex flex-column justify-content-center">
+                    <h6 class="text-white-50 text-uppercase fw-bold"><i class="bi bi-award text-warning"></i> Recorde Pessoal</h6>
                     <div class="stat-value text-warning mt-2">{{ maior_corrida|floatformat:1 }} <small class="fs-6 text-warning">km</small></div>
                 </div>
             </div>
-            <div class="col-md-4 mt-4">
-                <div class="glass-card text-center h-100">
-                    <h6 class="text-white text-uppercase fw-bold">🔥 Energia Gasta</h6>
+            <div class="col-md-4 mt-2">
+                <div class="glass-card text-center h-100 d-flex flex-column justify-content-center">
+                    <h6 class="text-white-50 text-uppercase fw-bold"><i class="bi bi-fire text-danger"></i> Energia Gasta</h6>
                     <div class="stat-value text-danger mt-2">{{ calorias }} <small class="fs-6 text-danger">kcal</small></div>
-                    <small class="text-white-50">Equivale a <strong class="text-white">🍕 {{ pizzas }} fatias de pizza!</strong></small>
+                    <small class="text-white-50 fw-bold mt-1">Equivale a <strong class="text-white">{{ pizzas }} fatias de pizza!</strong></small>
                 </div>
             </div>
 
-            <div class="col-12 mt-4">
+            <div class="col-12 mt-2">
                 <div class="glass-card">
-                    <h4 class="mb-1 text-white fw-bold">📅 Calendário de Treinos (Próximos 7 dias)</h4>
-                    <p class="text-white-50 small mb-3">Baseado no seu dia favorito (<strong class="text-white">{{ dia_favorito }}</strong>), montamos essa rotina:</p>
+                    <h4 class="mb-1 text-white fw-bold"><i class="bi bi-calendar-week text-success section-icon"></i> Calendário de Treinos</h4>
+                    <p class="text-white-50 small mb-4">Rotina sugerida para os próximos 7 dias baseada no seu perfil.</p>
                     <div class="calendar-scroll">
                         {% for dia in plano_semanal %}
                         <div class="day-card {% if dia.is_hoje %}hoje{% endif %}">
-                            {% if dia.is_hoje %}<span class="badge bg-info mb-2 text-white">HOJE</span><br>{% endif %}
-                            <small class="text-white-50 fw-bold">{{ dia.dia_semana }}</small>
-                            <div class="fs-5 fw-bold text-white mb-1">{{ dia.data }}</div>
-                            <div class="fs-2 mb-2">{{ dia.icon }}</div>
-                            <span class="badge bg-{{ dia.cor }} d-block mb-1 text-white">{{ dia.tipo }}</span>
+                            {% if dia.is_hoje %}<span class="badge bg-info mb-3 text-white">HOJE</span><br>{% endif %}
+                            <small class="text-white-50 fw-bold text-uppercase">{{ dia.dia_semana }}</small>
+                            <div class="fs-5 fw-bold text-white mb-2">{{ dia.data }}</div>
+                            <div class="fs-2 mb-3">{{ dia.icon }}</div>
+                            <span class="badge bg-{{ dia.cor }} d-block text-white" style="padding: 6px;">{{ dia.tipo }}</span>
                         </div>
                         {% endfor %}
                     </div>
                 </div>
             </div>
 
-            <div class="col-12 mt-4">
-                <h4 class="mb-3 px-2 text-white fw-bold">🧠 Coach de Bolso: Simulador de Situações</h4>
+            <div class="col-12 mt-2">
+                <h4 class="mb-3 px-2 text-white fw-bold"><i class="bi bi-lightbulb text-warning section-icon"></i> Simulador de Situações</h4>
                 <div class="accordion" id="coachAccordion">
-                    <div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cenario1">🌧️ "Está chovendo muito e não quero ir pra rua."</button></h2><div id="cenario1" class="accordion-collapse collapse" data-bs-parent="#coachAccordion"><div class="accordion-body"><strong>Recomendação:</strong> Faça treino de fortalecimento em casa (Core, Agachamentos, Flexões) por 30min, ou use a esteira.</div></div></div>
-                    <div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cenario2">🥱 "Dormi mal, estou estressado ou com dor."</button></h2><div id="cenario2" class="accordion-collapse collapse" data-bs-parent="#coachAccordion"><div class="accordion-body"><strong>Recomendação:</strong> Troque o treino por <strong>Descanso Ativo</strong> (caminhada leve de 20min ou alongamento). Escute seu corpo!</div></div></div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cenario1">
+                                <i class="bi bi-cloud-rain me-2 text-info"></i> "Está chovendo muito e não quero ir pra rua."
+                            </button>
+                        </h2>
+                        <div id="cenario1" class="accordion-collapse collapse" data-bs-parent="#coachAccordion">
+                            <div class="accordion-body">
+                                <strong>Recomendação:</strong> Faça treino de fortalecimento em casa (Core, Agachamentos, Flexões) por 30min, ou use a esteira. Não perca a constância!
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cenario2">
+                                <i class="bi bi-bandaid me-2 text-danger"></i> "Dormi mal, estou estressado ou com dor."
+                            </button>
+                        </h2>
+                        <div id="cenario2" class="accordion-collapse collapse" data-bs-parent="#coachAccordion">
+                            <div class="accordion-body">
+                                <strong>Recomendação:</strong> Troque o treino por <strong>Descanso Ativo</strong> (caminhada leve de 20min ou alongamento). Escute seu corpo para evitar lesões.
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
