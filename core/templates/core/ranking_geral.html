@@ -13,117 +13,140 @@
         .back-link { color: #888; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-weight: 600; margin-bottom: 25px; transition: 0.2s; }
         .back-link:hover { color: #fff; }
 
-        .glass-card {
-            background: #1e1e1e;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        /* --- TÍTULO PREMIUM --- */
+        .title-gradient {
+            background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900;
+            font-size: 2.2rem;
+            letter-spacing: -1px;
         }
 
-        /* --- TABELA PREMIUM --- */
-        .table-responsive { overflow-x: auto; }
-        .table { color: #fff; border-collapse: separate; border-spacing: 0 8px; margin-top: -8px; }
-        .table thead th { border-bottom: none; color: #888; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; padding: 0 15px; }
-        .table tbody tr { background: rgba(255,255,255,0.03); transition: transform 0.2s, background 0.2s; }
-        .table tbody tr:hover { transform: translateY(-2px); background: rgba(255,255,255,0.06); }
-        .table td { border: none; padding: 15px; vertical-align: middle; }
-        .table td:first-child { border-radius: 12px 0 0 12px; }
-        .table td:last-child { border-radius: 0 12px 12px 0; }
+        /* --- CARDS DO RANKING (Substituindo a Tabela) --- */
+        .ranking-container { display: flex; flex-direction: column; gap: 12px; }
+        
+        .rank-card {
+            display: flex; align-items: center; justify-content: space-between;
+            background: #1a1d20;
+            border-radius: 18px; padding: 16px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: transform 0.2s ease;
+        }
+        .rank-card:hover { transform: translateY(-3px); }
 
-        /* Estilo do Top 3 */
-        .rank-icon { font-size: 1.3rem; }
-        .rank-1 { color: #ffd700; filter: drop-shadow(0 0 5px rgba(255,215,0,0.5)); }
-        .rank-2 { color: #c0c0c0; }
-        .rank-3 { color: #cd7f32; }
+        /* ✨ O TOQUE ESPECIAL: Estilos Únicos para o Pódio ✨ */
+        .top-1 { 
+            background: linear-gradient(145deg, #1f1b0d 0%, #2e2400 100%);
+            border: 1px solid rgba(255, 215, 0, 0.4); 
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.15); 
+        }
+        .top-2 { 
+            background: linear-gradient(145deg, #1a1d20 0%, #242526 100%);
+            border: 1px solid rgba(192, 192, 192, 0.3); 
+        }
+        .top-3 { 
+            background: linear-gradient(145deg, #1a1d20 0%, #291e14 100%);
+            border: 1px solid rgba(205, 127, 50, 0.3); 
+        }
 
-        /* Badge Dias Ativos */
+        /* Ícones e Posições */
+        .pos-box { width: 45px; display: flex; justify-content: center; align-items: center; }
+        .rank-icon { font-size: 1.8rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4)); }
+        .icon-gold { color: #ffd700; }
+        .icon-silver { color: #c0c0c0; }
+        .icon-bronze { color: #cd7f32; }
+        .pos-number { font-size: 1.3rem; font-weight: 900; color: #6c757d; }
+
+        /* Dados do Atleta */
+        .athlete-info { flex-grow: 1; padding-left: 10px; }
+        .athlete-name { font-size: 1.15rem; font-weight: 800; color: #ffffff; margin-bottom: 0; line-height: 1.2; }
+        .athlete-level { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* Estatísticas à direita */
+        .stats-box { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
+        .total-km { font-size: 1.4rem; font-weight: 900; line-height: 1; }
+        .top-1 .total-km { color: #ffd700; } /* Destaque dourado para o 1º */
+        .top-2 .total-km, .top-3 .total-km, .rank-card .total-km { color: #00d2ff; } 
+        
         .badge-dias { 
             background: rgba(255, 255, 255, 0.05); 
-            padding: 6px 12px; 
+            padding: 4px 10px; 
             border-radius: 20px; 
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: #ccc;
-            white-space: nowrap;
-            border: 1px solid rgba(255,255,255,0.1);
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #aaa;
+            border: 1px solid rgba(255,255,255,0.08);
+            display: inline-flex; align-items: center; gap: 5px;
         }
 
-        /* Ajustes Mobile */
         @media (max-width: 576px) {
-            .glass-card { padding: 1.2rem; }
-            h2 { font-size: 1.5rem; }
-            .badge-dias { font-size: 0.75em; padding: 5px 8px; }
-            .table td, .table th { padding: 10px; font-size: 0.9rem; }
+            .rank-card { padding: 14px 15px; }
+            .athlete-name { font-size: 1.05rem; }
+            .total-km { font-size: 1.25rem; }
+            .rank-icon { font-size: 1.5rem; }
         }
     </style>
 </head>
 <body>
-<div class="container py-4" style="max-width: 800px;">
+<div class="container py-4" style="max-width: 650px;">
     
     <a href="{% url 'dashboard' %}" class="back-link">
         <i class="bi bi-arrow-left"></i> Voltar para o Dashboard
     </a>
     
-    <div class="glass-card">
-        <div class="text-center mb-4">
-            <h2 class="mb-2 fw-bold"><i class="bi bi-stars text-warning"></i> Hall da Fama Geral</h2>
-            <p class="text-muted small fw-bold">Somatório de todos os tempos</p>
+    <div class="text-center mb-5 mt-2">
+        <div class="d-inline-block p-3 rounded-circle" style="background: rgba(255, 215, 0, 0.1); margin-bottom: 10px;">
+            <i class="bi bi-star-fill text-warning fs-1"></i>
         </div>
-        
-        <div class="table-responsive">
-            <table class="table align-middle">
-                <thead>
-                    <tr>
-                        <th class="text-center" style="width: 50px;">Pos</th>
-                        <th>Atleta</th>
-                        <th class="text-center">Dias Ativos</th>
-                        <th class="text-end">Total KM</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for corredor in ranking %}
-                    <tr>
-                        <td class="text-center">
-                            {% if forloop.counter == 1 %} <i class="bi bi-trophy-fill rank-icon rank-1"></i>
-                            {% elif forloop.counter == 2 %} <i class="bi bi-award-fill rank-icon rank-2"></i>
-                            {% elif forloop.counter == 3 %} <i class="bi bi-award-fill rank-icon rank-3"></i>
-                            {% else %} <span class="fw-bold text-muted">{{ forloop.counter }}º</span>
-                            {% endif %}
-                        </td>
-                        
-                        <td>
-                            <div class="fw-bold text-white">{{ corredor.nome_usuario }}</div>
-                            <small class="{{ corredor.classe_nivel }} fw-bold" style="font-size: 0.75rem;">
-                                {{ corredor.nivel }}
-                            </small>
-                        </td>
-                        
-                        <td class="text-center">
-                            <span class="badge-dias">
-                                <i class="bi bi-calendar2-check text-info"></i> {{ corredor.dias_ativos }}
-                            </span>
-                        </td>
-                        
-                        <td class="text-end fw-bold text-warning fs-5">
-                            {{ corredor.total_km_geral|floatformat:1 }} <span class="fs-6 text-muted">km</span>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="4" class="text-center py-5">
-                            <i class="bi bi-inbox text-muted fs-1 d-block mb-3"></i>
-                            <span class="text-muted fw-bold">Ainda sem dados registrados.</span>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+        <h1 class="title-gradient mb-1">Hall da Fama</h1>
+        <p class="text-muted fw-bold mb-0">Somatório Geral de Todos os Tempos</p>
     </div>
+    
+    <div class="ranking-container">
+        {% for corredor in ranking %}
+        <div class="rank-card {% if forloop.counter == 1 %}top-1{% elif forloop.counter == 2 %}top-2{% elif forloop.counter == 3 %}top-3{% endif %}">
+            
+            <div class="d-flex align-items-center w-100">
+                
+                <div class="pos-box">
+                    {% if forloop.counter == 1 %} 
+                        <i class="bi bi-trophy-fill rank-icon icon-gold"></i>
+                    {% elif forloop.counter == 2 %} 
+                        <i class="bi bi-award-fill rank-icon icon-silver"></i>
+                    {% elif forloop.counter == 3 %} 
+                        <i class="bi bi-award-fill rank-icon icon-bronze"></i>
+                    {% else %} 
+                        <span class="pos-number">{{ forloop.counter }}º</span>
+                    {% endif %}
+                </div>
+                
+                <div class="athlete-info">
+                    <h4 class="athlete-name">{{ corredor.nome_usuario }}</h4>
+                    <span class="{{ corredor.classe_nivel }} athlete-level">{{ corredor.nivel }}</span>
+                </div>
+                
+                <div class="stats-box">
+                    <div class="total-km">
+                        {{ corredor.total_km_geral|floatformat:1 }}<span style="font-size: 0.8rem; font-weight: 600; color: #888;">km</span>
+                    </div>
+                    <div class="badge-dias">
+                        <i class="bi bi-calendar-check text-success"></i> {{ corredor.dias_ativos }} d
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-5">
+            <i class="bi bi-emoji-frown text-muted fs-1 d-block mb-3"></i>
+            <h5 class="text-white fw-bold">Nenhum atleta registrado.</h5>
+            <p class="text-muted">A corrida ainda não começou!</p>
+        </div>
+        {% endfor %}
+    </div>
+
 </div>
 </body>
 </html>
