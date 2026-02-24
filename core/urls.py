@@ -8,6 +8,8 @@ urlpatterns = [
     path('ranking-geral/', views.ranking_geral, name='ranking_geral'),
     path('desempenho/', views.desempenho, name='desempenho'),
     path('feed/', views.feed_atividades, name='feed'),
+    path('rotas/', views.listar_rotas, name='listar_rotas'),
+    path('rotas/criar/', views.criar_rota, name='criar_rota'),
     # NOVAS ROTAS DO STRAVA
     path('strava/login/', views.strava_login, name='strava_login'),
     path('strava/callback/', views.strava_callback, name='strava_callback'),
