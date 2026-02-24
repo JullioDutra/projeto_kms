@@ -55,11 +55,14 @@ def registrar_km(request):
     if request.method == 'POST':
         form = AtividadeForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            atividade = form.save(commit=False) # Pausa antes de guardar
+            # Se a pessoa estiver logada via Strava, roubamos a foto para o post manual!
+            if request.user.is_authenticated and 'foto_strava' in request.session:
+                atividade.avatar_url = request.session['foto_strava']
+            atividade.save() # Agora sim, guarda no banco
             return redirect('dashboard')
     else:
         form = AtividadeForm()
-    
     return render(request, 'core/registrar.html', {'form': form})
 
 def historico(request):
