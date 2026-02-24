@@ -91,7 +91,12 @@
     <a href="{% url 'dashboard' %}" class="back-link">
         <i class="bi bi-arrow-left"></i> Voltar
     </a>
-    
+
+    <div class="mb-4 text-center">
+        <button class="btn btn-destaque rounded-pill px-4 py-2 fw-bold w-100" data-bs-toggle="modal" data-bs-target="#destaqueModal">
+            <i class="bi bi-star-fill me-1"></i> Ver Destaque do Mês
+        </button>
+    </div>
 
     <h3 class="section-title text-white">
         <i class="bi bi-fire" style="color: #ff6b00;"></i> Ofensivas Ativas
@@ -129,7 +134,6 @@
     <div class="post-card">
         <div class="post-header">
             <div class="user-info">
-                <div class="user-info">
                 {% if post.avatar_url %}
                     <img src="{{ post.avatar_url }}" alt="Perfil" class="avatar" style="border: 2px solid #3a7bd5; object-fit: cover; background: transparent;">
                 {% else %}
@@ -141,11 +145,7 @@
                     <small><i class="bi bi-clock"></i> {{ post.data_envio|date:"d M, H:i" }}</small>
                 </div>
             </div>
-                <div class="post-meta">
-                    <h6>{{ post.nome_usuario }}</h6>
-                    <small><i class="bi bi-clock"></i> {{ post.data_envio|date:"d M, H:i" }}</small>
-                </div>
-            </div>
+            
             <div class="activity-icon {% if post.tipo == 'bike' %}icon-bike{% else %}icon-run{% endif %}">
                 {% if post.tipo == 'bike' %}
                     <i class="bi bi-bicycle"></i>
