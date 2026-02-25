@@ -53,54 +53,88 @@
     // 1. Inicia o mapa (Centralizado em Anápolis/GO)
     var map = L.map('map').setView([-16.3267, -48.9528], 14);
 
-    // 2. Coloca as imagens das ruas (Usando OpenStreetMap Gratuito)
+    // 2. Coloca as imagens das ruas (Usando CartoDB Dark Matter)
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
         attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
         maxZoom: 19
     }).addTo(map);
 
-    // Variáveis para guardar o desenho
-    var coordenadas = [];
-    var linhaDesenhada = L.polyline([], {color: '#ff6b00', weight: 5, opacity: 0.8}).addTo(map);
+    // Variáveis Inteligentes para guardar o desenho
+    var coordenadas = []; // Vai guardar a linha COMPLETA pelas ruas
+    var linhaDesenhada = L.polyline([], {color: '#00d2ff', weight: 5, opacity: 0.8}).addTo(map); // Neon Blue
     var distanciaTotal = 0;
     var marcadores = [];
+    var ultimoPonto = null;
 
     // 3. O que acontece quando clica no mapa
     map.on('click', function(e) {
         var latlng = e.latlng;
-        coordenadas.push([latlng.lat, latlng.lng]);
-        linhaDesenhada.addLatLng(latlng);
-
-        // Adiciona um bolinha em cada clique
-        var marcador = L.circleMarker(latlng, {radius: 4, color: '#fff', fillColor: '#ff6b00', fillOpacity: 1}).addTo(map);
+        
+        // Adiciona uma bolinha amarela onde você clicou
+        var marcador = L.circleMarker(latlng, {radius: 5, color: '#fff', fillColor: '#ffca28', fillOpacity: 1}).addTo(map);
         marcadores.push(marcador);
 
-        // Calcula a distância do último ponto até este novo
-        if (coordenadas.length > 1) {
-            var pontoAnterior = L.latLng(coordenadas[coordenadas.length - 2]);
-            var distanciaTrecho = pontoAnterior.distanceTo(latlng) / 1000; // Divide por 1000 para virar KM
-            distanciaTotal += distanciaTrecho;
-            document.getElementById('distanciaTexto').innerHTML = distanciaTotal.toFixed(2) + ' <span style="font-size: 1rem; color:#888;">km</span>';
+        if (!ultimoPonto) {
+            // É o primeiro clique da rota!
+            coordenadas.push([latlng.lat, latlng.lng]);
+            linhaDesenhada.setLatLngs(coordenadas);
+            ultimoPonto = latlng;
+        } else {
+            // Já existe um ponto. Vamos pedir ao OSRM para traçar o caminho pela rua!
+            // O OSRM (GPS) usa o formato [Longitude, Latitude] na URL.
+            var url = `https://router.project-osrm.org/route/v1/foot/${ultimoPonto.lng},${ultimoPonto.lat};${latlng.lng},${latlng.lat}?geometries=geojson`;
+            
+            fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                if(data.code === 'Ok') {
+                    var rotaOSRM = data.routes[0];
+                    var geometria = rotaOSRM.geometry.coordinates; // Array de curvas da rua
+                    
+                    // Adiciona a distância exata calculada pelo GPS (vem em metros)
+                    distanciaTotal += (rotaOSRM.distance / 1000);
+                    document.getElementById('distanciaTexto').innerHTML = distanciaTotal.toFixed(2) + ' <span style="font-size: 1rem; color:#888;">km</span>';
+                    
+                    // Transforma [lng, lat] em [lat, lng] para o Leaflet desenhar
+                    // Começamos do índice 1 para não duplicar o ponto de partida
+                    for (var i = 1; i < geometria.length; i++) {
+                        coordenadas.push([geometria[i][1], geometria[i][0]]);
+                    }
+                    
+                    // Desenha a linha perfeitamente colada à rua!
+                    linhaDesenhada.setLatLngs(coordenadas);
+                    ultimoPonto = latlng; // O novo ponto vira a partida do próximo trecho
+                } else {
+                    alert("Atenção: Não foi possível encontrar uma rua/trilha entre esses pontos!");
+                    map.removeLayer(marcador);
+                    marcadores.pop();
+                }
+            })
+            .catch(error => {
+                console.log("Erro na API de rotas:", error);
+                alert("Erro ao traçar a rota. Tente novamente.");
+            });
         }
     });
 
-    // Função para recomeçar o desenho
+    // Função para limpar e recomeçar
     function limparMapa() {
         coordenadas = [];
         distanciaTotal = 0;
+        ultimoPonto = null;
         linhaDesenhada.setLatLngs([]);
         marcadores.forEach(m => map.removeLayer(m));
         marcadores = [];
         document.getElementById('distanciaTexto').innerHTML = '0.00 <span style="font-size: 1rem; color:#888;">km</span>';
     }
 
-    // Função para Salvar (Envia para o Django)
+    // Função para Salvar no Banco de Dados
     function salvarRota() {
         var nome = document.getElementById('nomeRota').value;
         var criador = document.getElementById('nomeCriador').value;
 
         if (!nome || !criador || coordenadas.length < 2) {
-            alert("Preencha o nome, seu nome e clique pelo menos 2 vezes no mapa!");
+            alert("Preencha o nome, o seu nome e clique pelo menos 2 vezes no mapa para criar uma rota!");
             return;
         }
 
@@ -108,10 +142,15 @@
             nome: nome,
             criador: criador,
             distancia: distanciaTotal.toFixed(2),
-            coordenadas: coordenadas
+            coordenadas: coordenadas // Envia todas as curvas da rua para o banco
         };
 
-        // Manda o pacote de dados pro Python
+        // Mostra o botão carregando
+        var btnSalvar = document.querySelector('button[onclick="salvarRota()"]');
+        var textoOriginal = btnSalvar.innerHTML;
+        btnSalvar.innerHTML = '<i class="bi bi-hourglass-split"></i> SALVANDO...';
+        btnSalvar.disabled = true;
+
         fetch("{% url 'criar_rota' %}", {
             method: "POST",
             headers: {
@@ -122,14 +161,12 @@
         }).then(response => response.json())
           .then(data => {
               if (data.status === 'sucesso') {
-                  alert("Rota salva com sucesso!");
-                  window.location.href = "{% url 'dashboard' %}"; // Volta pro inicio (depois mudamos para a lista de rotas)
+                  window.location.href = "{% url 'listar_rotas' %}"; 
               } else {
-                  alert("Erro: " + data.mensagem);
+                  alert("Erro ao salvar: " + data.mensagem);
+                  btnSalvar.innerHTML = textoOriginal;
+                  btnSalvar.disabled = false;
               }
           });
     }
 </script>
-
-</body>
-</html>
