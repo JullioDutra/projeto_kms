@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}KMS Tracker{% endblock %}</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            padding-bottom: 50px;
+        }
+
+        /* --- CABEÇALHO GLOBAL PREMIUM --- */
+        .app-header {
+            background: rgba(30, 30, 30, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 12px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            margin-bottom: 25px;
+        }
+        .app-logo { 
+            font-weight: 900; font-size: 1.3rem; margin: 0; 
+            display: flex; align-items: center; gap: 8px; 
+            letter-spacing: -0.5px; text-decoration: none; color: white;
+        }
+        .app-logo:hover { color: #00d2ff; }
+
+        /* Onde os filhos injetam o CSS específico deles */
+        {% block extra_css %}{% endblock %}
+    </style>
+</head>
+<body>
+
+    <header class="app-header">
+        <div class="container d-flex justify-content-between align-items-center" style="max-width: 600px;">
+            
+            <a href="{% url 'dashboard' %}" class="app-logo">
+                <i class="bi bi-activity text-primary"></i> KMS Tracker
+            </a>
+            
+            <div class="text-muted d-flex align-items-center gap-2">
+                {% if request.user.is_authenticated %}
+                    {% if request.session.foto_strava %}
+                        <img src="{{ request.session.foto_strava }}" alt="Perfil" class="rounded-circle" style="width: 35px; height: 35px; border: 2px solid #fc4c02; object-fit: cover;">
+                    {% else %}
+                        <i class="bi bi-person-circle fs-3 text-white"></i>
+                    {% endif %}
+                {% else %}
+                    <a href="{% url 'strava_login' %}" class="btn btn-sm fw-bold px-3" style="background-color: #fc4c02; color: white; border-radius: 8px;">
+                        Entrar
+                    </a>
+                {% endif %}
+            </div>
+
+        </div>
+    </header>
+
+    {% block content %}
+    {% endblock %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
