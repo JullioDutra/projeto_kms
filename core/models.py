@@ -23,7 +23,7 @@ class Atividade(models.Model):
     
     quantidade_km = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="KM Percorrido")
     pace = models.CharField(max_length=5, blank=True, null=True, verbose_name="Pace (Min/Km)")
-    
+    descricao = models.TextField(blank=True, null=True, verbose_name="Descrição/Título do Treino")
     foto_comprovante = models.ImageField(upload_to='comprovantes/', verbose_name="Foto do Comprovante", blank=True, null=True)
     data_envio = models.DateTimeField(auto_now_add=True)
     strava_id = models.CharField(max_length=100, blank=True, null=True, unique=True)
