@@ -75,3 +75,13 @@ class TempoRota(models.Model):
     class Meta:
         verbose_name = "Tempo na Rota"
         verbose_name_plural = "Tempos nas Rotas"
+
+class TokenStrava(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='strava_token')
+    strava_id = models.CharField(max_length=100, unique=True)
+    access_token = models.CharField(max_length=255)
+    refresh_token = models.CharField(max_length=255)
+    expires_at = models.DateTimeField()
+
+    def __str__(self):
+        return f"Tokens de {self.user.first_name}"
