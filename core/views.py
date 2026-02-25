@@ -425,13 +425,19 @@ def feed_atividades(request):
 # PLANEJADOR DE ROTAS (MAPAS)
 # ==========================================
 def criar_rota(request):
+    # 1. TRAVA DE SEGURANÇA: Só passa se estiver logado
+    if not request.user.is_authenticated:
+        return redirect('listar_rotas')
+        
     if request.method == 'POST':
         try:
-            # Recebe os dados invisíveis do mapa em JavaScript
+            # Recebe os dados do mapa em JavaScript
             data = json.loads(request.body)
+            
             Rota.objects.create(
                 nome=data.get('nome'),
-                criador=data.get('criador'),
+                # 2. TRAVA DE AUTORIA: O Django injeta o nome da sessão de forma segura!
+                criador=request.user.first_name, 
                 distancia_estimada=data.get('distancia'),
                 coordenadas=data.get('coordenadas')
             )
@@ -439,6 +445,7 @@ def criar_rota(request):
         except Exception as e:
             return JsonResponse({'status': 'erro', 'mensagem': str(e)})
 
+    # Se não for POST (só está a abrir a página), carrega o HTML
     return render(request, 'core/criar_rota.html')
 
 def listar_rotas(request):
@@ -497,3 +504,15 @@ def ver_rota(request, id):
         'rota': rota, 
         'ranking_tempos': ranking_tempos
     })
+
+def excluir_rota(request, id):
+    # Puxa a rota do banco de dados
+    from .models import Rota
+    rota = get_object_or_404(Rota, id=id)
+    
+    #REGRA 2: Só exclui se estiver logado E for o dono exato da rota
+    if request.user.is_authenticated and request.user.first_name == rota.criador:
+        rota.delete()
+        
+    # Redireciona de volta para a biblioteca de mapas
+    return redirect('listar_rotas')
