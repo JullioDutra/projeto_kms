@@ -17,6 +17,10 @@
         .painel-flutuante { background: #1a1d20; padding: 20px; border-radius: 15px; margin-top: -30px; position: relative; z-index: 10; box-shadow: 0 -10px 20px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); }
         .distancia-display { font-size: 2.5rem; font-weight: 900; color: #ff6b00; line-height: 1; }
         .form-control { background-color: #2b2b2b !important; border: 1px solid #444 !important; color: white !important; }
+        /* A Lente Escura para o Mapa */
+        .leaflet-tile-pane {
+            filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+        }
     </style>
 </head>
 <body>
@@ -54,8 +58,8 @@
     var map = L.map('map').setView([-16.3267, -48.9528], 14);
 
     // 2. Coloca as imagens das ruas (Usando CartoDB Dark Matter)
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
         maxZoom: 19
     }).addTo(map);
 
