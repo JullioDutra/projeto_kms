@@ -1,4 +1,7 @@
 from django.db import models
+from django.contrib.auth.models import User
+from django.utils import timezone
+# ... resto dos imports
 
 class MetaMensal(models.Model):
     mes = models.IntegerField(choices=[(i, i) for i in range(1, 13)], verbose_name="Mês (Número)")
