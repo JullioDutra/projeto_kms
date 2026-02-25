@@ -518,3 +518,25 @@ def excluir_rota(request, id):
         
     # Redireciona de volta para a biblioteca de mapas
     return redirect('listar_rotas')
+
+def editar_descricao(request, id):
+    # 1. Trava Básica: Tem que estar logado
+    if not request.user.is_authenticated:
+        return redirect('feed')
+        
+    if request.method == 'POST':
+        # Puxa a atividade exata que a pessoa clicou
+        from .models import Atividade
+        atividade = get_object_or_404(Atividade, id=id)
+        
+        # 2. Trava de Segurança Nível Chefe: O usuário logado é o dono do post?
+        if request.user.first_name == atividade.nome_usuario:
+            # Pega o texto que veio do formulário (janela preta)
+            nova_descricao = request.POST.get('nova_descricao')
+            
+            # Atualiza e salva!
+            atividade.descricao = nova_descricao
+            atividade.save()
+            
+    # Independente de dar certo ou errado, devolve a pessoa para o Feed
+    return redirect('feed')
