@@ -331,6 +331,7 @@ def strava_callback(request):
 
             if distancia_km > 0.1:
                 moving_time = atividade['moving_time']
+                nome_do_treino = atividade.get('name', 'Treino sem título')
                 pace_str = ""
                 if distancia_km > 0:
                     pace_segundos = moving_time / distancia_km
@@ -345,7 +346,8 @@ def strava_callback(request):
                     pace=pace_str,
                     strava_id=act_strava_id,
                     tipo=tipo_atividade,
-                    avatar_url=foto_url
+                    avatar_url=foto_url,
+                    descricao=nome_do_treino
                 )
                 
     return redirect('dashboard')
