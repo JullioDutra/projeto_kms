@@ -32,7 +32,8 @@ def dashboard(request):
     
     total_acumulado = Atividade.objects.filter(
         data_envio__month=hoje.month, 
-        data_envio__year=hoje.year
+        data_envio__year=hoje.year,
+        tipo='corrida' # <--- Apenas Corridas no Tanque!
     ).aggregate(Sum('quantidade_km'))['quantidade_km__sum'] or 0
     
     porcentagem = round((total_acumulado / meta_valor) * 100, 2)
@@ -49,6 +50,33 @@ def dashboard(request):
         'porcentagem_visual': porcentagem_visual,
         'ranking': ranking,
     }
+
+    # --- INÍCIO DA LÓGICA DO CARTÃO DO ATLETA ---
+    if request.user.is_authenticated:
+        nome_atleta = request.user.first_name
+        
+        # Importações locais de segurança
+        from django.db.models import Count 
+        from .models import Rota, TempoRota
+        
+        # 1. Pega os KMs e Total de Corridas (Apenas Corridas também!)
+        stats_usuario = Atividade.objects.filter(nome_usuario=nome_atleta, tipo='corrida').aggregate(
+            total_km=Sum('quantidade_km'),
+            total_corridas=Count('id')
+        )
+        context['meu_total_km'] = stats_usuario['total_km'] or 0
+        context['minhas_corridas'] = stats_usuario['total_corridas'] or 0
+        
+        # 2. Verifica se ele é "Rei" de alguma Rota
+        minhas_coroas = 0
+        for rota in Rota.objects.all():
+            melhor_tempo = TempoRota.objects.filter(rota=rota).order_by('tempo_minutos', 'tempo_segundos').first()
+            if melhor_tempo and melhor_tempo.nome_atleta == nome_atleta:
+                minhas_coroas += 1
+                
+        context['minhas_coroas'] = minhas_coroas
+    # --- FIM DA LÓGICA DO CARTÃO ---
+
     return render(request, 'core/dashboard.html', context)
 
 def registrar_km(request):
