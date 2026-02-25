@@ -102,7 +102,9 @@ def ranking_geral(request):
     
     ranking_final = []
     for s in stats:
-        km = s['total_km_geral']
+        # 🛡️ A MÁGICA SALVADORA: Se a soma der None (Vazio), vira 0.
+        km = s['total_km_geral'] or 0
+        s['total_km_geral'] = km # Atualiza o valor no dicionário para o HTML não quebrar
         
         # Lógica da Gamificação (Níveis)
         nivel = "Novato 🥚"
@@ -126,6 +128,9 @@ def ranking_geral(request):
         s['nivel'] = nivel
         s['classe_nivel'] = classe
         ranking_final.append(s)
+
+    # Reordena a lista final para garantir que quem tem 0 vá para o final do pódio
+    ranking_final = sorted(ranking_final, key=lambda x: x['total_km_geral'], reverse=True)
 
     return render(request, 'core/ranking_geral.html', {'ranking': ranking_final})
 
