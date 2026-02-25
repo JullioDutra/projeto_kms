@@ -92,8 +92,6 @@
         <i class="bi bi-arrow-left"></i> Voltar
     </a>
 
-
-
     <h3 class="section-title text-white">
         <i class="bi bi-fire" style="color: #ff6b00;"></i> Ofensivas Ativas
     </h3>
@@ -106,7 +104,6 @@
                 
                 {% if atleta.avatar %}
                     <img src="{{ atleta.avatar }}" alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; padding: 2px;">
-                    
                     <i class="bi bi-fire" style="position: absolute; top: -6px; right: -6px; font-size: 1.3rem; color: {{ atleta.cor }}; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.8));"></i>
                 {% else %}
                     <i class="bi bi-fire" style="color: {{ atleta.cor }}; text-shadow: 0 0 15px {{ atleta.cor }};"></i>
@@ -158,6 +155,25 @@
             </div>
         </div>
 
+        <div class="px-1 mb-3 mt-1 d-flex justify-content-between align-items-start gap-2">
+            <div>
+                {% if post.descricao %}
+                    <h5 class="mb-0 fw-bold text-white" style="font-size: 1.15rem; letter-spacing: 0.3px;">
+                        {{ post.descricao }}
+                    </h5>
+                {% else %}
+                    {% if request.user.is_authenticated and request.user.first_name == post.nome_usuario %}
+                        <span class="text-muted small fst-italic"><i class="bi bi-journal-text"></i> Adicione um título...</span>
+                    {% endif %}
+                {% endif %}
+            </div>
+            
+            {% if request.user.is_authenticated and request.user.first_name == post.nome_usuario %}
+            <button class="btn btn-sm text-secondary p-0 m-0" data-bs-toggle="modal" data-bs-target="#editModal{{ post.id }}">
+                <i class="bi bi-pencil-square fs-5"></i>
+            </button>
+            {% endif %}
+        </div>
         {% if post.medalha %}
         <div class="medal-badge">
             <i class="bi bi-trophy-fill"></i> {{ post.medalha }}
@@ -190,6 +206,29 @@
             {% endif %}
         </div>
     </div>
+
+    {% if request.user.is_authenticated and request.user.first_name == post.nome_usuario %}
+    <div class="modal fade" id="editModal{{ post.id }}" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background: #1a1d20; border: 1px solid #333; border-radius: 15px;">
+          <div class="modal-header border-0 pb-0">
+            <h5 class="modal-title text-white fw-bold">Editar Título</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form action="{% url 'editar_descricao' post.id %}" method="POST">
+            {% csrf_token %}
+            <div class="modal-body">
+                <input type="text" name="nova_descricao" class="form-control text-white fw-bold" style="background: #121212; border: 1px solid #444; border-radius: 10px; padding: 12px;" value="{{ post.descricao|default:'' }}" placeholder="Como foi o treino?" maxlength="100" autocomplete="off">
+            </div>
+            <div class="modal-footer border-0 pt-0">
+              <button type="submit" class="btn btn-primary rounded-pill fw-bold w-100 py-2">Salvar Alteração</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
     {% empty %}
     <div class="post-card text-center py-5">
         <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
