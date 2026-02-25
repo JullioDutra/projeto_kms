@@ -1,7 +1,7 @@
 import requests
 from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Atividade, MetaMensal, Rota
+from .models import Atividade, MetaMensal, Rota, TokenStrava
 from django.db.models import Sum, Count
 from django.db.models.functions import TruncDate
 from datetime import datetime
@@ -250,6 +250,9 @@ def strava_callback(request):
 
     token_data = res.json()
     access_token = token_data.get('access_token')
+    refresh_token = token_data.get('refresh_token')
+    # O Strava manda a validade em segundos. Convertemos para data e hora reais:
+    expires_at = timezone.now() + timedelta(seconds=token_data.get('expires_in', 21600))
     
     # 1. PEGAR OS DADOS PESSOAIS DO ATLETA
     athlete = token_data.get('athlete', {})
@@ -257,12 +260,23 @@ def strava_callback(request):
     strava_id = str(athlete.get('id'))
     foto_url = athlete.get('profile', 'https://cdn-icons-png.flaticon.com/512/149/149071.png')
 
-    # 2. SISTEMA DE LOGIN (MÁGICA DO DJANGO)
+    # 2. SISTEMA DE LOGIN E COFRE DE TOKENS (A MÁGICA DA AUTOMAÇÃO)
     # Procura se o atleta já existe no nosso banco. Se não, cria uma conta para ele!
     user, created = User.objects.get_or_create(username=strava_id)
     if created:
         user.first_name = athlete_nome
         user.save()
+
+    # Guarda ou atualiza a "Chave Mestra" do Strava no Cofre do Banco de Dados
+    TokenStrava.objects.update_or_create(
+        user=user,
+        defaults={
+            'strava_id': strava_id,
+            'access_token': access_token,
+            'refresh_token': refresh_token,
+            'expires_at': expires_at
+        }
+    )
 
     # Faz o login oficial (cria o cookie de sessão)
     login(request, user)
@@ -271,7 +285,7 @@ def strava_callback(request):
     request.session['foto_strava'] = foto_url
     request.session['nome_strava'] = athlete_nome
 
-    # 3. PUXAR A ÚLTIMA CORRIDA (Código original mantido)
+    # 3. PUXAR A ÚLTIMA CORRIDA
     activities_url = "https://www.strava.com/api/v3/athlete/activities?per_page=1"
     headers = {'Authorization': f'Bearer {access_token}'}
     act_res = requests.get(activities_url, headers=headers)
@@ -296,6 +310,7 @@ def strava_callback(request):
                     s = int(pace_segundos % 60)
                     pace_str = f"{m:02d}:{s:02d}"
 
+                # Salva o treino puxando também a foto para aparecer no Feed!
                 Atividade.objects.create(
                     nome_usuario=athlete_nome,
                     quantidade_km=round(distancia_km, 2),
@@ -304,6 +319,7 @@ def strava_callback(request):
                     tipo=tipo_atividade,
                     avatar_url=foto_url
                 )
+                
     return redirect('dashboard')
 
 
