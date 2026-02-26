@@ -416,10 +416,18 @@ def feed_atividades(request):
             post.avatar_url = avatares[post.nome_usuario]
             post.save()
 
+    # =========================================================
+    # --- NOVO: PUXAR OS ÚLTIMOS DESAFIOS PARA O FEED ---
+    # =========================================================
+    from .models import Desafio
+    # Pega os últimos 5 desafios que não foram recusados
+    desafios_ativos = Desafio.objects.exclude(status='recusado').order_by('-data_criacao')[:5]
+
     context = {
         'atividades': atividades_feed, 
         'foguinhos': ranking_foguinhos,
-        'destaque': destaque
+        'destaque': destaque,
+        'desafios_feed': desafios_ativos # <--- VARIÁVEL ADICIONADA AO CONTEXTO AQUI
     }
     return render(request, 'core/feed.html', context)
 
