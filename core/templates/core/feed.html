@@ -4,55 +4,26 @@
 
 {% block extra_css %}
 <style>
-    .back-link { color: #888; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-weight: 600; margin-bottom: 25px; transition: 0.2s; }
-    .back-link:hover { color: #fff; }
-    
-    .section-title { font-weight: 900; font-size: 1.4rem; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
-    
-    /* --- MODAL DESTAQUE --- */
-    .btn-destaque { background: linear-gradient(135deg, #ffd700, #ff8c00); color: #000; border: none; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3); transition: transform 0.2s; }
-    .btn-destaque:hover { transform: scale(1.05); color: #000; }
-    .modal-content { background: linear-gradient(145deg, #1a1d20 0%, #2e2400 100%); border: 1px solid rgba(255, 215, 0, 0.4); border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
-    .title-gradient { background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-
-    /* --- FOGUINHOS DINÂMICOS & CARROSSEL --- */
-    .streak-container { display: flex; overflow-x: auto; gap: 20px; padding: 10px 5px 20px 5px; scrollbar-width: none; }
+    /* --- STORIES INSTAGRAM STYLE --- */
+    .streak-container { display: flex; overflow-x: auto; gap: 18px; padding: 15px 10px; scrollbar-width: none; border-bottom: 1px solid rgba(255,255,255,0.05); background: #121212; position: sticky; top: 0; z-index: 10; }
     .streak-container::-webkit-scrollbar { display: none; }
-    .streak-item { display: flex; flex-direction: column; align-items: center; min-width: 70px; }
+    .streak-item { display: flex; flex-direction: column; align-items: center; min-width: 65px; }
     
-    .streak-ring {
-        width: 65px; height: 65px; border-radius: 50%;
-        background: #1a1c1e;
-        display: flex; align-items: center; justify-content: center;
-        position: relative;
-        border: 2px solid; 
-    }
+    .streak-ring { width: 65px; height: 65px; border-radius: 50%; background: #1a1c1e; display: flex; align-items: center; justify-content: center; position: relative; border: 2px solid; padding: 3px; }
+    .streak-ring img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+    .streak-ring .bi-fire-icon { position: absolute; bottom: -8px; font-size: 0.9rem; background: #121212; border-radius: 50%; padding: 2px; }
     
-    .streak-ring .bi-fire { font-size: 2.2rem; }
-    
-    .streak-count {
-        position: absolute; bottom: -8px;
-        background: #121212; color: #fff; font-size: 0.8rem; font-weight: 900;
-        padding: 2px 12px; border-radius: 12px;
-        border: 2px solid;
-    }
-    .streak-name { font-size: 0.8rem; color: #aaa; margin-top: 10px; font-weight: 700; text-transform: capitalize; }
+    .streak-count { position: absolute; bottom: -12px; background: #121212; color: #fff; font-size: 0.75rem; font-weight: 900; padding: 1px 8px; border-radius: 12px; border: 2px solid; }
+    .streak-name { font-size: 0.75rem; color: #aaa; margin-top: 12px; font-weight: 700; text-transform: capitalize; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70px; text-align: center; }
 
-    /* ✨ ANIMAÇÃO DO 1º LUGAR (FOGO ARDENTE) ✨ */
-    @keyframes pulse-blaze {
-        0% { transform: scale(1); filter: brightness(1); }
-        50% { transform: scale(1.15); filter: brightness(1.3); }
-        100% { transform: scale(1); filter: brightness(1); }
-    }
-    .is-first .bi-fire { animation: pulse-blaze 1s infinite alternate; }
-    .is-first .streak-ring { border-width: 3px; border-style: dashed; }
+    @keyframes pulse-blaze { 0% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.15); filter: brightness(1.3); } 100% { transform: scale(1); filter: brightness(1); } }
+    .is-first .bi-fire-icon { animation: pulse-blaze 1s infinite alternate; }
 
     /* --- POSTS DA COMUNIDADE --- */
-    .post-card { background-color: #1a1d20; border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid #282a2d; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+    .post-card { background-color: #1a1d20; border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
     .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-    
     .user-info { display: flex; align-items: center; gap: 12px; }
-    .avatar { width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, #00d2ff, #3a7bd5); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.2rem; color: white; }
+    .avatar { width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, #00d2ff, #3a7bd5); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.2rem; color: white; border: 2px solid #3a7bd5; object-fit: cover; }
     
     .post-meta h6 { margin: 0; font-weight: 800; color: #fff; font-size: 1.05rem; }
     .post-meta small { color: #888; font-size: 0.8rem; font-weight: 500; }
@@ -61,13 +32,7 @@
     .icon-run { color: #00d2ff; background: rgba(0, 210, 255, 0.1); }
     .icon-bike { color: #2ecc71; background: rgba(46, 204, 113, 0.1); }
 
-    .medal-badge {
-        display: inline-flex; align-items: center; gap: 8px;
-        background: linear-gradient(135deg, rgba(255, 193, 7, 0.15), rgba(255, 152, 0, 0.15));
-        color: #ffc107; border: 1px solid rgba(255, 193, 7, 0.3);
-        padding: 6px 14px; border-radius: 20px;
-        font-size: 0.85rem; font-weight: 800; margin-bottom: 15px; text-transform: uppercase;
-    }
+    .medal-badge { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, rgba(255, 193, 7, 0.15), rgba(255, 152, 0, 0.15)); color: #ffc107; border: 1px solid rgba(255, 193, 7, 0.3); padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 800; margin-bottom: 15px; text-transform: uppercase; }
 
     .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: rgba(255,255,255,0.03); border-radius: 14px; padding: 15px; border: 1px solid rgba(255,255,255,0.05); }
     .stat-box { display: flex; flex-direction: column; }
@@ -77,93 +42,107 @@
     
     .text-accent-run { color: #00d2ff !important; }
     .text-accent-bike { color: #2ecc71 !important; }
-    
-    .glass-card { background: #1e1e1e; border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container py-2" style="max-width: 600px;">
-    
-    <a href="{% url 'dashboard' %}" class="back-link">
-        <i class="bi bi-arrow-left"></i> Voltar
-    </a>
+{% if desafios_pendentes > 0 %}
+<div class="alert mb-0 rounded-0 text-center text-dark fw-bold d-flex justify-content-center align-items-center gap-2" style="background: linear-gradient(135deg, #ffd700, #ffca28); border: none;">
+    <i class="bi bi-exclamation-circle-fill"></i> Tem {{ desafios_pendentes }} desafio(s) à sua espera! 
+    <a href="{% url 'arena_desafios' %}" class="btn btn-sm btn-dark rounded-pill fw-bold ms-2">Ir para Arena</a>
+</div>
+{% endif %}
 
-    <h3 class="section-title text-white">
-        <i class="bi bi-fire" style="color: #ff6b00;"></i> Ofensivas Ativas
-    </h3>
+<div class="streak-container">
+    <div class="streak-item" data-bs-toggle="modal" data-bs-target="#destaqueModal" style="cursor: pointer;">
+        <div class="streak-ring" style="border-color: #ffd700; border-style: dashed; padding: 2px;">
+            <div style="width: 100%; height: 100%; border-radius: 50%; background: rgba(255,215,0,0.1); display: flex; align-items: center; justify-content: center;">
+                <i class="bi bi-trophy-fill text-warning fs-3"></i>
+            </div>
+        </div>
+        <div class="streak-name fw-900 text-warning">Destaque</div>
+    </div>
+
+    {% for atleta in foguinhos %}
+    <div class="streak-item {% if atleta.is_first %}is-first{% endif %}">
+        <div class="streak-ring" style="border-color: {{ atleta.cor }};">
+            {% if atleta.avatar %}
+                <img src="{{ atleta.avatar }}" alt="Avatar">
+            {% else %}
+                <i class="bi bi-person-fill text-muted fs-1"></i>
+            {% endif %}
+            <i class="bi bi-fire bi-fire-icon" style="color: {{ atleta.cor }};"></i>
+            <div class="streak-count" style="border-color: {{ atleta.cor }}; color: {{ atleta.cor }};">
+                {{ atleta.fogo }}
+            </div>
+        </div>
+        <div class="streak-name" {% if atleta.is_first %}style="color: {{ atleta.cor }};"{% endif %}>
+            {{ atleta.nome }}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="container py-4" style="max-width: 600px;">
     
-    <div class="streak-container mb-4">
-        {% for atleta in foguinhos %}
-        <div class="streak-item {% if atleta.is_first %}is-first{% endif %}">
-            <div class="streak-ring" style="border-color: {{ atleta.cor }}; box-shadow: 0 0 15px {{ atleta.cor }}60;">
-                {% if atleta.avatar %}
-                    <img src="{{ atleta.avatar }}" alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; padding: 2px;">
-                    <i class="bi bi-fire" style="position: absolute; top: -6px; right: -6px; font-size: 1.3rem; color: {{ atleta.cor }}; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.8));"></i>
-                {% else %}
-                    <i class="bi bi-fire" style="color: {{ atleta.cor }}; text-shadow: 0 0 15px {{ atleta.cor }};"></i>
-                {% endif %}
-                <div class="streak-count" style="border-color: {{ atleta.cor }}; color: {{ atleta.cor }}; background: #121212; display: flex; align-items: center; gap: 3px; padding: 2px 10px;">
-                    <i class="bi bi-fire" style="font-size: 0.75rem;"></i> {{ atleta.fogo }}
+    {% for pd in posts_desafios %}
+    <div class="post-card" style="background: linear-gradient(145deg, #1e1e1e, #2a1515); border: 1px solid rgba(255, 75, 43, 0.3);">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex align-items-center gap-2">
+                <div class="activity-icon icon-run" style="background: rgba(255, 75, 43, 0.2); color: #ff4b2b;">
+                    <i class="bi bi-crosshair"></i>
+                </div>
+                <div>
+                    <h6 class="mb-0 fw-bold text-white">Atualização da Arena</h6>
+                    <small style="color: #ffca28; font-weight: 700;">{% if pd.status == 'concluido' %}Batalha Finalizada 🏆{% else %}Batalha em Andamento 🔥{% endif %}</small>
                 </div>
             </div>
-            <div class="streak-name" {% if atleta.is_first %}style="color: {{ atleta.cor }};"{% endif %}>
-                {{ atleta.nome }}
-            </div>
         </div>
-        {% empty %}
-        <div class="w-100 text-center py-3">
-            <p class="text-muted fw-bold mb-0">Nenhuma ofensiva ativa no momento. Inicie uma hoje!</p>
-        </div>
-        {% endfor %}
-    </div>
-
-    {% if desafios_feed %}
-    <h3 class="section-title text-white mt-4">
-        <i class="bi bi-crosshair text-danger"></i> Desafios da Comunidade
-    </h3>
-    
-    <div class="streak-container mb-4" style="padding: 10px 5px;">
-        {% for d in desafios_feed %}
-        <div class="glass-card mb-0" style="min-width: 260px; padding: 15px; border-width: 2px; border-color: {% if d.status == 'ativo' %}#ff4b2b{% else %}#ffca28{% endif %}; flex: 0 0 auto;">
-            
-            <div class="text-center mb-3">
-                <span class="badge {% if d.status == 'ativo' %}bg-danger{% else %}bg-warning text-dark{% endif %} mb-3" style="font-size: 0.7rem; letter-spacing: 1px;">
-                    {% if d.status == 'ativo' %}<i class="bi bi-fire"></i> EM ANDAMENTO{% else %}<i class="bi bi-hourglass-split"></i> PENDENTE{% endif %}
-                </span>
-                <h5 class="fw-900 text-white mb-0" style="font-size: 1.2rem;">{{ d.desafiante }}</h5>
-                <small class="text-muted fw-bold d-block my-1" style="font-size: 0.75rem;">VS</small>
-                <h5 class="fw-900 text-white mt-0" style="font-size: 1.2rem;">{{ d.desafiado }}</h5>
+        
+        <div class="text-center bg-dark rounded-4 p-3" style="border: 1px solid rgba(255,255,255,0.05);">
+            <div class="d-flex justify-content-center align-items-center gap-3">
+                <div class="text-center" style="flex: 1;">
+                    {% if pd.avatar_desafiante %}
+                        <img src="{{ pd.avatar_desafiante }}" class="rounded-circle mb-2" style="width: 50px; height: 50px; border: 2px solid #00d2ff; object-fit: cover;">
+                    {% else %}
+                        <i class="bi bi-person-circle fs-1 text-info mb-2 d-block"></i>
+                    {% endif %}
+                    <h6 class="fw-bold mb-0 text-white" style="font-size: 0.9rem;">{{ pd.desafiante }}</h6>
+                    <h5 class="fw-900 mb-0" style="color: #00d2ff;">{{ pd.km_desafiante|floatformat:1 }}<small style="font-size: 0.7rem;">km</small></h5>
+                </div>
+                
+                <h4 class="fw-900 text-muted mx-1" style="font-style: italic;">VS</h4>
+                
+                <div class="text-center" style="flex: 1;">
+                    {% if pd.avatar_desafiado %}
+                        <img src="{{ pd.avatar_desafiado }}" class="rounded-circle mb-2" style="width: 50px; height: 50px; border: 2px solid #ff4b2b; object-fit: cover;">
+                    {% else %}
+                        <i class="bi bi-person-circle fs-1 text-danger mb-2 d-block"></i>
+                    {% endif %}
+                    <h6 class="fw-bold mb-0 text-white" style="font-size: 0.9rem;">{{ pd.desafiado }}</h6>
+                    <h5 class="fw-900 mb-0" style="color: #ff4b2b;">{{ pd.km_desafiado|floatformat:1 }}<small style="font-size: 0.7rem;">km</small></h5>
+                </div>
             </div>
             
-            <div class="text-center rounded-3 p-2 mb-3" style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05);">
-                <small class="text-info fw-bold d-block" style="font-size: 0.85rem;">Meta: {{ d.alvo_km|floatformat:0 }} km</small>
-                <small class="text-muted fw-bold" style="font-size: 0.75rem;"><i class="bi bi-clock"></i> {{ d.prazo_dias }} dias</small>
-            </div>
-
-            {% if d.status == 'pendente' and request.user.first_name == d.desafiado %}
-                <a href="{% url 'responder_desafio' d.id 'aceitar' %}" class="btn btn-sm btn-success w-100 fw-bold rounded-pill" style="box-shadow: 0 4px 10px rgba(40, 167, 69, 0.4);">
-                    <i class="bi bi-check-circle-fill"></i> Aceitar Batalha
-                </a>
-            {% else %}
-                <a href="{% url 'arena_desafios' %}" class="btn btn-sm btn-outline-light w-100 fw-bold rounded-pill">
-                    <i class="bi bi-eye-fill"></i> Ver na Arena
-                </a>
+            {% if pd.status == 'concluido' %}
+                <div class="mt-3 pt-2" style="border-top: 1px solid rgba(255,255,255,0.05);">
+                    {% if pd.vencendo == 'Empate' %}
+                        <span class="text-muted fw-bold">A Batalha terminou em Empate!</span>
+                    {% else %}
+                        <span class="text-warning fw-bold"><i class="bi bi-trophy-fill"></i> Vencedor: {{ pd.vencendo }}</span>
+                    {% endif %}
+                </div>
             {% endif %}
         </div>
-        {% endfor %}
     </div>
-    {% endif %}
-    <h3 class="section-title text-white mt-4">
-        <i class="bi bi-activity text-primary"></i> Atividades Recentes
-    </h3>
-    
+    {% endfor %}
+
     {% for post in atividades %}
     <div class="post-card">
         <div class="post-header">
             <div class="user-info">
                 {% if post.avatar_url %}
-                    <img src="{{ post.avatar_url }}" alt="Perfil" class="avatar" style="border: 2px solid #3a7bd5; object-fit: cover; background: transparent;">
+                    <img src="{{ post.avatar_url }}" alt="Perfil" class="avatar">
                 {% else %}
                     <div class="avatar text-white">{{ post.nome_usuario|make_list|first|upper }}</div>
                 {% endif %}
@@ -186,9 +165,7 @@
         <div class="px-1 mb-3 mt-1 d-flex justify-content-between align-items-start gap-2">
             <div>
                 {% if post.descricao %}
-                    <h5 class="mb-0 fw-bold text-white" style="font-size: 1.15rem; letter-spacing: 0.3px;">
-                        {{ post.descricao }}
-                    </h5>
+                    <h5 class="mb-0 fw-bold text-white" style="font-size: 1.15rem; letter-spacing: 0.3px;">{{ post.descricao }}</h5>
                 {% else %}
                     {% if request.user.is_authenticated and request.user.first_name == post.nome_usuario %}
                         <span class="text-muted small fst-italic"><i class="bi bi-journal-text"></i> Adicione um título...</span>
@@ -268,22 +245,20 @@
 </div>
 
 <div class="modal fade" id="destaqueModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-body text-center py-5">
-        <i class="bi bi-trophy-fill" style="font-size: 4.5rem; color: #ffd700; filter: drop-shadow(0 0 25px rgba(255,215,0,0.4));"></i>
-        <h3 class="mt-3 fw-bold title-gradient">Destaque do Mês</h3>
-        
-        {% if destaque %}
-            <h1 class="text-white fw-900 mt-4 mb-1" style="font-size: 2.5rem;">{{ destaque.nome_usuario }}</h1>
-            <p class="text-muted fw-bold">Liderando absoluto com <strong class="text-warning fs-3">{{ destaque.total|floatformat:1 }} km</strong> correndo nas ruas!</p>
-        {% else %}
-            <p class="text-muted mt-4 fw-bold">Ainda não temos um destaque este mês. A pista está livre!</p>
-        {% endif %}
-        
-        <button type="button" class="btn btn-light rounded-pill mt-4 px-5 fw-bold" data-bs-dismiss="modal">Incrível!</button>
-      </div>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center py-5">
+                <i class="bi bi-trophy-fill" style="font-size: 4.5rem; color: #ffd700; filter: drop-shadow(0 0 25px rgba(255,215,0,0.4));"></i>
+                <h3 class="mt-3 fw-bold title-gradient">Destaque do Mês</h3>
+                {% if destaque %}
+                    <h1 class="text-white fw-900 mt-4 mb-1" style="font-size: 2.5rem;">{{ destaque.nome_usuario }}</h1>
+                    <p class="text-muted fw-bold">Liderando absoluto com <strong class="text-warning fs-3">{{ destaque.total|floatformat:1 }} km</strong> correndo nas ruas!</p>
+                {% else %}
+                    <p class="text-muted mt-4 fw-bold">Ainda não temos um destaque este mês. A pista está livre!</p>
+                {% endif %}
+                <button type="button" class="btn btn-light rounded-pill mt-4 px-5 fw-bold" data-bs-dismiss="modal">Incrível!</button>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 {% endblock %}
