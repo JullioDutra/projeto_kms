@@ -1,91 +1,106 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Criador de Rotas</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    
-    <style>
-        body { background-color: #121212; color: #fff; font-family: sans-serif; }
-        .back-link { color: #888; text-decoration: none; display: block; margin-bottom: 15px; }
-        #map { height: 60vh; width: 100%; border-radius: 15px; border: 2px solid #333; z-index: 1; }
-        .painel-flutuante { background: #1a1d20; padding: 20px; border-radius: 15px; margin-top: -30px; position: relative; z-index: 10; box-shadow: 0 -10px 20px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); }
-        .distancia-display { font-size: 2.5rem; font-weight: 900; color: #ff6b00; line-height: 1; }
-        .form-control { background-color: #2b2b2b !important; border: 1px solid #444 !important; color: white !important; }
-        /* A Lente Escura para o Mapa */
-        .leaflet-tile-pane {
-            filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
-        }
-    </style>
-</head>
-<body>
+{% extends 'core/base.html' %}
 
-<div class="container py-3" style="max-width: 600px;">
-    <a href="{% url 'dashboard' %}" class="back-link"><i class="bi bi-arrow-left"></i> Voltar</a>
+{% block title %}Desenhar Rota - KMS Tracker{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    #map { height: 50vh; width: 100%; border-radius: 20px; border: 2px solid #333; z-index: 1; margin-bottom: 20px; }
     
-    <h3 class="fw-bold mb-3"><i class="bi bi-map text-warning"></i> Desenhar Rota</h3>
-    <p class="text-muted small">Clique no mapa para ligar os pontos e desenhar o seu percurso.</p>
+    .painel-flutuante { 
+        background: #1e1e1e; 
+        padding: 25px; 
+        border-radius: 20px; 
+        border: 1px solid rgba(255,255,255,0.05);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .distancia-display { font-size: 2.8rem; font-weight: 900; color: #ffd700; line-height: 1; letter-spacing: -1px; }
+    
+    .form-control-dark { 
+        background-color: #121212 !important; 
+        border: 1px solid #444 !important; 
+        color: white !important; 
+        padding: 12px;
+        border-radius: 12px;
+    }
+    .form-control-dark::placeholder { color: #666; }
+
+    /* Lente de contraste para o mapa (Cinza Chumbo) */
+    .leaflet-tile-pane {
+        filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(85%);
+    }
+    
+    .instrucoes { font-size: 0.85rem; color: #aaa; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-2" style="max-width: 600px;">
+    
+    <div class="mb-3">
+        <h3 class="fw-900 mb-1"><i class="bi bi-map-fill text-primary"></i> Desenhar <span class="text-primary">Rota</span></h3>
+        <p class="instrucoes"><i class="bi bi-info-circle"></i> Clique no mapa para traçar o percurso</p>
+    </div>
 
     <div id="map"></div>
 
     <div class="painel-flutuante">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <div>
-                <small class="text-muted text-uppercase fw-bold">Distância Total</small>
-                <div class="distancia-display" id="distanciaTexto">0.00 <span style="font-size: 1rem; color:#888;">km</span></div>
+        <div class="row align-items-center mb-4">
+            <div class="col-7">
+                <small class="text-muted fw-bold d-block mb-1">DISTÂNCIA TOTAL</small>
+                <div class="distancia-display" id="distanciaTexto">0.00 <small style="font-size: 1.2rem; color:#666; font-weight: 700;">km</small></div>
             </div>
-            <button class="btn btn-outline-danger rounded-pill" onclick="limparMapa()">
-                <i class="bi bi-trash"></i> Limpar
-            </button>
+            <div class="col-5 text-end">
+                <button class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-bold" onclick="limparMapa()">
+                    <i class="bi bi-trash"></i> RECOMEÇAR
+                </button>
+            </div>
         </div>
 
-        <input type="text" id="nomeRota" class="form-control mb-2" placeholder="Nome da Rota (ex: Longão de Sábado)">
-        <input type="text" id="nomeCriador" class="form-control mb-3" placeholder="Seu Nome">
+        <div class="mb-3">
+            <label class="form-label text-muted small fw-bold">NOME DA ROTA</label>
+            <input type="text" id="nomeRota" class="form-control form-control-dark" placeholder="Ex: Treino da Orla">
+        </div>
 
-        <button class="btn w-100 fw-bold py-3 rounded-pill" style="background: linear-gradient(135deg, #ff6b00, #ffca28); color: black;" onclick="salvarRota()">
-            <i class="bi bi-floppy-fill"></i> SALVAR ROTA NA COMUNIDADE
+        <div class="mb-4">
+            <label class="form-label text-muted small fw-bold">AUTOR</label>
+            <input type="text" id="nomeCriador" class="form-control form-control-dark" placeholder="Seu nome ou apelido">
+        </div>
+
+        <button class="btn w-100 fw-900 py-3 rounded-pill" style="background: linear-gradient(135deg, #00d2ff, #3a7bd5); color: white; border: none; box-shadow: 0 5px 15px rgba(0, 210, 255, 0.3);" onclick="salvarRota()">
+            <i class="bi bi-cloud-arrow-up-fill"></i> PUBLICAR ROTA
         </button>
     </div>
 </div>
+{% endblock %}
 
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // 1. Inicia o mapa (Centralizado em Anápolis/GO)
     var map = L.map('map').setView([-16.3267, -48.9528], 14);
 
-    // 2. Coloca as imagens das ruas (Usando CartoDB Dark Matter)
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',
         maxZoom: 19
     }).addTo(map);
 
-    // Variáveis Inteligentes para guardar o desenho
-    var coordenadas = []; // Vai guardar a linha COMPLETA pelas ruas
-    var linhaDesenhada = L.polyline([], {color: '#00d2ff', weight: 5, opacity: 0.8}).addTo(map); // Neon Blue
+    var coordenadas = [];
+    var linhaDesenhada = L.polyline([], {color: '#00d2ff', weight: 6, opacity: 0.9}).addTo(map);
     var distanciaTotal = 0;
     var marcadores = [];
     var ultimoPonto = null;
 
-    // 3. O que acontece quando clica no mapa
     map.on('click', function(e) {
         var latlng = e.latlng;
-        
-        // Adiciona uma bolinha amarela onde você clicou
-        var marcador = L.circleMarker(latlng, {radius: 5, color: '#fff', fillColor: '#ffca28', fillOpacity: 1}).addTo(map);
+        var marcador = L.circleMarker(latlng, {radius: 6, color: '#fff', fillColor: '#00d2ff', fillOpacity: 1, weight: 2}).addTo(map);
         marcadores.push(marcador);
 
         if (!ultimoPonto) {
-            // É o primeiro clique da rota!
             coordenadas.push([latlng.lat, latlng.lng]);
             linhaDesenhada.setLatLngs(coordenadas);
             ultimoPonto = latlng;
         } else {
-            // Já existe um ponto. Vamos pedir ao OSRM para traçar o caminho pela rua!
-            // O OSRM (GPS) usa o formato [Longitude, Latitude] na URL.
             var url = `https://router.project-osrm.org/route/v1/foot/${ultimoPonto.lng},${ultimoPonto.lat};${latlng.lng},${latlng.lat}?geometries=geojson`;
             
             fetch(url)
@@ -93,35 +108,20 @@
             .then(data => {
                 if(data.code === 'Ok') {
                     var rotaOSRM = data.routes[0];
-                    var geometria = rotaOSRM.geometry.coordinates; // Array de curvas da rua
-                    
-                    // Adiciona a distância exata calculada pelo GPS (vem em metros)
+                    var geometria = rotaOSRM.geometry.coordinates;
                     distanciaTotal += (rotaOSRM.distance / 1000);
-                    document.getElementById('distanciaTexto').innerHTML = distanciaTotal.toFixed(2) + ' <span style="font-size: 1rem; color:#888;">km</span>';
+                    document.getElementById('distanciaTexto').innerHTML = distanciaTotal.toFixed(2) + ' <small style="font-size: 1.2rem; color:#666; font-weight: 700;">km</small>';
                     
-                    // Transforma [lng, lat] em [lat, lng] para o Leaflet desenhar
-                    // Começamos do índice 1 para não duplicar o ponto de partida
                     for (var i = 1; i < geometria.length; i++) {
                         coordenadas.push([geometria[i][1], geometria[i][0]]);
                     }
-                    
-                    // Desenha a linha perfeitamente colada à rua!
                     linhaDesenhada.setLatLngs(coordenadas);
-                    ultimoPonto = latlng; // O novo ponto vira a partida do próximo trecho
-                } else {
-                    alert("Atenção: Não foi possível encontrar uma rua/trilha entre esses pontos!");
-                    map.removeLayer(marcador);
-                    marcadores.pop();
+                    ultimoPonto = latlng;
                 }
-            })
-            .catch(error => {
-                console.log("Erro na API de rotas:", error);
-                alert("Erro ao traçar a rota. Tente novamente.");
             });
         }
     });
 
-    // Função para limpar e recomeçar
     function limparMapa() {
         coordenadas = [];
         distanciaTotal = 0;
@@ -129,48 +129,29 @@
         linhaDesenhada.setLatLngs([]);
         marcadores.forEach(m => map.removeLayer(m));
         marcadores = [];
-        document.getElementById('distanciaTexto').innerHTML = '0.00 <span style="font-size: 1rem; color:#888;">km</span>';
+        document.getElementById('distanciaTexto').innerHTML = '0.00 <small style="font-size: 1.2rem; color:#666; font-weight: 700;">km</small>';
     }
 
-    // Função para Salvar no Banco de Dados
     function salvarRota() {
         var nome = document.getElementById('nomeRota').value;
         var criador = document.getElementById('nomeCriador').value;
-
         if (!nome || !criador || coordenadas.length < 2) {
-            alert("Preencha o nome, o seu nome e clique pelo menos 2 vezes no mapa para criar uma rota!");
+            alert("Preencha todos os campos e desenhe a rota no mapa!");
             return;
         }
 
-        var dados = {
-            nome: nome,
-            criador: criador,
-            distancia: distanciaTotal.toFixed(2),
-            coordenadas: coordenadas // Envia todas as curvas da rua para o banco
-        };
-
-        // Mostra o botão carregando
+        var dados = { nome: nome, criador: criador, distancia: distanciaTotal.toFixed(2), coordenadas: coordenadas };
         var btnSalvar = document.querySelector('button[onclick="salvarRota()"]');
-        var textoOriginal = btnSalvar.innerHTML;
-        btnSalvar.innerHTML = '<i class="bi bi-hourglass-split"></i> SALVANDO...';
+        btnSalvar.innerHTML = '<span class="spinner-border spinner-border-sm"></span> SALVANDO...';
         btnSalvar.disabled = true;
 
         fetch("{% url 'criar_rota' %}", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": "{{ csrf_token }}"
-            },
+            headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
             body: JSON.stringify(dados)
-        }).then(response => response.json())
-          .then(data => {
-              if (data.status === 'sucesso') {
-                  window.location.href = "{% url 'listar_rotas' %}"; 
-              } else {
-                  alert("Erro ao salvar: " + data.mensagem);
-                  btnSalvar.innerHTML = textoOriginal;
-                  btnSalvar.disabled = false;
-              }
-          });
+        }).then(response => response.json()).then(data => {
+            if (data.status === 'sucesso') { window.location.href = "{% url 'listar_rotas' %}"; }
+        });
     }
 </script>
+{% endblock %}
