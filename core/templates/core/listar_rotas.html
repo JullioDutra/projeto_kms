@@ -1,111 +1,120 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Rotas da Comunidade - KMS Tracker{% endblock %}
+{% block title %}Biblioteca de Rotas - KMS Tracker{% endblock %}
 
 {% block extra_css %}
 <style>
-    /* Card da Rota Refinado */
+    /* Estilo do Card Principal */
     .rota-card { 
         background: #1e1e1e; 
-        border-radius: 20px; 
-        padding: 20px; 
+        border-radius: 24px; 
+        padding: 22px; 
         margin-bottom: 20px; 
         border: 1px solid rgba(255,255,255,0.05); 
-        box-shadow: 0 8px 25px rgba(0,0,0,0.3); 
-        transition: transform 0.2s ease;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
     }
-    .rota-card:hover { transform: translateY(-3px); border-color: rgba(0, 210, 255, 0.2); }
     
-    .rota-nome { font-size: 1.3rem; font-weight: 900; margin-bottom: 4px; color: #ffffff; letter-spacing: -0.3px; }
-    .rota-criador { font-size: 0.85rem; color: #00d2ff; font-weight: 700; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .rota-card:hover { 
+        transform: translateY(-5px); 
+        border-color: rgba(0, 210, 255, 0.3);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+    }
+
+    /* Título e Autor */
+    .rota-nome { font-size: 1.4rem; font-weight: 900; color: #ffffff; margin-bottom: 4px; letter-spacing: -0.5px; }
+    .rota-criador { font-size: 0.85rem; color: #00d2ff; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.9; }
     
-    /* Badge de Distância em Destaque */
-    .distancia-badge { 
-        background: rgba(0, 210, 255, 0.08); 
+    /* Badge de Distância Impactante */
+    .distancia-neon { 
+        background: rgba(0, 210, 255, 0.1); 
         border: 1px solid rgba(0, 210, 255, 0.2); 
         color: #00d2ff; 
-        padding: 12px; 
-        border-radius: 18px; 
+        padding: 14px; 
+        border-radius: 20px; 
         text-align: center;
-        min-width: 85px;
+        min-width: 90px;
     }
-    .distancia-valor { font-size: 1.6rem; font-weight: 900; line-height: 1; }
+    .distancia-valor { font-size: 1.8rem; font-weight: 900; line-height: 1; display: block; }
+    .distancia-unid { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
     
-    .footer-card { 
-        margin-top: 18px; 
+    /* Rodapé do Card */
+    .footer-meta { 
+        margin-top: 20px; 
         padding-top: 15px; 
         border-top: 1px solid rgba(255,255,255,0.05); 
         display: flex; 
         justify-content: space-between; 
         align-items: center; 
     }
+    .data-label { color: #666; font-weight: 700; font-size: 0.8rem; display: flex; align-items: center; gap: 5px; }
 
-    .data-rota { color: #666; font-weight: 700; font-size: 0.8rem; }
-    
-    .btn-rota {
-        background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+    /* Botão Explorar Estilizado */
+    .btn-explorar {
+        background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
         color: white;
         border: none;
-        font-weight: 800;
-        padding: 8px 20px;
+        font-weight: 900;
+        padding: 10px 24px;
         border-radius: 50px;
-        box-shadow: 0 4px 12px rgba(0, 210, 255, 0.2);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        box-shadow: 0 4px 15px rgba(0, 210, 255, 0.3);
+        transition: all 0.2s;
     }
-    .btn-rota:hover { color: white; opacity: 0.9; transform: scale(1.02); }
+    .btn-explorar:hover { color: white; opacity: 0.9; transform: scale(1.05); }
+
+    /* Estilo da Seção de Título da Página */
+    .page-header { margin-bottom: 35px; }
+    .page-title { font-weight: 900; font-size: 2.2rem; line-height: 1.1; }
+    .page-subtitle { color: #555; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; font-size: 0.8rem; }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container py-2" style="max-width: 600px;">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="page-header d-flex justify-content-between align-items-end">
         <div>
-            <h3 class="fw-900 mb-0 text-white"><i class="bi bi-map-fill text-primary"></i> Biblioteca de <span class="text-primary">Rotas</span></h3>
-            <p class="text-muted small fw-bold mb-0 text-uppercase" style="letter-spacing: 1px;">Percursos da Comunidade</p>
+            <p class="page-subtitle mb-1">Comunidade</p>
+            <h1 class="page-title text-white">Biblioteca de <span class="text-primary">Rotas</span></h1>
         </div>
         {% if request.user.is_authenticated %}
-            <a href="{% url 'criar_rota' %}" class="btn btn-sm btn-primary fw-900 px-3 py-2 rounded-pill shadow-sm">
-                <i class="bi bi-plus-lg"></i> NOVA ROTA
+            <a href="{% url 'criar_rota' %}" class="btn btn-primary fw-900 px-4 py-2 rounded-pill shadow-sm mb-2">
+                <i class="bi bi-plus-lg"></i> NOVA
             </a>
         {% endif %}
     </div>
 
-    {% if not request.user.is_authenticated %}
-        <div class="alert bg-dark border-secondary text-center mb-4 py-3 rounded-4">
-            <small class="fw-bold text-muted"><i class="bi bi-lock-fill text-warning"></i> Conecte-se para desenhar e salvar as suas próprias rotas.</small>
-        </div>
-    {% endif %}
-
     {% for rota in rotas %}
     <div class="rota-card">
-        <div class="row align-items-center">
-            <div class="col-8">
-                <h4 class="rota-nome">{{ rota.nome }}</h4>
+        <div class="d-flex justify-content-between align-items-start">
+            <div style="flex: 1;">
+                <h2 class="rota-nome">{{ rota.nome }}</h2>
                 <div class="rota-criador">
                     <i class="bi bi-person-circle"></i> {{ rota.criador }}
                 </div>
             </div>
-            <div class="col-4 d-flex justify-content-end">
-                <div class="distancia-badge">
-                    <div class="distancia-valor">{{ rota.distancia_estimada|floatformat:1 }}</div>
-                    <small class="fw-bold text-uppercase" style="font-size: 0.65rem;">km</small>
-                </div>
+            <div class="distancia-neon">
+                <span class="distancia-valor">{{ rota.distancia_estimada|floatformat:1 }}</span>
+                <span class="distancia-unid">km</span>
             </div>
         </div>
         
-        <div class="footer-card">
-            <span class="data-rota"><i class="bi bi-calendar3"></i> {{ rota.data_criacao|date:"d/m/Y" }}</span>
-            <a href="{% url 'ver_rota' rota.id %}" class="btn btn-rota btn-sm">
-                <i class="bi bi-eye-fill"></i> EXPLORAR
+        <div class="footer-meta">
+            <span class="data-label">
+                <i class="bi bi-calendar3"></i> {{ rota.data_criacao|date:"d M Y" }}
+            </span>
+            <a href="{% url 'ver_rota' rota.id %}" class="btn-explorar text-decoration-none">
+                <i class="bi bi-geo-alt-fill me-1"></i> Explorar
             </a>
         </div>
     </div>
     {% empty %}
     <div class="text-center py-5">
-        <i class="bi bi-compass text-muted" style="font-size: 3.5rem; opacity: 0.3;"></i>
-        <h5 class="text-white mt-3 fw-900">NENHUMA ROTA NO RADAR</h5>
-        <p class="text-muted fw-bold">Seja o primeiro a desenhar um percurso épico!</p>
-        <a href="{% url 'criar_rota' %}" class="btn btn-outline-primary rounded-pill px-4 mt-2 fw-bold">DESENHAR AGORA</a>
+        <i class="bi bi-map text-muted" style="font-size: 4rem; opacity: 0.2;"></i>
+        <h5 class="text-white mt-3 fw-bold">Nenhuma rota disponível</h5>
     </div>
     {% endfor %}
 
