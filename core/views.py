@@ -611,28 +611,38 @@ def arena_desafios(request):
         km_desafiante = 0
         km_desafiado = 0
         
-        if d.status == 'ativo':
-            # CORREÇÃO: Usar 'nome_usuario', 'data_envio' e 'quantidade_km'
+        # Só calcula os KMs se o desafio já foi aceito e possui data de início!
+        if d.status == 'ativo' and d.data_inicio:
+            
+            # CORREÇÃO DE DATA: Ignora as horas e pega apenas o dia para evitar bugs de fuso horário
+            data_inicio_corte = d.data_inicio.date()
+            fim = d.data_fim if d.data_fim and d.data_fim < timezone.now() else timezone.now()
+            data_fim_corte = fim.date()
+            
+            # Busca os KMs do desafiante
             km_desafiante = Atividade.objects.filter(
                 nome_usuario=d.desafiante, 
-                data_envio__gte=d.data_inicio, 
-                data_envio__lte=d.data_fim,
-                tipo='corrida' # É bom manter o tipo corrida para não contar de bike
+                data_envio__gte=data_inicio_corte, 
+                data_envio__lte=data_fim_corte,
+                tipo='corrida' # Apenas corrida entra no X1
             ).aggregate(Sum('quantidade_km'))['quantidade_km__sum'] or 0
 
+            # Busca os KMs do desafiado
             km_desafiado = Atividade.objects.filter(
                 nome_usuario=d.desafiado, 
-                data_envio__gte=d.data_inicio, 
-                data_envio__lte=d.data_fim,
+                data_envio__gte=data_inicio_corte, 
+                data_envio__lte=data_fim_corte,
                 tipo='corrida'
             ).aggregate(Sum('quantidade_km'))['quantidade_km__sum'] or 0
 
         # Converte para float para evitar erro de Decimal
         alvo = float(d.alvo_km) if d.alvo_km > 0 else 1
+        
+        # Calcula a porcentagem com trava visual no máximo de 100%
         porc_desafiante = min((float(km_desafiante) / alvo) * 100, 100)
         porc_desafiado = min((float(km_desafiado) / alvo) * 100, 100)
 
-        # SOLUÇÃO DAS FOTOS: Puxa da sessão se for o logado, senão cria um Avatar Gamer
+        # SOLUÇÃO DAS FOTOS: Puxa da sessão se for o logado, senão cria um Avatar com a inicial do nome
         avatar_desafiante = request.session.get('foto_strava') if request.user.first_name == d.desafiante else f"https://ui-avatars.com/api/?name={d.desafiante}&background=00d2ff&color=fff&bold=true&size=150"
         avatar_desafiado = request.session.get('foto_strava') if request.user.first_name == d.desafiado else f"https://ui-avatars.com/api/?name={d.desafiado}&background=ff416c&color=fff&bold=true&size=150"
 
