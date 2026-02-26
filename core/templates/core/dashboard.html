@@ -188,15 +188,40 @@
 <body>
 
 <header class="app-header">
-    <div class="container d-flex justify-content-between align-items-center">
-        <h1 class="app-logo text-white">
-            <i class="bi bi-activity text-primary"></i> KMS Tracker
-        </h1>
-        <div class="text-muted">
-            <i class="bi bi-person-circle fs-4"></i>
+        <div class="container d-flex justify-content-between align-items-center" style="max-width: 600px;">
+            
+            <a href="{% url 'dashboard' %}" class="app-logo">
+                <i class="bi bi-activity text-primary"></i> KMS Tracker
+            </a>
+            
+            <div class="d-flex align-items-center gap-3">
+                
+                <div class="d-flex align-items-center gap-3 pe-2" style="border-right: 1px solid rgba(255,255,255,0.1);">
+                    <a href="{% url 'listar_rotas' %}" class="nav-icon rotas text-decoration-none" title="Explorar Rotas">
+                        <i class="bi bi-map-fill"></i>
+                    </a>
+                    <a href="{% url 'arena_desafios' %}" class="nav-icon arena text-decoration-none" title="Arena de Desafios">
+                        <i class="bi bi-crosshair"></i>
+                    </a>
+                </div>
+
+                <div class="text-muted d-flex align-items-center">
+                    {% if request.user.is_authenticated %}
+                        {% if request.session.foto_strava %}
+                            <img src="{{ request.session.foto_strava }}" alt="Perfil" class="rounded-circle" style="width: 35px; height: 35px; border: 2px solid #fc4c02; object-fit: cover;">
+                        {% else %}
+                            <i class="bi bi-person-circle fs-3 text-white"></i>
+                        {% endif %}
+                    {% else %}
+                        <a href="{% url 'strava_login' %}" class="btn btn-sm fw-bold px-3" style="background-color: #fc4c02; color: white; border-radius: 8px;">
+                            Entrar
+                        </a>
+                    {% endif %}
+                </div>
+
+            </div>
         </div>
-    </div>
-</header>
+    </header>
 
     {% if request.user.is_authenticated %}
     <div class="d-flex align-items-center gap-3 mb-4 p-3 rounded-4" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
