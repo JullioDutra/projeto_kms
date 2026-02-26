@@ -354,6 +354,8 @@ def strava_callback(request):
 
 
 def feed_atividades(request):
+    from .models import Desafio
+    from django.db.models import Sum
     atividades_feed = Atividade.objects.all().order_by('-data_envio')
     atletas = Atividade.objects.values_list('nome_usuario', flat=True).distinct()
     ranking_foguinhos = []
@@ -419,8 +421,7 @@ def feed_atividades(request):
     # =========================================================
     # --- NOVO: MODELO INSTAGRAM (Banners e Posts Especiais) ---
     # =========================================================
-    from .models import Desafio
-    from django.db.models import Sum
+
 
     # A. Banner de Alerta (Só aparece se o usuário logado tiver sido desafiado)
     desafios_pendentes = 0
