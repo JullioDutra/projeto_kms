@@ -1,92 +1,89 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Feed - Comunidade</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+{% extends 'core/base.html' %}
+
+{% block title %}Feed - Comunidade{% endblock %}
+
+{% block extra_css %}
+<style>
+    .back-link { color: #888; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-weight: 600; margin-bottom: 25px; transition: 0.2s; }
+    .back-link:hover { color: #fff; }
     
-    <style>
-        body { background-color: #121212; color: #fff; font-family: 'Inter', sans-serif; padding-bottom: 40px; }
-        .back-link { color: #888; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-weight: 600; margin-bottom: 25px; transition: 0.2s; }
-        .back-link:hover { color: #fff; }
-        
-        .section-title { font-weight: 900; font-size: 1.4rem; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
-        
-        /* --- MODAL DESTAQUE --- */
-        .btn-destaque { background: linear-gradient(135deg, #ffd700, #ff8c00); color: #000; border: none; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3); transition: transform 0.2s; }
-        .btn-destaque:hover { transform: scale(1.05); color: #000; }
-        .modal-content { background: linear-gradient(145deg, #1a1d20 0%, #2e2400 100%); border: 1px solid rgba(255, 215, 0, 0.4); border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
-        .title-gradient { background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .section-title { font-weight: 900; font-size: 1.4rem; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+    
+    /* --- MODAL DESTAQUE --- */
+    .btn-destaque { background: linear-gradient(135deg, #ffd700, #ff8c00); color: #000; border: none; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3); transition: transform 0.2s; }
+    .btn-destaque:hover { transform: scale(1.05); color: #000; }
+    .modal-content { background: linear-gradient(145deg, #1a1d20 0%, #2e2400 100%); border: 1px solid rgba(255, 215, 0, 0.4); border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+    .title-gradient { background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-        /* --- FOGUINHOS DINÂMICOS --- */
-        .streak-container { display: flex; overflow-x: auto; gap: 20px; padding: 10px 5px 20px 5px; scrollbar-width: none; }
-        .streak-container::-webkit-scrollbar { display: none; }
-        .streak-item { display: flex; flex-direction: column; align-items: center; min-width: 70px; }
-        
-        .streak-ring {
-            width: 65px; height: 65px; border-radius: 50%;
-            background: #1a1c1e;
-            display: flex; align-items: center; justify-content: center;
-            position: relative;
-            border: 2px solid; /* Cor injetada no HTML */
-        }
-        
-        .streak-ring .bi-fire { font-size: 2.2rem; }
-        
-        .streak-count {
-            position: absolute; bottom: -8px;
-            background: #121212; color: #fff; font-size: 0.8rem; font-weight: 900;
-            padding: 2px 12px; border-radius: 12px;
-            border: 2px solid; /* Cor injetada no HTML */
-        }
-        .streak-name { font-size: 0.8rem; color: #aaa; margin-top: 10px; font-weight: 700; text-transform: capitalize; }
+    /* --- FOGUINHOS DINÂMICOS & CARROSSEL --- */
+    .streak-container { display: flex; overflow-x: auto; gap: 20px; padding: 10px 5px 20px 5px; scrollbar-width: none; }
+    .streak-container::-webkit-scrollbar { display: none; }
+    .streak-item { display: flex; flex-direction: column; align-items: center; min-width: 70px; }
+    
+    .streak-ring {
+        width: 65px; height: 65px; border-radius: 50%;
+        background: #1a1c1e;
+        display: flex; align-items: center; justify-content: center;
+        position: relative;
+        border: 2px solid; 
+    }
+    
+    .streak-ring .bi-fire { font-size: 2.2rem; }
+    
+    .streak-count {
+        position: absolute; bottom: -8px;
+        background: #121212; color: #fff; font-size: 0.8rem; font-weight: 900;
+        padding: 2px 12px; border-radius: 12px;
+        border: 2px solid;
+    }
+    .streak-name { font-size: 0.8rem; color: #aaa; margin-top: 10px; font-weight: 700; text-transform: capitalize; }
 
-        /* ✨ ANIMAÇÃO DO 1º LUGAR (FOGO ARDENTE) ✨ */
-        @keyframes pulse-blaze {
-            0% { transform: scale(1); filter: brightness(1); }
-            50% { transform: scale(1.15); filter: brightness(1.3); }
-            100% { transform: scale(1); filter: brightness(1); }
-        }
-        .is-first .bi-fire { animation: pulse-blaze 1s infinite alternate; }
-        .is-first .streak-ring { border-width: 3px; border-style: dashed; }
+    /* ✨ ANIMAÇÃO DO 1º LUGAR (FOGO ARDENTE) ✨ */
+    @keyframes pulse-blaze {
+        0% { transform: scale(1); filter: brightness(1); }
+        50% { transform: scale(1.15); filter: brightness(1.3); }
+        100% { transform: scale(1); filter: brightness(1); }
+    }
+    .is-first .bi-fire { animation: pulse-blaze 1s infinite alternate; }
+    .is-first .streak-ring { border-width: 3px; border-style: dashed; }
 
-        /* --- POSTS DA COMUNIDADE --- */
-        .post-card { background-color: #1a1d20; border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid #282a2d; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
-        .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        
-        .user-info { display: flex; align-items: center; gap: 12px; }
-        .avatar { width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, #00d2ff, #3a7bd5); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.2rem; color: white; }
-        
-        .post-meta h6 { margin: 0; font-weight: 800; color: #fff; font-size: 1.05rem; }
-        .post-meta small { color: #888; font-size: 0.8rem; font-weight: 500; }
-        
-        .activity-icon { font-size: 1.4rem; padding: 8px 12px; border-radius: 12px; }
-        .icon-run { color: #00d2ff; background: rgba(0, 210, 255, 0.1); }
-        .icon-bike { color: #2ecc71; background: rgba(46, 204, 113, 0.1); }
+    /* --- POSTS DA COMUNIDADE --- */
+    .post-card { background-color: #1a1d20; border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid #282a2d; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+    .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    
+    .user-info { display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, #00d2ff, #3a7bd5); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.2rem; color: white; }
+    
+    .post-meta h6 { margin: 0; font-weight: 800; color: #fff; font-size: 1.05rem; }
+    .post-meta small { color: #888; font-size: 0.8rem; font-weight: 500; }
+    
+    .activity-icon { font-size: 1.4rem; padding: 8px 12px; border-radius: 12px; }
+    .icon-run { color: #00d2ff; background: rgba(0, 210, 255, 0.1); }
+    .icon-bike { color: #2ecc71; background: rgba(46, 204, 113, 0.1); }
 
-        .medal-badge {
-            display: inline-flex; align-items: center; gap: 8px;
-            background: linear-gradient(135deg, rgba(255, 193, 7, 0.15), rgba(255, 152, 0, 0.15));
-            color: #ffc107; border: 1px solid rgba(255, 193, 7, 0.3);
-            padding: 6px 14px; border-radius: 20px;
-            font-size: 0.85rem; font-weight: 800; margin-bottom: 15px; text-transform: uppercase;
-        }
+    .medal-badge {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: linear-gradient(135deg, rgba(255, 193, 7, 0.15), rgba(255, 152, 0, 0.15));
+        color: #ffc107; border: 1px solid rgba(255, 193, 7, 0.3);
+        padding: 6px 14px; border-radius: 20px;
+        font-size: 0.85rem; font-weight: 800; margin-bottom: 15px; text-transform: uppercase;
+    }
 
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: rgba(255,255,255,0.03); border-radius: 14px; padding: 15px; border: 1px solid rgba(255,255,255,0.05); }
-        .stat-box { display: flex; flex-direction: column; }
-        .stat-label { font-size: 0.75rem; color: #888; text-transform: uppercase; font-weight: 700; margin-bottom: 4px; }
-        .stat-value { font-size: 1.5rem; font-weight: 900; color: #fff; line-height: 1; }
-        .stat-unit { font-size: 0.9rem; font-weight: 600; color: #aaa; margin-left: 2px; text-transform: lowercase; }
-        
-        .text-accent-run { color: #00d2ff !important; }
-        .text-accent-bike { color: #2ecc71 !important; }
-    </style>
-</head>
-<body>
-<div class="container py-4" style="max-width: 600px;">
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: rgba(255,255,255,0.03); border-radius: 14px; padding: 15px; border: 1px solid rgba(255,255,255,0.05); }
+    .stat-box { display: flex; flex-direction: column; }
+    .stat-label { font-size: 0.75rem; color: #888; text-transform: uppercase; font-weight: 700; margin-bottom: 4px; }
+    .stat-value { font-size: 1.5rem; font-weight: 900; color: #fff; line-height: 1; }
+    .stat-unit { font-size: 0.9rem; font-weight: 600; color: #aaa; margin-left: 2px; text-transform: lowercase; }
+    
+    .text-accent-run { color: #00d2ff !important; }
+    .text-accent-bike { color: #2ecc71 !important; }
+    
+    .glass-card { background: #1e1e1e; border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-2" style="max-width: 600px;">
     
     <a href="{% url 'dashboard' %}" class="back-link">
         <i class="bi bi-arrow-left"></i> Voltar
@@ -99,22 +96,17 @@
     <div class="streak-container mb-4">
         {% for atleta in foguinhos %}
         <div class="streak-item {% if atleta.is_first %}is-first{% endif %}">
-            
-        <div class="streak-ring" style="border-color: {{ atleta.cor }}; box-shadow: 0 0 15px {{ atleta.cor }}60;">
-                
+            <div class="streak-ring" style="border-color: {{ atleta.cor }}; box-shadow: 0 0 15px {{ atleta.cor }}60;">
                 {% if atleta.avatar %}
                     <img src="{{ atleta.avatar }}" alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; padding: 2px;">
                     <i class="bi bi-fire" style="position: absolute; top: -6px; right: -6px; font-size: 1.3rem; color: {{ atleta.cor }}; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.8));"></i>
                 {% else %}
                     <i class="bi bi-fire" style="color: {{ atleta.cor }}; text-shadow: 0 0 15px {{ atleta.cor }};"></i>
                 {% endif %}
-                
                 <div class="streak-count" style="border-color: {{ atleta.cor }}; color: {{ atleta.cor }}; background: #121212; display: flex; align-items: center; gap: 3px; padding: 2px 10px;">
                     <i class="bi bi-fire" style="font-size: 0.75rem;"></i> {{ atleta.fogo }}
                 </div>
-                
             </div>
-            
             <div class="streak-name" {% if atleta.is_first %}style="color: {{ atleta.cor }};"{% endif %}>
                 {{ atleta.nome }}
             </div>
@@ -126,6 +118,42 @@
         {% endfor %}
     </div>
 
+    {% if desafios_feed %}
+    <h3 class="section-title text-white mt-4">
+        <i class="bi bi-crosshair text-danger"></i> Desafios da Comunidade
+    </h3>
+    
+    <div class="streak-container mb-4" style="padding: 10px 5px;">
+        {% for d in desafios_feed %}
+        <div class="glass-card mb-0" style="min-width: 260px; padding: 15px; border-width: 2px; border-color: {% if d.status == 'ativo' %}#ff4b2b{% else %}#ffca28{% endif %}; flex: 0 0 auto;">
+            
+            <div class="text-center mb-3">
+                <span class="badge {% if d.status == 'ativo' %}bg-danger{% else %}bg-warning text-dark{% endif %} mb-3" style="font-size: 0.7rem; letter-spacing: 1px;">
+                    {% if d.status == 'ativo' %}<i class="bi bi-fire"></i> EM ANDAMENTO{% else %}<i class="bi bi-hourglass-split"></i> PENDENTE{% endif %}
+                </span>
+                <h5 class="fw-900 text-white mb-0" style="font-size: 1.2rem;">{{ d.desafiante }}</h5>
+                <small class="text-muted fw-bold d-block my-1" style="font-size: 0.75rem;">VS</small>
+                <h5 class="fw-900 text-white mt-0" style="font-size: 1.2rem;">{{ d.desafiado }}</h5>
+            </div>
+            
+            <div class="text-center rounded-3 p-2 mb-3" style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05);">
+                <small class="text-info fw-bold d-block" style="font-size: 0.85rem;">Meta: {{ d.alvo_km|floatformat:0 }} km</small>
+                <small class="text-muted fw-bold" style="font-size: 0.75rem;"><i class="bi bi-clock"></i> {{ d.prazo_dias }} dias</small>
+            </div>
+
+            {% if d.status == 'pendente' and request.user.first_name == d.desafiado %}
+                <a href="{% url 'responder_desafio' d.id 'aceitar' %}" class="btn btn-sm btn-success w-100 fw-bold rounded-pill" style="box-shadow: 0 4px 10px rgba(40, 167, 69, 0.4);">
+                    <i class="bi bi-check-circle-fill"></i> Aceitar Batalha
+                </a>
+            {% else %}
+                <a href="{% url 'arena_desafios' %}" class="btn btn-sm btn-outline-light w-100 fw-bold rounded-pill">
+                    <i class="bi bi-eye-fill"></i> Ver na Arena
+                </a>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
     <h3 class="section-title text-white mt-4">
         <i class="bi bi-activity text-primary"></i> Atividades Recentes
     </h3>
@@ -174,6 +202,7 @@
             </button>
             {% endif %}
         </div>
+        
         {% if post.medalha %}
         <div class="medal-badge">
             <i class="bi bi-trophy-fill"></i> {{ post.medalha }}
@@ -257,7 +286,4 @@
     </div>
   </div>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+{% endblock %}
