@@ -1,144 +1,232 @@
+
 {% extends 'core/base.html' %}
 
-{% block title %}Arena de Duelos - KMS Tracker{% endblock %}
+{% block title %}Arena X1 - KMS Tracker{% endblock %}
 
 {% block extra_css %}
 <style>
-    :root {
-        --primary-blue: #00d2ff;
-        --deep-blue: #3a7bd5;
-        --primary-red: #ff416c;
-        --deep-red: #ff4b2b;
-        --gold: #ffd700;
-    }
-
-    .arena-container { padding-top: 10px; padding-bottom: 50px; }
-
-    /* CARD ESTILO GAME DE LUTA */
-    .arena-card { 
-        background: linear-gradient(145deg, #18181a 0%, #0a0a0b 100%); 
-        /* Efeito de grade sutil no fundo */
-        background-image: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-        background-size: 20px 20px;
-        border-radius: 30px; 
-        padding: 30px 20px; 
-        margin-bottom: 35px; 
+    /* --- ESTRUTURA DOS CARDS --- */
+    .glass-card { 
+        background: #15171a; 
         border: 1px solid rgba(255, 255, 255, 0.08); 
-        box-shadow: 0 20px 50px rgba(0,0,0,0.6); 
-        position: relative; 
+        border-radius: 24px; 
+        padding: 2rem; 
+        box-shadow: 0 15px 35px rgba(0,0,0,0.5); 
+        margin-bottom: 25px; 
+        position: relative;
         overflow: hidden;
     }
 
-    .glow-blue { position: absolute; top: -80px; left: -80px; width: 250px; height: 250px; background: var(--primary-blue); filter: blur(100px); opacity: 0.15; z-index: 0; }
-    .glow-red { position: absolute; bottom: -80px; right: -80px; width: 250px; height: 250px; background: var(--primary-red); filter: blur(100px); opacity: 0.15; z-index: 0; }
+    /* --- AVATARES PREMIUM --- */
+    .avatar-duelo {
+        width: 80px; 
+        height: 80px; 
+        border-radius: 50%; 
+        object-fit: cover;
+        border: 3px solid; 
+        background-color: #222;
+    }
+    .avatar-azul { border-color: #00d2ff; box-shadow: 0 0 20px rgba(0, 210, 255, 0.4); }
+    .avatar-vermelho { border-color: #ff416c; box-shadow: 0 0 20px rgba(255, 65, 108, 0.4); }
 
-    .duel-tag { 
-        background: var(--gold); color: #000; font-weight: 900; padding: 5px 15px; 
-        border-radius: 50px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px;
-        box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+    /* --- TANQUES DE BATALHA --- */
+    .tanque-wrapper-slim { position: relative; width: 75px; height: 220px; margin: 0 auto; }
+    
+    .tanque-externo-slim { 
+        width: 100%; 
+        height: 100%; 
+        border: 3px solid #333; 
+        border-radius: 20px; 
+        position: relative; 
+        background: #0a0a0a; /* Fundo super escuro para dar contraste */
+        overflow: hidden; 
+        z-index: 1; 
+        box-shadow: inset 0 5px 15px rgba(0,0,0,0.8);
+    }
+    
+    .liquido-azul { 
+        width: 100%; 
+        background: linear-gradient(180deg, #00d2ff 0%, #3a7bd5 100%); 
+        position: absolute; bottom: 0; left: 0;
+        transition: height 1s ease-in-out; 
+        box-shadow: 0 -5px 15px rgba(0, 210, 255, 0.5); 
     }
 
-    /* AVATARES */
-    .fighter-zone { display: flex; justify-content: space-around; align-items: flex-end; position: relative; z-index: 2; margin-top: 20px; }
-    .athlete-column { width: 120px; text-align: center; }
+    .liquido-vermelho { 
+        width: 100%; 
+        background: linear-gradient(180deg, #ff416c 0%, #ff4b2b 100%); 
+        position: absolute; bottom: 0; left: 0;
+        transition: height 1s ease-in-out; 
+        box-shadow: 0 -5px 15px rgba(255, 65, 108, 0.5); 
+    }
     
-    .photo-frame { width: 95px; height: 95px; margin: 0 auto 15px; position: relative; }
-    .photo-frame img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 4px solid; padding: 3px; background: #000; }
-    .frame-blue img { border-color: var(--primary-blue); box-shadow: 0 0 20px rgba(0, 210, 255, 0.5); }
-    .frame-red img { border-color: var(--primary-red); box-shadow: 0 0 20px rgba(255, 65, 108, 0.5); }
+    .porcentagem-badge-slim { 
+        position: absolute; top: 50%; left: 50%; 
+        transform: translate(-50%, -50%); 
+        font-size: 1.4rem; font-weight: 900; 
+        text-shadow: 0 2px 8px rgba(0,0,0,1); 
+        z-index: 5; color: #ffffff !important; 
+    }
 
-    .athlete-name { font-weight: 900; font-size: 1.1rem; color: #fff; margin-bottom: 10px; text-transform: uppercase; }
+    .vs-text {
+        font-size: 3rem;
+        font-weight: 900;
+        font-style: italic;
+        background: linear-gradient(135deg, #ffd700, #ff8c00);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        filter: drop-shadow(0 0 10px rgba(255,215,0,0.3));
+    }
 
-    /* TANQUES DE ENERGIA */
-    .tank-v2 { width: 65px; height: 180px; background: #121212; border: 2px solid #333; border-radius: 10px 10px 20px 20px; margin: 0 auto; position: relative; overflow: hidden; }
-    .fill-blue { background: linear-gradient(180deg, var(--primary-blue), var(--deep-blue)); }
-    .fill-red { background: linear-gradient(180deg, var(--primary-red), var(--deep-red)); }
-    
-    .perc-badge { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-weight: 900; font-size: 1.2rem; color: #fff; text-shadow: 0 2px 5px #000; z-index: 5; }
-
-    .vs-divider { font-size: 3.5rem; font-weight: 900; font-style: italic; color: var(--gold); text-shadow: 0 0 15px rgba(255, 215, 0, 0.4); margin-bottom: 60px; line-height: 1; }
-
-    /* Frase Dinâmica */
-    .status-phrase { font-size: 0.9rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; margin-top: 20px; position: relative; z-index: 2; }
-
-    .btn-share { background: #25D366; color: white !important; font-weight: 900; border: none; border-radius: 16px; padding: 16px; width: 100%; margin-top: 25px; transition: 0.3s; box-shadow: 0 10px 20px rgba(37, 211, 102, 0.2); font-size: 0.95rem; }
-    .btn-share:hover { transform: translateY(-3px); box-shadow: 0 15px 25px rgba(37, 211, 102, 0.4); }
+    /* --- FORMULÁRIOS --- */
+    .form-control-dark { background: #121212 !important; border: 1px solid #444 !important; color: white !important; }
+    .form-control-dark:focus { border-color: #ff4b2b !important; box-shadow: 0 0 0 4px rgba(255, 75, 43, 0.2) !important; }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container arena-container" style="max-width: 550px;">
+<div class="container py-2" style="max-width: 600px;">
     
-    <div class="d-flex justify-content-between align-items-center mb-4 px-2">
+    <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <p class="mb-0 text-muted small fw-bold text-uppercase">Combate Direto</p>
-            <h1 class="fw-900 text-white mb-0">ARENA <span class="text-primary">X1</span></h1>
+            <h3 class="fw-900 mb-0 text-white" style="letter-spacing: -0.5px;">Arena <span style="color: #ff4b2b;">X1</span></h3>
+            <p class="text-muted small fw-bold mb-0 text-uppercase">Batalhas da Comunidade</p>
         </div>
-        <button class="btn btn-sm fw-900 px-4 py-2" style="background: var(--primary-red); color: white; border-radius: 12px; box-shadow: 0 0 15px rgba(255, 65, 108, 0.4);" data-bs-toggle="modal" data-bs-target="#novoDesafioModal">
-            ⚔️ DESAFIAR
+        <button class="btn btn-sm fw-900 px-3 py-2 rounded-pill" style="background: linear-gradient(135deg, #ff416c, #ff4b2b); color: white; border: none; box-shadow: 0 5px 15px rgba(255, 75, 43, 0.4);" data-bs-toggle="modal" data-bs-target="#novoDesafioModal">
+            <i class="bi bi-plus-lg"></i> NOVO DUELO
         </button>
     </div>
 
     {% for d in desafios %}
-        {% if d.status == 'ativo' %}
-        <div class="arena-card" id="cartaoDesafio_{{ d.id }}">
-            <div class="glow-blue"></div>
-            <div class="glow-red"></div>
-
-            <div class="text-center position-relative" style="z-index: 2;">
-                <span class="duel-tag">⚔️ Duelo de Titãs</span>
-                <h2 class="fw-900 text-white mt-3 mb-0" style="letter-spacing: -1px;">META: {{ d.alvo_km|floatformat:0 }} KM</h2>
-                <p class="text-muted small fw-bold mt-1 mb-0">ENCERRA EM: {{ d.prazo_dias }} DIAS</p>
-            </div>
-
-            <div class="fighter-zone">
-                <div class="athlete-column">
-                    <div class="photo-frame frame-blue">
-                        <img src="{{ d.avatar_desafiante }}" crossorigin="anonymous">
-                    </div>
-                    <h6 class="athlete-name text-info">{{ d.desafiante }}</h6>
-                    <div class="tank-v2">
-                        <div class="perc-badge">{{ d.porc_desafiante|floatformat:0 }}%</div>
-                        <div class="fill-blue" style="width: 100%; height: {{ d.porc_desafiante }}%; position: absolute; bottom: 0;"></div>
-                    </div>
-                    <h5 class="fw-900 mt-3 text-white">{{ d.km_desafiante|floatformat:1 }} <small style="font-size: 0.7rem; color: #888;">KM</small></h5>
-                </div>
-
-                <div class="vs-divider">VS</div>
-
-                <div class="athlete-column">
-                    <div class="photo-frame frame-red">
-                        <img src="{{ d.avatar_desafiado }}" crossorigin="anonymous">
-                    </div>
-                    <h6 class="athlete-name text-danger">{{ d.desafiado }}</h6>
-                    <div class="tank-v2">
-                        <div class="perc-badge">{{ d.porc_desafiado|floatformat:0 }}%</div>
-                        <div class="fill-red" style="width: 100%; height: {{ d.porc_desafiado }}%; position: absolute; bottom: 0;"></div>
-                    </div>
-                    <h5 class="fw-900 mt-3 text-white">{{ d.km_desafiado|floatformat:1 }} <small style="font-size: 0.7rem; color: #888;">KM</small></h5>
+        
+        {% if d.status == 'pendente' %}
+        <div class="glass-card p-3" style="border-left: 4px solid #ffca28; background: #1a1a1a;">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="fw-900 mb-1 text-warning text-uppercase"><i class="bi bi-hourglass-split"></i> Desafio em Espera</h6>
+                    <p class="mb-1 text-white fs-5 fw-bold">{{ d.desafiante }} <span class="text-muted">vs</span> {{ d.desafiado }}</p>
+                    <small class="text-muted fw-bold">Meta: {{ d.alvo_km|floatformat:0 }}km | Prazo: {{ d.prazo_dias }} dias</small>
                 </div>
             </div>
+            
+            {% if request.user.first_name == d.desafiado %}
+            <div class="mt-3 d-flex gap-2">
+                <a href="{% url 'responder_desafio' d.id 'aceitar' %}" class="btn btn-success flex-grow-1 fw-900 rounded-pill">ACEITAR</a>
+                <a href="{% url 'responder_desafio' d.id 'recusar' %}" class="btn btn-outline-danger flex-grow-1 fw-900 rounded-pill">RECUSAR</a>
+            </div>
+            {% endif %}
+        </div>
 
-            <div class="text-center status-phrase">
-                {% if d.porc_desafiante == d.porc_desafiado %}
-                    <span style="color: #ffd700;"><i class="bi bi-lightning-charge-fill"></i> TENSÃO MÁXIMA! EMPATE TÉCNICO!</span>
-                {% elif d.porc_desafiante > d.porc_desafiado %}
-                    <span style="color: var(--primary-blue);"><i class="bi bi-fire"></i> {{ d.desafiante }} ESTÁ DOMINANDO A PISTA!</span>
+        {% elif d.status == 'ativo' %}
+        <div class="glass-card text-center" id="cartaoDesafio_{{ d.id }}">
+            
+            <div style="position: absolute; top: 0; left: -20px; width: 120px; height: 120px; background: #00d2ff; filter: blur(80px); opacity: 0.15;"></div>
+            <div style="position: absolute; bottom: 0; right: -20px; width: 120px; height: 120px; background: #ff416c; filter: blur(80px); opacity: 0.15;"></div>
+
+            <div class="badge bg-dark border border-warning text-warning mb-3 px-3 py-2 rounded-pill shadow-sm" style="letter-spacing: 2px;">
+                <i class="bi bi-x-diamond-fill"></i> DUELO DE TITÃS
+            </div>
+            
+            <h3 class="fw-900 text-white mb-1">META: {{ d.alvo_km|floatformat:0 }} KM</h3>
+            <p class="text-muted small fw-bold mb-4 text-uppercase" style="letter-spacing: 1px;">Encerra em: {{ d.prazo_dias }} dias</p>
+
+            <div class="d-flex justify-content-between align-items-center mb-4 px-2" style="position: relative; z-index: 2;">
+                
+                <div class="text-center" style="flex: 1;">
+                    <img src="{{ d.avatar_desafiante|default:'' }}" class="avatar-duelo avatar-azul mb-3" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ d.desafiante }}&background=00d2ff&color=fff&bold=true';">
+                    <h5 class="fw-900 mb-3 text-uppercase" style="color: #00d2ff; letter-spacing: 0.5px;">{{ d.desafiante }}</h5>
+                    
+                    <div class="tanque-wrapper-slim">
+                        <div class="tanque-externo-slim">
+                            <div class="liquido-azul" style="height: {% if d.porc_desafiante > 0 %}max(15%, {{ d.porc_desafiante }}%){% else %}0%{% endif %};"></div>
+                            <div class="porcentagem-badge-slim">{{ d.porc_desafiante|floatformat:0 }}%</div>
+                        </div>
+                    </div>
+                    
+                    <h4 class="fw-900 mt-3 mb-0 text-white">{{ d.km_desafiante|floatformat:1 }} <small class="text-muted fs-6">km</small></h4>
+                </div>
+
+                <div class="px-2">
+                    <div class="vs-text">VS</div>
+                </div>
+
+                <div class="text-center" style="flex: 1;">
+                    <img src="{{ d.avatar_desafiado|default:'' }}" class="avatar-duelo avatar-vermelho mb-3" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ d.desafiado }}&background=ff416c&color=fff&bold=true';">
+                    <h5 class="fw-900 mb-3 text-uppercase" style="color: #ff4b2b; letter-spacing: 0.5px;">{{ d.desafiado }}</h5>
+                    
+                    <div class="tanque-wrapper-slim">
+                        <div class="tanque-externo-slim">
+                            <div class="liquido-vermelho" style="height: {% if d.porc_desafiado > 0 %}max(15%, {{ d.porc_desafiado }}%){% else %}0%{% endif %};"></div>
+                            <div class="porcentagem-badge-slim">{{ d.porc_desafiado|floatformat:0 }}%</div>
+                        </div>
+                    </div>
+                    
+                    <h4 class="fw-900 mt-3 mb-0 text-white">{{ d.km_desafiado|floatformat:1 }} <small class="text-muted fs-6">km</small></h4>
+                </div>
+            </div>
+
+            <div class="mt-4 mb-4 text-center">
+                {% if d.km_desafiante > d.km_desafiado %}
+                    <h6 class="fw-900 text-white mb-0"><i class="bi bi-fire text-warning fs-5"></i> {{ d.desafiante }} ESTÁ DOMINANDO A PISTA!</h6>
+                {% elif d.km_desafiado > d.km_desafiante %}
+                    <h6 class="fw-900 text-white mb-0"><i class="bi bi-fire text-warning fs-5"></i> {{ d.desafiado }} ESTÁ DOMINANDO A PISTA!</h6>
                 {% else %}
-                    <span style="color: var(--primary-red);"><i class="bi bi-fire"></i> {{ d.desafiado }} ASSUMIU A LIDERANÇA!</span>
+                    <h6 class="fw-900 text-white mb-0"><i class="bi bi-exclamation-circle text-warning fs-5"></i> A BATALHA ESTÁ EMPATADA!</h6>
                 {% endif %}
             </div>
 
-            <button onclick="partilharDesafio({{ d.id }})" class="btn-share btn-partilhar position-relative" style="z-index: 10;">
+            <button onclick="partilharDesafio({{ d.id }})" class="btn w-100 fw-900 py-3 rounded-pill btn-partilhar" style="background-color: #25D366; color: white; position: relative; z-index: 2;">
                 <i class="bi bi-whatsapp me-2 fs-5"></i> AQUECER O GRUPO
             </button>
         </div>
         {% endif %}
+
+    {% empty %}
+        <div class="text-center py-5">
+            <i class="bi bi-shield-slash" style="font-size: 3.5rem; color: #444;"></i>
+            <h5 class="mt-3 text-white fw-900">ARENA VAZIA</h5>
+            <p class="text-muted fw-bold">Que tal desafiar alguém e colocar fogo na pista?</p>
+        </div>
     {% endfor %}
 </div>
 
 <div class="modal fade" id="novoDesafioModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal-content-dark">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title text-white fw-900"><i class="bi bi-crosshair text-danger"></i> Lançar Desafio</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{% url 'criar_desafio' %}" method="POST">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold text-uppercase">Escolha o Adversário</label>
+                        <select name="desafiado" class="form-select form-control-dark fw-bold" required>
+                            <option value="">Selecione...</option>
+                            {% for u in usuarios_disponiveis %}
+                                <option value="{{ u }}">{{ u }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label text-muted small fw-bold text-uppercase">Meta (KM)</label>
+                            <input type="number" name="alvo_km" class="form-control form-control-dark fw-bold fs-5" value="30" required>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label text-muted small fw-bold text-uppercase">Prazo (Dias)</label>
+                            <input type="number" name="prazo_dias" class="form-control form-control-dark fw-bold fs-5" value="7" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="submit" class="btn fw-900 w-100 py-3 rounded-pill" style="background: linear-gradient(135deg, #ff416c, #ff4b2b); color: white;">INICIAR BATALHA!</button>
+                </div>
+            </form>
+        </div>
     </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
@@ -147,45 +235,25 @@
     function partilharDesafio(id) {
         const cartao = document.getElementById('cartaoDesafio_' + id);
         const botao = cartao.querySelector('.btn-partilhar');
-        const originalText = botao.innerHTML;
         
-        botao.innerHTML = '<span class="spinner-border spinner-border-sm"></span> GERANDO CARD...';
+        // Esconde o botão para a foto ficar limpa
+        botao.style.display = 'none';
         
-        // Timeout para garantir que a UI atualizou o botão
-        setTimeout(() => {
-            html2canvas(cartao, {
-                scale: 3, 
-                backgroundColor: '#0a0a0b',
-                useCORS: true,
-                allowTaint: true,
-                borderRadius: 30
-            }).then(canvas => {
-                botao.innerHTML = originalText;
-                
-                canvas.toBlob(function(blob) {
-                    const file = new File([blob], "Duelo_Arena_KMS.png", { type: "image/png" });
-                    
-                    // NOVA LÓGICA DE COMPARTILHAMENTO (Nativo para Celular)
-                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                        navigator.share({
-                            title: 'Duelo KMS Tracker',
-                            text: '🔥 Olha como está essa disputa na Arena KMS!',
-                            files: [file]
-                        }).catch(err => console.log("Erro ao compartilhar", err));
-                    } else {
-                        // Fallback para baixar no PC
-                        const link = document.createElement('a');
-                        link.download = 'Duelo_Arena_KMS.png';
-                        link.href = URL.createObjectURL(blob);
-                        link.click();
-                    }
-                });
-            }).catch(err => {
-                console.error("Erro na imagem:", err);
-                botao.innerHTML = originalText;
-                alert("Erro ao gerar o cartão.");
-            });
-        }, 300);
+        html2canvas(cartao, {
+            scale: 3, 
+            backgroundColor: '#15171a',
+            useCORS: true,
+            allowTaint: true
+        }).then(canvas => {
+            botao.style.display = 'block';
+            const link = document.createElement('a');
+            link.download = 'Duelo_KMS_Arena.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }).catch(err => {
+            botao.style.display = 'block';
+            console.error("Erro ao gerar imagem", err);
+        });
     }
 </script>
 {% endblock %}
