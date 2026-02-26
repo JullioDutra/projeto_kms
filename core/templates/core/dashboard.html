@@ -1,219 +1,127 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KM Tracker - Meta Coletiva</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary-blue: #00d2ff;
-            --deep-blue: #3a7bd5;
-            --dark-bg: #121212;
-            --card-bg: #1e1e1e;
-        }
+{% extends 'core/base.html' %}
 
-        body {
-            background-color: var(--dark-bg);
-            color: #ffffff;
-            font-family: 'Inter', sans-serif;
-            padding-bottom: 30px;
-        }
+{% block title %}KM Tracker - Meta Coletiva{% endblock %}
 
-        /* --- NOVO: Cabeçalho Premium --- */
-        .app-header {
-            background: rgba(30, 30, 30, 0.8);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 15px 0;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            margin-bottom: 30px;
-        }
-        .app-logo { font-weight: 900; font-size: 1.3rem; margin: 0; display: flex; align-items: center; gap: 8px; letter-spacing: -0.5px; }
+{% block extra_css %}
+<style>
+    :root {
+        --primary-blue: #00d2ff;
+        --deep-blue: #3a7bd5;
+        --dark-bg: #121212;
+        --card-bg: #1e1e1e;
+    }
 
-        .glass-card {
-            background: var(--card-bg);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
+    .glass-card {
+        background: var(--card-bg);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
 
-        /* --- Estilização do Tanque Profissional (INTACTA) --- */
-        .tanque-wrapper {
-            position: relative;
-            width: 180px;
-            height: 350px;
-            margin: 0 auto;
-        }
+    /* --- Estilização do Tanque Profissional (MANTIDA) --- */
+    .tanque-wrapper {
+        position: relative;
+        width: 180px;
+        height: 350px;
+        margin: 0 auto;
+    }
 
-        .tanque-externo {
-            width: 100%;
-            height: 100%;
-            border: 6px solid #333;
-            border-radius: 20px 20px 40px 40px;
-            position: relative;
-            background: rgba(255, 255, 255, 0.05);
-            overflow: hidden;
-            z-index: 1;
-        }
+    .tanque-externo {
+        width: 100%;
+        height: 100%;
+        border: 6px solid #333;
+        border-radius: 20px 20px 40px 40px;
+        position: relative;
+        background: rgba(255, 255, 255, 0.05);
+        overflow: hidden;
+        z-index: 1;
+    }
 
-        .liquido {
-            width: 100%;
-            background: linear-gradient(180deg, var(--primary-blue) 0%, var(--deep-blue) 100%);
-            position: absolute;
-            bottom: 0;
-            transition: height 2s cubic-bezier(0.17, 0.67, 0.83, 0.67);
-            box-shadow: 0 0 20px rgba(0, 210, 255, 0.5);
-        }
+    .liquido {
+        width: 100%;
+        background: linear-gradient(180deg, var(--primary-blue) 0%, var(--deep-blue) 100%);
+        position: absolute;
+        bottom: 0;
+        transition: height 2s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+        box-shadow: 0 0 20px rgba(0, 210, 255, 0.5);
+    }
 
-        .wave {
-            position: absolute;
-            top: -15px;
-            left: 0;
-            width: 200%;
-            height: 20px;
-            background: url('https://svgshare.com/i/wfS.svg'); 
-            background-size: 50% 20px;
-            animation: move_wave 3s linear infinite;
-            opacity: 0.3;
-        }
+    .wave {
+        position: absolute;
+        top: -15px;
+        left: 0;
+        width: 200%;
+        height: 20px;
+        background: url('https://svgshare.com/i/wfS.svg'); 
+        background-size: 50% 20px;
+        animation: move_wave 3s linear infinite;
+        opacity: 0.3;
+    }
 
-        @keyframes move_wave {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
+    @keyframes move_wave {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+    }
 
-        .porcentagem-badge {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 2.5rem;
-            font-weight: 900;
-            text-shadow: 0 0 10px rgba(0,0,0,0.5);
-            z-index: 5;
-        }
+    .porcentagem-badge {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 2.5rem;
+        font-weight: 900;
+        text-shadow: 0 0 10px rgba(0,0,0,0.5);
+        z-index: 5;
+        color: white;
+    }
 
-        /* --- RANKING PREMIUM --- */
-        .table-responsive { overflow-x: auto; }
-        .table { color: #fff; border-collapse: separate; border-spacing: 0 10px; margin-top: -10px; }
-        .table thead th { border-bottom: none; color: #888; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; padding: 0 15px; }
-        .table tbody tr { background: rgba(255,255,255,0.03); transition: transform 0.2s, background 0.2s; }
-        .table tbody tr:hover { transform: translateY(-2px); background: rgba(255,255,255,0.06); }
-        .table td { border: none; padding: 15px; vertical-align: middle; }
-        .table td:first-child { border-radius: 12px 0 0 12px; }
-        .table td:last-child { border-radius: 0 12px 12px 0; }
-        
-        /* Cores das Medalhas no Ranking */
-        .rank-1 i { color: #ffd700; font-size: 1.3rem; filter: drop-shadow(0 0 5px rgba(255,215,0,0.5)); }
-        .rank-2 i { color: #c0c0c0; font-size: 1.2rem; }
-        .rank-3 i { color: #cd7f32; font-size: 1.1rem; }
-        .rank-number { color: #666; font-weight: 700; font-size: 1rem; }
+    /* --- RANKING PREMIUM --- */
+    .table { color: #fff; border-collapse: separate; border-spacing: 0 10px; margin-top: -10px; }
+    .table thead th { border-bottom: none; color: #888; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; padding: 0 15px; }
+    .table tbody tr { background: rgba(255,255,255,0.03); transition: transform 0.2s, background 0.2s; }
+    .table tbody tr:hover { transform: translateY(-2px); background: rgba(255,255,255,0.06); }
+    .table td { border: none; padding: 15px; vertical-align: middle; }
+    
+    .rank-1 i { color: #ffd700; font-size: 1.3rem; filter: drop-shadow(0 0 5px rgba(255,215,0,0.5)); }
+    .rank-2 i { color: #c0c0c0; font-size: 1.2rem; }
+    .rank-3 i { color: #cd7f32; font-size: 1.1rem; }
+    .rank-number { color: #666; font-weight: 700; font-size: 1rem; }
 
-        /* --- BOTÕES STRAVA E MANUAL --- */
-        .btn-strava {
-            background-color: #fc4c02;
-            color: white;
-            border: none;
-            border-radius: 14px;
-            padding: 14px 20px;
-            font-size: 1.05rem;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            box-shadow: 0 8px 15px rgba(252, 76, 2, 0.3);
-            transition: all 0.3s ease;
-            text-decoration: none;
-            width: 100%;
-        }
-        .btn-strava:hover { background-color: #e34402; transform: translateY(-2px); box-shadow: 0 12px 20px rgba(252, 76, 2, 0.4); color: white; }
+    /* --- BOTÕES --- */
+    .btn-strava { background-color: #fc4c02; color: white; border-radius: 14px; padding: 14px 20px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; width: 100%; transition: 0.3s; }
+    .btn-manual { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; border-radius: 14px; padding: 14px 20px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; width: 100%; transition: 0.3s; }
+    .btn-strava:hover, .btn-manual:hover { transform: translateY(-2px); color: white; }
 
-        .btn-manual {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: #ffffff;
-            border-radius: 14px;
-            padding: 14px 20px;
-            font-size: 1.05rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            width: 100%;
-        }
-        .btn-manual:hover { background: rgba(255, 255, 255, 0.15); border-color: rgba(255, 255, 255, 0.3); transform: translateY(-2px); color: white; }
+    .btn-modern { background: rgba(255, 255, 255, 0.05); color: #aaa; border-radius: 14px; padding: 12px 2px; font-size: 0.75rem; font-weight: 600; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-decoration: none; width: 100%; transition: 0.2s; }
+    .btn-modern:hover { background: rgba(255, 255, 255, 0.1); transform: translateY(-2px); color: #fff; }
+    .btn-modern i { font-size: 1.4rem; }
+</style>
+{% endblock %}
 
-        /* --- BOTÕES INFERIORES (MODERN APP MENU) --- */
-        .btn-modern {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            color: #aaa;
-            border-radius: 14px;
-            padding: 12px 2px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            transition: all 0.2s ease;
-            text-decoration: none;
-            width: 100%;
-        }
-        .btn-modern:hover { background: rgba(255, 255, 255, 0.1); transform: translateY(-2px); color: #fff; }
-        
-        .btn-history:hover { color: #fff; }
-        .btn-history:hover i { color: #a8a8a8; }
-        .btn-ranking:hover { color: #fff; }
-        .btn-ranking:hover i { color: #f1c40f; }
-        .btn-performance:hover { color: #fff; }
-        .btn-performance:hover i { color: #00d2ff; }
-        .btn-feed:hover { color: #fff; }
-        .btn-feed:hover i { color: #ff9f43; }
-        
-        .icon-lg { font-size: 1.4rem; transition: 0.2s; }
-    </style>
-</head>
-<body>
-
-<header class="app-header">
-    <div class="container d-flex justify-content-between align-items-center">
-        <h1 class="app-logo text-white">
-            <i class="bi bi-activity text-primary"></i> KMS Tracker
-        </h1>
-        <div class="text-muted">
-            <i class="bi bi-person-circle fs-4"></i>
-        </div>
-    </div>
-</header>
+{% block content %}
+<div class="container pb-5">
 
     {% if request.user.is_authenticated %}
-    <div class="d-flex align-items-center gap-3 mb-4 p-3 rounded-4" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-        <img src="{{ request.session.foto_strava }}" alt="Perfil" class="rounded-circle" style="width: 55px; height: 55px; border: 2px solid #fc4c02; object-fit: cover;">
-        <div>
-            <h5 class="mb-0 text-white fw-bold">Olá, {{ request.user.first_name }}! 🔥</h5>
-            <small class="text-white fw-bold" color="white"><i class="bi bi-strava" style="color: #fc4c02;"></i> Conta Conectada</small>
+    <div class="d-flex align-items-center justify-content-between gap-3 mb-4 p-3 rounded-4" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);">
+        <div class="d-flex align-items-center gap-3">
+            {% if request.session.foto_strava %}
+                <img src="{{ request.session.foto_strava }}" alt="Perfil" class="rounded-circle" style="width: 55px; height: 55px; border: 2px solid #fc4c02; object-fit: cover;">
+            {% else %}
+                <i class="bi bi-person-circle fs-1 text-white"></i>
+            {% endif %}
+            <div>
+                <h5 class="mb-0 text-white fw-bold">Olá, {{ request.user.first_name }}! 🔥</h5>
+                <small class="text-white fw-bold"><i class="bi bi-strava" style="color: #fc4c02;"></i> Conta Conectada</small>
+            </div>
         </div>
-        <button class="btn btn-sm mt-2 fw-bold" style="background: linear-gradient(135deg, #fc4c02, #ffca28); color: black; border-radius: 10px;" data-bs-toggle="modal" data-bs-target="#modalCartao">
-                <i class="bi bi-person-vcard"></i> Meu Cartão Oficial
+        <button class="btn btn-sm fw-bold" style="background: linear-gradient(135deg, #fc4c02, #ffca28); color: black; border-radius: 10px;" data-bs-toggle="modal" data-bs-target="#modalCartao">
+            <i class="bi bi-person-vcard"></i> MEU CARTÃO
         </button>
     </div>
     {% endif %}
 
-<div class="container pb-5">
     <div class="row g-4 justify-content-center">
-        
         <div class="col-lg-5 text-center">
             
             {% if boss %}
@@ -239,8 +147,7 @@
                 <h3 class="mb-4 fw-bold">Meta Coletiva</h3>
                 
                 <div class="tanque-wrapper">
-                    <div class="porcentagem-badge">{{ porcentagem|floatformat:2 }}%</div>
-                    
+                    <div class="porcentagem-badge">{{ porcentagem|floatformat:1 }}%</div>
                     <div class="tanque-externo">
                         <div class="liquido" style="height: {{ porcentagem_visual }}%;">
                             <div class="wave"></div>
@@ -249,43 +156,33 @@
                 </div>
 
                 <div class="mt-4 mb-4">
-                    <h4 class="mb-0 fw-bold">{{ total_acumulado|floatformat:2 }} / {{ meta_valor|floatformat:2 }} KM</h4>
+                    <h4 class="mb-0 fw-bold" style="color:white;">{{ total_acumulado|floatformat:1 }} / {{ meta_valor|floatformat:0 }} KM</h4>
                     <p class="text-muted mb-0">Meta do mês atual</p>
                 </div>
                 
                 <div class="d-flex flex-column flex-md-row justify-content-center gap-3 mt-3 mb-4 px-2">
                     <a href="{% url 'strava_login' %}" class="btn-strava">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
-                            <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169"/>
-                        </svg>
-                        Sincronizar Strava
+                        <i class="bi bi-strava"></i> Sincronizar Strava
                     </a>
-
                     <a href="{% url 'registrar' %}" class="btn-manual">
-                        <i class="bi bi-pencil-square fs-5"></i>
-                        Registro Manual
+                        <i class="bi bi-pencil-square fs-5"></i> Registro Manual
                     </a>
                 </div>
 
                 <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 15px;">
-                    <a href="{% url 'historico' %}" class="btn-modern btn-history">
-                        <i class="bi bi-calendar-event icon-lg"></i>
-                        Histórico
+                    <a href="{% url 'historico' %}" class="btn-modern">
+                        <i class="bi bi-calendar-event"></i> Histórico
                     </a>
-                    <a href="{% url 'ranking_geral' %}" class="btn-modern btn-ranking">
-                        <i class="bi bi-trophy icon-lg"></i>
-                        Ranking
+                    <a href="{% url 'ranking_geral' %}" class="btn-modern">
+                        <i class="bi bi-trophy"></i> Ranking
                     </a>
-                    <a href="{% url 'desempenho' %}" class="btn-modern btn-performance">
-                        <i class="bi bi-graph-up-arrow icon-lg"></i>
-                        Coach
+                    <a href="{% url 'desempenho' %}" class="btn-modern">
+                        <i class="bi bi-graph-up-arrow"></i> Coach
                     </a>
-                    <a href="{% url 'feed' %}" class="btn-modern btn-feed">
-                        <i class="bi bi-fire icon-lg"></i>
-                        Feed
+                    <a href="{% url 'feed' %}" class="btn-modern">
+                        <i class="bi bi-fire"></i> Feed
                     </a>
                 </div>
-
             </div>
         </div>
 
@@ -304,22 +201,15 @@
                         <tbody>
                             {% for corredor in ranking %}
                             <tr>
-                                <td class="rank-{{ forloop.counter }} text-center">
-                                    {% if forloop.counter == 1 %} <i class="bi bi-trophy-fill"></i> 
-                                    {% elif forloop.counter == 2 %} <i class="bi bi-award-fill"></i> 
-                                    {% elif forloop.counter == 3 %} <i class="bi bi-award-fill"></i> 
+                                <td class="text-center">
+                                    {% if forloop.counter == 1 %} <i class="bi bi-trophy-fill" style="color:#ffd700;"></i> 
+                                    {% elif forloop.counter == 2 %} <i class="bi bi-award-fill" style="color:#c0c0c0;"></i> 
+                                    {% elif forloop.counter == 3 %} <i class="bi bi-award-fill" style="color:#cd7f32;"></i> 
                                     {% else %} <span class="rank-number">{{ forloop.counter }}º</span> 
                                     {% endif %}
                                 </td>
                                 <td class="fw-bold">{{ corredor.nome_usuario }}</td>
-                                <td class="text-end fw-bold text-info">{{ corredor.total|floatformat:2 }} <span class="text-muted small">km</span></td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="3" class="text-center text-muted py-4">
-                                    <i class="bi bi-inbox fs-2 d-block mb-2"></i>
-                                    Aguardando o primeiro registro do mês...
-                                </td>
+                                <td class="text-end fw-bold text-info">{{ corredor.total|floatformat:1 }} <small class="text-muted">km</small></td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -327,10 +217,56 @@
                 </div>
             </div>
         </div>
-
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+<div class="modal fade" id="modalCartao" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="background-color: transparent; border: none;">
+      <div class="modal-body text-center">
+        <div id="cartaoAtleta" style="background: linear-gradient(145deg, #181818, #0a0a0a); border-radius: 20px; padding: 35px 25px; border: 2px solid #fc4c02; position: relative; overflow: hidden; box-shadow: 0 15px 35px rgba(252, 76, 2, 0.4);">
+            <div style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: #fc4c02; filter: blur(70px); opacity: 0.6;"></div>
+            <h4 class="fw-900 mb-4" style="color: #fff; letter-spacing: 3px; font-style: italic;">KMS TRACKER</h4>
+            {% if request.session.foto_strava %}
+                <img src="{{ request.session.foto_strava }}" alt="Perfil" class="rounded-circle mb-3 shadow-lg" style="width: 110px; height: 110px; border: 4px solid #fc4c02; object-fit: cover; position: relative; z-index: 2;" crossorigin="anonymous">
+            {% endif %}
+            <h2 class="text-white fw-900 mb-1" style="font-size: 2.2rem;">{{ request.user.first_name }}</h2>
+            <p class="fw-bold mb-4" style="color: #fc4c02; letter-spacing: 1px;">ATLETA OFICIAL</p>
+            <div class="row text-center mb-2">
+                <div class="col-6" style="border-right: 1px solid rgba(255,255,255,0.1);">
+                    <h3 class="fw-900 mb-0" style="color: #00d2ff;">{{ meu_total_km|floatformat:1 }}</h3>
+                    <span style="color: #888; font-size: 0.75rem; text-transform: uppercase; font-weight: 800;">Quilómetros</span>
+                </div>
+                <div class="col-6">
+                    <h3 class="fw-900 mb-0 text-white">{{ minhas_corridas }}</h3>
+                    <span style="color: #888; font-size: 0.75rem; text-transform: uppercase; font-weight: 800;">Corridas</span>
+                </div>
+            </div>
+        </div>
+        <button onclick="baixarCartao()" class="btn w-100 fw-bold py-3 mt-4 rounded-pill shadow" style="background-color: #fc4c02; color: white;">
+            <i class="bi bi-camera-fill me-2"></i> SALVAR NA GALERIA
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+    function baixarCartao() {
+        const cartao = document.getElementById('cartaoAtleta');
+        html2canvas(cartao, {
+            scale: 3,
+            backgroundColor: null,
+            useCORS: true
+        }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = 'Meu_Cartao_KMS.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+    }
+</script>
+{% endblock %}
