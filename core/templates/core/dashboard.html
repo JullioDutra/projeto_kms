@@ -11,13 +11,13 @@
 
     .glass-card {
         background: #1e1e1e;
-        border: 1px solid rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 20px;
         padding: 2rem;
         box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     }
 
-    /* --- Tanque de Meta Coletiva --- */
+    /* --- AJUSTE DO TANQUE (ÁGUA E PORCENTAGEM) --- */
     .tanque-wrapper {
         position: relative;
         width: 180px;
@@ -31,7 +31,7 @@
         border: 6px solid #333;
         border-radius: 20px 20px 40px 40px;
         position: relative;
-        background: rgba(255, 255, 255, 0.05);
+        background: #121212; /* Fundo mais escuro para destacar o líquido */
         overflow: hidden;
         z-index: 1;
     }
@@ -41,8 +41,11 @@
         background: linear-gradient(180deg, var(--primary-blue) 0%, var(--deep-blue) 100%);
         position: absolute;
         bottom: 0;
+        left: 0;
+        /* A variável porcentagem_visual deve vir da view limitada a 100 */
         transition: height 2s cubic-bezier(0.17, 0.67, 0.83, 0.67);
-        box-shadow: 0 0 20px rgba(0, 210, 255, 0.5);
+        box-shadow: 0 0 30px rgba(0, 210, 255, 0.6);
+        z-index: 2;
     }
 
     .wave {
@@ -54,7 +57,7 @@
         background: url('https://svgshare.com/i/wfS.svg'); 
         background-size: 50% 20px;
         animation: move_wave 3s linear infinite;
-        opacity: 0.3;
+        opacity: 0.5;
     }
 
     @keyframes move_wave {
@@ -67,48 +70,34 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        font-size: 2.5rem;
+        font-size: 2.8rem;
         font-weight: 900;
-        text-shadow: 0 0 10px rgba(0,0,0,0.5);
-        z-index: 5;
+        color: #ffffff !important;
+        text-shadow: 0 0 15px rgba(0,0,0,0.9);
+        z-index: 10;
     }
 
-    /* --- RANKING DE LÍDERES --- */
-    .table { color: #fff; border-collapse: separate; border-spacing: 0 10px; margin-top: -10px; }
-    .table thead th { border-bottom: none; color: #888; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; padding: 0 15px; }
-    .table tbody tr { background: rgba(255,255,255,0.03); transition: transform 0.2s; }
-    .table tbody tr:hover { transform: translateY(-2px); background: rgba(255,255,255,0.06); }
-    .table td { border: none; padding: 15px; vertical-align: middle; }
-    .table td:first-child { border-radius: 12px 0 0 12px; }
-    .table td:last-child { border-radius: 0 12px 12px 0; }
+    /* --- AJUSTE DOS NOMES ILEGÍVEIS NO RANKING --- */
+    .table { color: #ffffff !important; margin-top: -10px; }
+    .table thead th { border: none; color: #888 !important; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; padding: 0 15px; }
+    .table tbody tr { background: rgba(255,255,255,0.03); transition: 0.2s; }
+    .table tbody tr:hover { background: rgba(255,255,255,0.08); }
     
-    .rank-1 i { color: #ffd700; font-size: 1.3rem; filter: drop-shadow(0 0 5px rgba(255,215,0,0.5)); }
-    .rank-2 i { color: #c0c0c0; font-size: 1.2rem; }
-    .rank-3 i { color: #cd7f32; font-size: 1.1rem; }
-
-    /* --- BOTÕES DE AÇÃO --- */
-    .btn-strava { background-color: #fc4c02; color: white; border: none; border-radius: 14px; padding: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 8px 15px rgba(252, 76, 2, 0.3); text-decoration: none; width: 100%; transition: 0.3s; }
-    .btn-manual { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #fff; border-radius: 14px; padding: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; width: 100%; transition: 0.3s; }
-    .btn-strava:hover, .btn-manual:hover { transform: translateY(-2px); color: white; opacity: 0.9; }
-
-    /* --- MENU MODERNO INFERIOR --- */
-    .btn-modern {
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        color: #888;
-        border-radius: 16px;
-        padding: 12px 2px;
-        font-size: 0.7rem;
-        font-weight: 800;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 6px;
-        transition: 0.2s;
-        text-decoration: none;
+    .table td { 
+        border: none; 
+        padding: 15px; 
+        vertical-align: middle; 
+        color: #ffffff !important; /* Força branco nos nomes */
+        font-weight: 600;
     }
-    .btn-modern:hover { background: rgba(255, 255, 255, 0.1); color: #fff; transform: translateY(-2px); }
-    .btn-modern i { font-size: 1.4rem; }
+    
+    .text-info { color: #00d2ff !important; font-weight: 900; }
+    .rank-number { color: #ffffff !important; font-weight: 800; }
+
+    /* --- BOTÕES E MENU --- */
+    .btn-strava { background-color: #fc4c02; color: white !important; border-radius: 14px; padding: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; }
+    .btn-manual { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #fff !important; border-radius: 14px; padding: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; }
+    .btn-modern { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); color: #fff !important; border-radius: 16px; padding: 12px 2px; font-size: 0.7rem; font-weight: 800; display: flex; flex-direction: column; align-items: center; gap: 6px; text-decoration: none; }
 </style>
 {% endblock %}
 
@@ -121,7 +110,7 @@
             <img src="{{ request.session.foto_strava }}" alt="Perfil" class="rounded-circle" style="width: 50px; height: 50px; border: 2px solid #fc4c02; object-fit: cover;">
             <div>
                 <h6 class="mb-0 text-white fw-900">Olá, {{ request.user.first_name }}!</h6>
-                <small class="fw-bold" style="color: #666;"><i class="bi bi-strava"></i> Atleta Verificado</small>
+                <small class="fw-bold" style="color: #00d2ff;">Atleta Verificado</small>
             </div>
         </div>
         <button class="btn btn-sm fw-900 px-3" style="background: linear-gradient(135deg, #fc4c02, #ffca28); color: black; border-radius: 10px;" data-bs-toggle="modal" data-bs-target="#modalCartao">
@@ -149,7 +138,7 @@
             {% endif %}
 
             <div class="glass-card">
-                <h4 class="mb-4 fw-900 text-uppercase" style="letter-spacing: 1px;">Meta Coletiva</h4>
+                <h4 class="mb-4 fw-900 text-uppercase" style="letter-spacing: 1px; color: #fff;">Meta Coletiva</h4>
                 
                 <div class="tanque-wrapper">
                     <div class="porcentagem-badge">{{ porcentagem|floatformat:1 }}%</div>
@@ -161,7 +150,7 @@
                 </div>
 
                 <div class="mt-4 mb-4">
-                    <h3 class="mb-0 fw-900">{{ total_acumulado|floatformat:1 }} <small class="text-muted" style="font-size: 1rem;">/ {{ meta_valor }} KM</small></h3>
+                    <h3 class="mb-0 fw-900" style="color: #fff;">{{ total_acumulado|floatformat:1 }} <small style="font-size: 1rem; color: #888;">/ {{ meta_valor }} KM</small></h3>
                 </div>
                 
                 <div class="row g-2 mb-4">
@@ -174,25 +163,17 @@
                 </div>
 
                 <div class="row g-2">
-                    <div class="col-3">
-                        <a href="{% url 'historico' %}" class="btn-modern"><i class="bi bi-calendar-check"></i>Metas</a>
-                    </div>
-                    <div class="col-3">
-                        <a href="{% url 'ranking_geral' %}" class="btn-modern"><i class="bi bi-trophy"></i>Hall</a>
-                    </div>
-                    <div class="col-3">
-                        <a href="{% url 'desempenho' %}" class="btn-modern"><i class="bi bi-graph-up"></i>Coach</a>
-                    </div>
-                    <div class="col-3">
-                        <a href="{% url 'feed' %}" class="btn-modern"><i class="bi bi-fire"></i>Feed</a>
-                    </div>
+                    <div class="col-3"><a href="{% url 'historico' %}" class="btn-modern"><i class="bi bi-calendar-check"></i>Metas</a></div>
+                    <div class="col-3"><a href="{% url 'ranking_geral' %}" class="btn-modern"><i class="bi bi-trophy"></i>Hall</a></div>
+                    <div class="col-3"><a href="{% url 'desempenho' %}" class="btn-modern"><i class="bi bi-graph-up"></i>Coach</a></div>
+                    <div class="col-3"><a href="{% url 'feed' %}" class="btn-modern"><i class="bi bi-fire"></i>Feed</a></div>
                 </div>
             </div>
         </div>
 
         <div class="col-lg-7">
             <div class="glass-card h-100">
-                <h5 class="mb-4 fw-900 text-uppercase"><i class="bi bi-award text-warning"></i> Líderes do Mês</h5>
+                <h5 class="mb-4 fw-900 text-uppercase" style="color: #fff;"><i class="bi bi-award text-warning"></i> Líderes do Mês</h5>
                 <div class="table-responsive">
                     <table class="table">
                         <thead>
@@ -205,14 +186,14 @@
                         <tbody>
                             {% for corredor in ranking %}
                             <tr>
-                                <td class="rank-{{ forloop.counter }} text-center">
-                                    {% if forloop.counter == 1 %} <i class="bi bi-trophy-fill"></i> 
-                                    {% elif forloop.counter == 2 %} <i class="bi bi-award-fill"></i> 
-                                    {% elif forloop.counter == 3 %} <i class="bi bi-award-fill"></i> 
-                                    {% else %} <span class="text-muted fw-bold">{{ forloop.counter }}º</span> 
+                                <td class="text-center">
+                                    {% if forloop.counter == 1 %} <i class="bi bi-trophy-fill text-warning"></i> 
+                                    {% elif forloop.counter == 2 %} <i class="bi bi-award-fill" style="color: #c0c0c0;"></i> 
+                                    {% elif forloop.counter == 3 %} <i class="bi bi-award-fill" style="color: #cd7f32;"></i> 
+                                    {% else %} <span class="rank-number">{{ forloop.counter }}º</span> 
                                     {% endif %}
                                 </td>
-                                <td class="fw-bold text-white">{{ corredor.nome_usuario }}</td>
+                                <td class="fw-bold">{{ corredor.nome_usuario }}</td>
                                 <td class="text-end fw-900 text-info">{{ corredor.total|floatformat:1 }}</td>
                             </tr>
                             {% endfor %}
@@ -221,50 +202,6 @@
                 </div>
             </div>
         </div>
-
     </div>
 </div>
-
-<div class="modal fade" id="modalCartao" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content" style="background: transparent; border: none;">
-      <div class="modal-body text-center">
-        <div id="cartaoAtleta" style="background: linear-gradient(145deg, #181818, #0a0a0a); border-radius: 20px; padding: 35px 25px; border: 2px solid #fc4c02; position: relative; overflow: hidden; box-shadow: 0 15px 35px rgba(252, 76, 2, 0.4);">
-            <div style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: #fc4c02; filter: blur(70px); opacity: 0.6;"></div>
-            <h4 class="fw-900 mb-4" style="color: #fff; letter-spacing: 3px; font-style: italic;">KMS TRACKER</h4>
-            <img src="{{ request.session.foto_strava }}" alt="Perfil" class="rounded-circle mb-3 shadow-lg" style="width: 110px; height: 110px; border: 4px solid #fc4c02; object-fit: cover; position: relative; z-index: 2;" crossorigin="anonymous">
-            <h2 class="text-white fw-900 mb-1" style="font-size: 2.2rem;">{{ request.user.first_name }}</h2>
-            <p class="fw-bold mb-4" style="color: #fc4c02; letter-spacing: 1px;">ATLETA OFICIAL</p>
-            <div class="row text-center mb-2" style="position: relative; z-index: 2;">
-                <div class="col-6" style="border-right: 1px solid rgba(255,255,255,0.1);">
-                    <h3 class="fw-900 mb-0" style="color: #00d2ff;">{{ meu_total_km|floatformat:1 }}</h3>
-                    <span style="color: #888; font-size: 0.75rem; text-transform: uppercase; font-weight: 800;">Quilómetros</span>
-                </div>
-                <div class="col-6">
-                    <h3 class="fw-900 mb-0 text-white">{{ minhas_corridas }}</h3>
-                    <span style="color: #888; font-size: 0.75rem; text-transform: uppercase; font-weight: 800;">Corridas</span>
-                </div>
-            </div>
-        </div>
-        <button onclick="baixarCartao()" class="btn w-100 fw-bold py-3 mt-4 rounded-pill shadow" style="background-color: #fc4c02; color: white;">SALVAR NA GALERIA</button>
-        <button type="button" class="btn btn-link text-muted mt-2 fw-bold" data-bs-dismiss="modal">Fechar</button>
-      </div>
-    </div>
-  </div>
-</div>
-{% endblock %}
-
-{% block extra_js %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script>
-    function baixarCartao() {
-        const cartao = document.getElementById('cartaoAtleta');
-        html2canvas(cartao, { scale: 3, backgroundColor: null, useCORS: true }).then(canvas => {
-            const link = document.createElement('a');
-            link.download = 'Meu_Cartao_KMS.png';
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-        });
-    }
-</script>
 {% endblock %}
