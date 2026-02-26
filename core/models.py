@@ -88,3 +88,41 @@ class TokenStrava(models.Model):
 
     def __str__(self):
         return f"Tokens de {self.user.first_name}"
+
+class Desafio(models.Model):
+    STATUS_CHOICES = [
+        ('pendente', '🟡 Aguardando Aceite'),
+        ('ativo', '🔥 Em Andamento'),
+        ('concluido', '✅ Finalizado'),
+        ('recusado', '❌ Recusado'),
+    ]
+    
+    TIPO_CHOICES = [
+        ('distancia', 'Corrida Maluca (Quem bate os KMs primeiro)'),
+        ('prazo', 'Resistência (Quem corre mais KMs no prazo)'),
+    ]
+    
+    desafiante = models.CharField(max_length=100, verbose_name="Quem Desafiou")
+    desafiado = models.CharField(max_length=100, verbose_name="Quem foi Desafiado")
+    
+    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, default='distancia')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pendente')
+    
+    # Se o tipo for 'distancia', alvo_km é obrigatório. (Ex: Quem chega em 50km primeiro)
+    alvo_km = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, verbose_name="Meta (KM)")
+    
+    # Quantos dias o desafio vai durar no máximo (Ex: 7 dias, 15 dias, 30 dias)
+    prazo_dias = models.PositiveIntegerField(default=7, verbose_name="Prazo (Dias)")
+    
+    # O relógio só começa a contar quando o desafiado aceita!
+    data_inicio = models.DateTimeField(null=True, blank=True)
+    data_fim = models.DateTimeField(null=True, blank=True)
+    
+    data_criacao = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.desafiante} vs {self.desafiado} - {self.get_status_display()}"
+
+    class Meta:
+        verbose_name = "Desafio 1x1"
+        verbose_name_plural = "Desafios 1x1"
