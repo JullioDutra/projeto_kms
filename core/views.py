@@ -417,20 +417,63 @@ def feed_atividades(request):
             post.save()
 
     # =========================================================
-    # --- NOVO: PUXAR OS ÚLTIMOS DESAFIOS PARA O FEED ---
+    # --- NOVO: MODELO INSTAGRAM (Banners e Posts Especiais) ---
     # =========================================================
     from .models import Desafio
-    # Pega os últimos 5 desafios que não foram recusados
-    desafios_ativos = Desafio.objects.exclude(status='recusado').order_by('-data_criacao')[:5]
+    from django.db.models import Sum
+
+    # A. Banner de Alerta (Só aparece se o usuário logado tiver sido desafiado)
+    desafios_pendentes = 0
+    if request.user.is_authenticated:
+        desafios_pendentes = Desafio.objects.filter(desafiado=request.user.first_name, status='pendente').count()
+
+    # B. Criar os "Posts" de Desafio para o Feed
+    # Pega as 3 batalhas mais recentes (ativas ou recém-concluídas)
+    desafios_recentes = Desafio.objects.filter(status__in=['ativo', 'concluido']).order_by('-data_criacao')[:3]
+    posts_desafios = []
+    
+    for d in desafios_recentes:
+        fim = d.data_fim if d.data_fim and d.data_fim < timezone.now() else timezone.now()
+        
+        # O Django pode atualizar automaticamente para concluído se o prazo passou!
+        if d.status == 'ativo' and d.data_fim and d.data_fim < timezone.now():
+            d.status = 'concluido'
+            d.save()
+
+        km_desafiante = Atividade.objects.filter(
+            nome_usuario=d.desafiante, data_envio__gte=d.data_inicio, data_envio__lte=fim, tipo='corrida'
+        ).aggregate(Sum('quantidade_km'))['quantidade_km__sum'] or 0
+        
+        km_desafiado = Atividade.objects.filter(
+            nome_usuario=d.desafiado, data_envio__gte=d.data_inicio, data_envio__lte=fim, tipo='corrida'
+        ).aggregate(Sum('quantidade_km'))['quantidade_km__sum'] or 0
+
+        # Quem está ganhando?
+        if km_desafiante > km_desafiado: vencendo = d.desafiante
+        elif km_desafiado > km_desafiante: vencendo = d.desafiado
+        else: vencendo = 'Empate'
+
+        posts_desafios.append({
+            'id': d.id,
+            'desafiante': d.desafiante,
+            'desafiado': d.desafiado,
+            'avatar_desafiante': avatares.get(d.desafiante, ''),
+            'avatar_desafiado': avatares.get(d.desafiado, ''),
+            'km_desafiante': km_desafiante,
+            'km_desafiado': km_desafiado,
+            'alvo_km': d.alvo_km,
+            'status': d.status,
+            'vencendo': vencendo
+        })
 
     context = {
         'atividades': atividades_feed, 
         'foguinhos': ranking_foguinhos,
         'destaque': destaque,
-        'desafios_feed': desafios_ativos # <--- VARIÁVEL ADICIONADA AO CONTEXTO AQUI
+        'desafios_pendentes': desafios_pendentes, # Para o banner
+        'posts_desafios': posts_desafios # Para o feed de notícias
     }
     return render(request, 'core/feed.html', context)
-
 # ==========================================
 # PLANEJADOR DE ROTAS (MAPAS)
 # ==========================================
