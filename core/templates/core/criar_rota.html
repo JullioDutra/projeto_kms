@@ -5,7 +5,7 @@
 {% block extra_css %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
-    /* Estilo Base do seu Código Original */
+    /* Estilo Original Mantido */
     #map { height: 60vh; width: 100%; border-radius: 15px; border: 2px solid #333; z-index: 1; }
     
     .painel-flutuante { 
@@ -20,10 +20,9 @@
     }
     
     .distancia-display { font-size: 2.5rem; font-weight: 900; color: #ff6b00; line-height: 1; }
-    
     .form-control { background-color: #2b2b2b !important; border: 1px solid #444 !important; color: white !important; }
     
-    /* Filtro Dark do Mapa */
+    /* Filtro Dark Original */
     .leaflet-tile-pane {
         filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
     }
@@ -62,21 +61,30 @@
 {% block extra_js %}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // 1. Inicia o mapa (Centralizado em Anápolis/GO)
-    var map = L.map('map').setView([-16.3267, -48.9528], 14);
+    // 1. Inicialização do mapa (Centralizado em Anápolis/GO)
+    var map = L.map('map', {
+        zoomControl: true,
+        tap: false // Melhora clique em dispositivos móveis
+    }).setView([-16.3267, -48.9528], 14);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',
         maxZoom: 19
     }).addTo(map);
 
-    // --- CORREÇÃO DO BUG VISUAL ---
-    // Força o mapa a se redesenhar corretamente após o carregamento da página no Django
-    setTimeout(function(){ 
-        map.invalidateSize(); 
-    }, 400);
+    // --- SOLUÇÃO EFETIVA PARA O BUG DO MAPA ---
+    // Executa o ajuste de tamanho em três momentos para garantir que extremidades apareçam
+    function fixMap() {
+        map.invalidateSize();
+    }
+    
+    // Assim que a página carrega
+    window.addEventListener('load', fixMap);
+    // Após um curto delay (tempo do cabeçalho renderizar)
+    setTimeout(fixMap, 200);
+    setTimeout(fixMap, 800);
 
-    // Lógica Original do Desenho
+    // Lógica Original de Desenho (Inalterada)
     var coordenadas = []; 
     var linhaDesenhada = L.polyline([], {color: '#00d2ff', weight: 5, opacity: 0.8}).addTo(map);
     var distanciaTotal = 0;
@@ -128,38 +136,22 @@
         var nome = document.getElementById('nomeRota').value;
         var criador = document.getElementById('nomeCriador').value;
         if (!nome || !criador || coordenadas.length < 2) {
-            alert("Preencha os campos e desenhe a rota!");
+            alert("Preencha todos os campos!");
             return;
         }
 
-        var dados = {
-            nome: nome,
-            criador: criador,
-            distancia: distanciaTotal.toFixed(2),
-            coordenadas: coordenadas 
-        };
-
+        var dados = { nome: nome, criador: criador, distancia: distanciaTotal.toFixed(2), coordenadas: coordenadas };
         var btnSalvar = document.querySelector('button[onclick="salvarRota()"]');
         btnSalvar.innerHTML = 'SALVANDO...';
         btnSalvar.disabled = true;
 
         fetch("{% url 'criar_rota' %}", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": "{{ csrf_token }}"
-            },
+            headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
             body: JSON.stringify(dados)
-        }).then(response => response.json())
-          .then(data => {
-              if (data.status === 'sucesso') {
-                  window.location.href = "{% url 'listar_rotas' %}"; 
-              } else {
-                  alert("Erro: " + data.mensagem);
-                  btnSalvar.disabled = false;
-                  btnSalvar.innerHTML = 'SALVAR ROTA';
-              }
-          });
+        }).then(response => response.json()).then(data => {
+            if (data.status === 'sucesso') window.location.href = "{% url 'listar_rotas' %}";
+        });
     }
 </script>
 {% endblock %}
