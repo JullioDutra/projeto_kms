@@ -632,8 +632,9 @@ def arena_desafios(request):
 
         # Calcula a porcentagem para os Tanques Visuais
         if d.alvo_km and d.alvo_km > 0:
-            porc_desafiante = min((km_desafiante / float(d.alvo_km)) * 100, 100)
-            porc_desafiado = min((km_desafiado / float(d.alvo_km)) * 100, 100)
+            # Mude as linhas 635 e 636 para:
+            porc_desafiante = min((float(km_desafiante) / float(d.alvo_km)) * 100, 100)
+            porc_desafiado = min((float(km_desafiado) / float(d.alvo_km)) * 100, 100)
 
         desafios_processados.append({
             'id': d.id,
