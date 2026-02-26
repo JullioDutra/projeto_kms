@@ -1,6 +1,6 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Duelo 1x1 KM - Arena KMS{% endblock %}
+{% block title %}Arena de Duelos - KMS Tracker{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -12,7 +12,7 @@
         --gold: #ffd700;
     }
 
-    /* --- ARENA CARDS --- */
+    /* --- CARDS DA ARENA (VISUAL COM VIDA) --- */
     .arena-card { 
         background: linear-gradient(145deg, #1a1a1c 0%, #0a0a0b 100%); 
         border-radius: 30px; 
@@ -24,53 +24,52 @@
         overflow: hidden;
     }
 
-    /* Brilho no contorno do vencedor ou do card ativo */
-    .arena-card::before {
-        content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px;
-        background: linear-gradient(90deg, var(--primary-blue), var(--primary-red));
-    }
+    /* Brilhos Dinâmicos de Fundo */
+    .glow-blue { position: absolute; top: -80px; left: -80px; width: 200px; height: 200px; background: var(--primary-blue); filter: blur(90px); opacity: 0.15; }
+    .glow-red { position: absolute; bottom: -80px; right: -80px; width: 200px; height: 200px; background: var(--primary-red); filter: blur(90px); opacity: 0.15; }
 
     /* --- AVATARES COM FOTO --- */
-    .athlete-photo-container {
-        width: 90px; height: 90px; margin: 0 auto 15px; position: relative;
+    .photo-frame {
+        width: 85px; height: 85px; margin: 0 auto 12px; position: relative;
     }
-    
-    .athlete-photo {
+    .photo-frame img {
         width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
         border: 3px solid; padding: 3px; background: #000;
-        box-shadow: 0 0 20px rgba(0,0,0,0.5);
     }
-
-    .photo-blue { border-color: var(--primary-blue); box-shadow: 0 0 15px rgba(0, 210, 255, 0.4); }
-    .photo-red { border-color: var(--primary-red); box-shadow: 0 0 15px rgba(255, 65, 108, 0.4); }
+    .frame-blue img { border-color: var(--primary-blue); box-shadow: 0 0 20px rgba(0, 210, 255, 0.4); }
+    .frame-red img { border-color: var(--primary-red); box-shadow: 0 0 20px rgba(255, 65, 108, 0.4); }
 
     .vs-text-vibrant {
         font-size: 2.8rem; font-weight: 900; font-style: italic;
-        background: linear-gradient(180deg, #fff 30%, var(--gold) 100%);
-        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        opacity: 0.9; margin-bottom: 50px;
+        color: var(--gold); text-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+        margin-bottom: 50px;
     }
 
-    /* --- TANQUES INTEGRADOS --- */
-    .tank-slim-v2 {
-        width: 65px; height: 180px; background: rgba(255,255,255,0.03);
+    /* --- TANQUES REFINADOS --- */
+    .tank-v2 {
+        width: 65px; height: 180px; background: #121212;
         border: 2px solid #333; border-radius: 10px 10px 20px 20px;
         margin: 0 auto; position: relative; overflow: hidden;
     }
-    
     .fill-blue { background: linear-gradient(180deg, var(--primary-blue), var(--deep-blue)); }
     .fill-red { background: linear-gradient(180deg, var(--primary-red), var(--deep-red)); }
     
-    .perc-tag {
+    .perc-badge {
         position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
         font-weight: 900; font-size: 1.1rem; color: #fff; text-shadow: 0 2px 4px #000; z-index: 5;
     }
 
-    .duel-meta-badge {
+    .meta-tag-premium {
         background: rgba(255, 215, 0, 0.1); color: var(--gold);
-        border: 1px solid var(--gold); padding: 5px 15px;
-        border-radius: 50px; font-weight: 800; font-size: 0.8rem;
-        text-transform: uppercase; letter-spacing: 1px;
+        border: 1px solid var(--gold); padding: 6px 16px;
+        border-radius: 50px; font-weight: 800; font-size: 0.85rem;
+        text-transform: uppercase; letter-spacing: 1.5px;
+    }
+
+    .btn-share-premium {
+        background: #25D366; color: white !important; font-weight: 900;
+        border: none; border-radius: 15px; padding: 14px; width: 100%;
+        margin-top: 25px; transition: 0.3s; box-shadow: 0 10px 20px rgba(37, 211, 102, 0.2);
     }
 </style>
 {% endblock %}
@@ -79,32 +78,35 @@
 <div class="container py-2" style="max-width: 550px;">
     
     <div class="d-flex justify-content-between align-items-center mb-4 px-2">
-        <h3 class="fw-900 mb-0 text-white">ARENA <span class="text-danger">DE DUELOS</span></h3>
-        <button class="btn btn-sm fw-900 px-3 py-2" style="background: var(--primary-red); color: white; border-radius: 12px;" data-bs-toggle="modal" data-bs-target="#novoDesafioModal">
-            NOVO X1
+        <h2 class="fw-900 text-white mb-0">ARENA <span class="text-danger">X1</span></h2>
+        <button class="btn btn-sm fw-900 px-4 py-2" style="background: var(--primary-red); color: white; border-radius: 12px;" data-bs-toggle="modal" data-bs-target="#novoDesafioModal">
+            DESAFIAR
         </button>
     </div>
 
     {% for d in desafios %}
         {% if d.status == 'ativo' %}
         <div class="arena-card" id="cartaoDesafio_{{ d.id }}">
-            <div class="text-center mb-4">
-                <span class="duel-meta-badge">Objetivo: {{ d.alvo_km|floatformat:0 }}KM</span>
+            <div class="glow-blue"></div>
+            <div class="glow-red"></div>
+
+            <div class="text-center mb-4 position-relative" style="z-index: 2;">
+                <span class="meta-tag-premium">Objetivo: {{ d.alvo_km|floatformat:0 }} KM</span>
                 <p class="text-muted small fw-bold mt-2 mb-0">PRAZO: {{ d.prazo_dias }} DIAS RESTANTES</p>
             </div>
 
-            <div class="d-flex justify-content-around align-items-end mb-4">
+            <div class="d-flex justify-content-around align-items-end mb-4 position-relative" style="z-index: 2;">
                 <div class="text-center" style="width: 120px;">
-                    <div class="athlete-photo-container">
+                    <div class="photo-frame frame-blue">
                         {% if d.avatar_desafiante %}
-                            <img src="{{ d.avatar_desafiante }}" class="athlete-photo photo-blue">
+                            <img src="{{ d.avatar_desafiante }}">
                         {% else %}
-                            <div class="athlete-photo photo-blue d-flex align-items-center justify-content-center text-white fw-bold fs-2">{{ d.desafiante|first|upper }}</div>
+                            <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png">
                         {% endif %}
                     </div>
                     <h6 class="fw-900 text-white mb-3">{{ d.desafiante|upper }}</h6>
-                    <div class="tank-slim-v2">
-                        <div class="perc-tag">{{ d.porc_desafiante|floatformat:0 }}%</div>
+                    <div class="tank-v2">
+                        <div class="perc-badge">{{ d.porc_desafiante|floatformat:0 }}%</div>
                         <div class="fill-blue" style="width: 100%; height: {{ d.porc_desafiante }}%; position: absolute; bottom: 0;"></div>
                     </div>
                     <h5 class="fw-900 mt-3 text-info">{{ d.km_desafiante|floatformat:1 }} <small style="font-size: 0.7rem;">KM</small></h5>
@@ -113,23 +115,23 @@
                 <div class="vs-text-vibrant">VS</div>
 
                 <div class="text-center" style="width: 120px;">
-                    <div class="athlete-photo-container">
+                    <div class="photo-frame frame-red">
                         {% if d.avatar_desafiado %}
-                            <img src="{{ d.avatar_desafiado }}" class="athlete-photo photo-red">
+                            <img src="{{ d.avatar_desafiado }}">
                         {% else %}
-                            <div class="athlete-photo photo-red d-flex align-items-center justify-content-center text-white fw-bold fs-2">{{ d.desafiado|first|upper }}</div>
+                            <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png">
                         {% endif %}
                     </div>
                     <h6 class="fw-900 text-white mb-3">{{ d.desafiado|upper }}</h6>
-                    <div class="tank-slim-v2">
-                        <div class="perc-tag">{{ d.porc_desafiado|floatformat:0 }}%</div>
+                    <div class="tank-v2">
+                        <div class="perc-badge">{{ d.porc_desafiado|floatformat:0 }}%</div>
                         <div class="fill-red" style="width: 100%; height: {{ d.porc_desafiado }}%; position: absolute; bottom: 0;"></div>
                     </div>
                     <h5 class="fw-900 mt-3 text-danger">{{ d.km_desafiado|floatformat:1 }} <small style="font-size: 0.7rem;">KM</small></h5>
                 </div>
             </div>
 
-            <button onclick="partilharDesafio({{ d.id }})" class="btn w-100 fw-900 py-3 rounded-pill" style="background: #25D366; color: white; border: none; box-shadow: 0 10px 20px rgba(37, 211, 102, 0.2);">
+            <button onclick="partilharDesafio({{ d.id }})" class="btn-share-premium btn-partilhar position-relative" style="z-index: 10;">
                 <i class="bi bi-whatsapp me-2"></i> CONVOCAR A TORCIDA
             </button>
         </div>
