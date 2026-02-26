@@ -1,103 +1,91 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Histórico de Metas</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
-    <style>
-        body { background-color: #121212; color: #fff; font-family: 'Inter', sans-serif; padding-bottom: 40px; }
-        
-        .back-link { color: #888; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-weight: 600; margin-bottom: 25px; transition: 0.2s; }
-        .back-link:hover { color: #fff; }
+{% extends 'core/base.html' %}
 
-        .glass-card {
-            background: #1e1e1e;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 20px;
-            padding: 1.5rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .glass-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
-        }
+{% block title %}Histórico de Metas - KMS Tracker{% endblock %}
 
-        /* --- BADGES (SELOS PREMIUM) --- */
-        .badge-premium {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .badge-success-custom {
-            background: rgba(46, 204, 113, 0.15);
-            color: #2ecc71;
-            border: 1px solid rgba(46, 204, 113, 0.3);
-        }
-        .badge-progress-custom {
-            background: rgba(255, 255, 255, 0.05);
-            color: #aaa;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
+{% block extra_css %}
+<style>
+    .glass-card {
+        background: #1e1e1e;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+        padding: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .glass-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+    }
 
-        /* --- TEXTOS E VALORES --- */
-        .month-title { font-weight: 800; font-size: 1.2rem; margin: 0; color: #fff; }
-        .year-text { font-weight: 500; color: #666; font-size: 1rem; }
-        
-        .km-stats { margin-top: 15px; margin-bottom: 10px; display: flex; align-items: baseline; gap: 5px; }
-        .km-current { font-size: 1.6rem; font-weight: 900; color: #00d2ff; line-height: 1; }
-        .km-target { font-size: 1rem; font-weight: 600; color: #666; }
+    /* --- BADGES (SELOS PREMIUM) --- */
+    .badge-premium {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .badge-success-custom {
+        background: rgba(46, 204, 113, 0.15);
+        color: #2ecc71;
+        border: 1px solid rgba(46, 204, 113, 0.3);
+    }
+    .badge-progress-custom {
+        background: rgba(255, 255, 255, 0.05);
+        color: #aaa;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
 
-        /* --- BARRA DE PROGRESSO --- */
-        .progress-container {
-            height: 22px; 
-            background-color: rgba(255,255,255,0.05); 
-            border-radius: 12px; 
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
-            overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.02);
-        }
-        
-        .progress-bar-custom {
-            height: 100%;
-            font-weight: 800;
-            font-size: 0.8rem;
-            line-height: 22px;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .bg-gradient-primary { background: linear-gradient(90deg, #00d2ff, #3a7bd5); }
-        .bg-gradient-success { background: linear-gradient(90deg, #2ecc71, #27ae60); box-shadow: 0 0 15px rgba(46, 204, 113, 0.4); }
-    </style>
-</head>
-<body>
-<div class="container py-4" style="max-width: 900px;">
+    /* --- TEXTOS E VALORES --- */
+    .month-title { font-weight: 800; font-size: 1.2rem; margin: 0; color: #fff; }
+    .year-text { font-weight: 500; color: #666; font-size: 1rem; }
     
-    <a href="{% url 'dashboard' %}" class="back-link">
-        <i class="bi bi-arrow-left"></i> Voltar para o Dashboard
-    </a>
+    .km-stats { margin-top: 15px; margin-bottom: 10px; display: flex; align-items: baseline; gap: 5px; }
+    .km-current { font-size: 1.6rem; font-weight: 900; color: #00d2ff; line-height: 1; }
+    .km-target { font-size: 1rem; font-weight: 600; color: #666; }
+
+    /* --- BARRA DE PROGRESSO --- */
+    .progress-container {
+        height: 22px; 
+        background-color: rgba(255,255,255,0.05); 
+        border-radius: 12px; 
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.02);
+    }
+    
+    .progress-bar-custom {
+        height: 100%;
+        font-weight: 800;
+        font-size: 0.8rem;
+        line-height: 22px;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .bg-gradient-primary { background: linear-gradient(90deg, #00d2ff, #3a7bd5); }
+    .bg-gradient-success { background: linear-gradient(90deg, #2ecc71, #27ae60); box-shadow: 0 0 15px rgba(46, 204, 113, 0.4); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-2" style="max-width: 900px;">
     
     <div class="mb-4">
-        <h2 class="fw-bold text-white mb-1"><i class="bi bi-calendar3 text-primary"></i> Histórico de Metas</h2>
-        <p class="text-muted small fw-bold">Acompanhe a evolução do grupo mês a mês</p>
+        <h2 class="fw-900 text-white mb-1"><i class="bi bi-calendar3 text-primary"></i> Histórico de <span class="text-primary">Metas</span></h2>
+        <p class="text-muted small fw-bold text-uppercase" style="letter-spacing: 1px;">Evolução mensal do grupo</p>
     </div>
 
     <div class="row g-4">
         {% for item in dados %}
-        <div class="col-md-6 col-lg-6">
+        <div class="col-md-6">
             <div class="glass-card h-100">
                 
                 <div class="d-flex justify-content-between align-items-center mb-2">
@@ -132,12 +120,9 @@
         {% empty %}
         <div class="col-12 text-center py-5">
             <i class="bi bi-inbox text-muted fs-1 d-block mb-3"></i>
-            <span class="text-muted fw-bold">Nenhum histórico encontrado ainda. O primeiro registro aparecerá aqui!</span>
+            <span class="text-muted fw-bold">Nenhum histórico encontrado ainda.</span>
         </div>
         {% endfor %}
     </div>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+{% endblock %}
