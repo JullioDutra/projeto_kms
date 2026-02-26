@@ -4,108 +4,81 @@
 
 {% block extra_css %}
 <style>
-    /* --- ESTRUTURA GERAL --- */
-    .arena-header { margin-bottom: 25px; }
-    
-    .duel-card {
-        background: linear-gradient(145deg, #181a1f 0%, #0d0f12 100%);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        border-radius: 28px;
-        padding: 2.5rem 1.5rem;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-        margin-bottom: 30px;
-        position: relative;
-        overflow: hidden;
-    }
+    body { background-color: #121212; }
 
-    /* --- CONVITE PENDENTE (TICKET) --- */
-    .invite-ticket {
-        background: linear-gradient(135deg, rgba(255, 202, 40, 0.08) 0%, rgba(20, 20, 20, 0.95) 100%);
-        border: 1px dashed rgba(255, 202, 40, 0.4);
-        border-radius: 20px;
-        padding: 1.5rem;
+    /* --- NOTIFICAÇÃO DE CONVITE (ESTILO APP) --- */
+    .app-notification-card {
+        background: #1a1d21;
+        border-left: 4px solid #ffca28;
+        border-radius: 16px;
+        padding: 20px;
         margin-bottom: 25px;
-        box-shadow: 0 10px 25px rgba(255, 202, 40, 0.05);
-        transition: transform 0.3s;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.3);
     }
-    .invite-ticket:hover { transform: translateY(-3px); }
-    .invite-icon { font-size: 2.5rem; color: #ffca28; filter: drop-shadow(0 0 10px rgba(255, 202, 40, 0.4)); }
-
-    /* --- AVATARES COM EFEITO GLOW --- */
-    .avatar-wrapper { position: relative; width: 85px; height: 85px; margin: 0 auto 15px auto; }
-    
-    .avatar-duelo {
-        width: 100%; height: 100%;
+    .icon-circle {
+        width: 45px; height: 45px;
+        background: rgba(255, 202, 40, 0.15);
+        color: #ffca28;
         border-radius: 50%;
-        object-fit: cover;
-        background-color: #1a1a1a;
-        border: 3px solid;
-        z-index: 2;
-        position: relative;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.5rem;
     }
-    .avatar-azul { border-color: #00d2ff; }
-    .avatar-vermelho { border-color: #ff416c; }
+
+    /* --- CARD DO DUELO ATIVO --- */
+    .duel-card {
+        background: #16181b;
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 24px;
+        padding: 25px 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    .duel-header-meta {
+        text-align: center;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    /* --- AVATARES NO TOPO --- */
+    .avatar-sm {
+        width: 55px; height: 55px;
+        border-radius: 50%; object-fit: cover;
+        border: 3px solid; background-color: #222;
+    }
+    .avatar-azul { border-color: #00d2ff; box-shadow: 0 0 15px rgba(0, 210, 255, 0.3); }
+    .avatar-vermelho { border-color: #ff416c; box-shadow: 0 0 15px rgba(255, 65, 108, 0.3); }
+
+    /* --- TRILHAS HORIZONTAIS (A SOLUÇÃO PARA OS KMs) --- */
+    .racer-block { margin-bottom: 25px; }
     
-    .glow-azul { position: absolute; inset: -5px; background: #00d2ff; border-radius: 50%; filter: blur(15px); opacity: 0.4; z-index: 1; }
-    .glow-vermelho { position: absolute; inset: -5px; background: #ff416c; border-radius: 50%; filter: blur(15px); opacity: 0.4; z-index: 1; }
-
-    /* --- TANQUES ESTILO CÁPSULA --- */
-    .arena-track {
-        display: flex;
-        justify-content: space-evenly;
-        align-items: flex-end;
-        margin: 35px 0 20px 0;
+    .racer-info {
+        display: flex; justify-content: space-between; align-items: flex-end;
+        margin-bottom: 8px;
     }
+    .racer-name { font-weight: 900; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.5px; margin: 0; }
+    .racer-stats { text-align: right; }
+    .racer-km { font-size: 1.3rem; font-weight: 900; line-height: 1; }
+    .racer-pct { font-size: 0.8rem; font-weight: 700; color: #888; margin-left: 8px; }
 
-    .tanque-coluna { display: flex; flex-direction: column; align-items: center; flex: 1; z-index: 2; }
-
-    .tanque-capsula {
-        width: 65px; height: 230px;
-        background: #050505;
-        border: 2px solid rgba(255, 255, 255, 0.08);
-        border-radius: 40px;
-        position: relative;
+    .track-bg {
+        width: 100%; height: 14px;
+        background: #0a0a0a;
+        border-radius: 20px;
         overflow: hidden;
-        box-shadow: inset 0 10px 20px rgba(0,0,0,0.8), 0 0 15px rgba(0,0,0,0.4);
-        margin: 15px 0;
+        box-shadow: inset 0 2px 5px rgba(0,0,0,0.8);
+        border: 1px solid rgba(255,255,255,0.05);
     }
-
-    .liquido-base {
-        width: 100%; position: absolute; bottom: 0; left: 0;
-        transition: height 1.2s cubic-bezier(0.17, 0.67, 0.83, 0.67);
-        border-radius: 0 0 40px 40px;
+    
+    .track-fill {
+        height: 100%; border-radius: 20px;
+        transition: width 1s ease-in-out;
     }
-    .liquido-azul { background: linear-gradient(180deg, #00d2ff 0%, #005c8a 100%); box-shadow: 0 -5px 20px rgba(0, 210, 255, 0.6); }
-    .liquido-vermelho { background: linear-gradient(180deg, #ff416c 0%, #8a0024 100%); box-shadow: 0 -5px 20px rgba(255, 65, 108, 0.6); }
+    .track-fill-azul { background: linear-gradient(90deg, #00d2ff, #3a7bd5); box-shadow: 0 0 10px rgba(0, 210, 255, 0.6); }
+    .track-fill-vermelho { background: linear-gradient(90deg, #ff416c, #ff4b2b); box-shadow: 0 0 10px rgba(255, 65, 108, 0.6); }
 
-    .porcentagem-pill {
-        position: absolute; top: 50%; left: 50%;
-        transform: translate(-50%, -50%);
-        background: rgba(0, 0, 0, 0.6);
-        backdrop-filter: blur(5px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        color: #fff; padding: 6px 12px;
-        border-radius: 20px; font-size: 1rem; font-weight: 900; z-index: 5;
-    }
-
-    /* --- TEXTOS E TIPOGRAFIA --- */
-    .vs-container { display: flex; align-items: center; justify-content: center; padding-bottom: 70px; z-index: 2; }
-    .vs-badge {
-        background: linear-gradient(135deg, #ffd700, #ff8c00);
-        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        font-size: 2.8rem; font-weight: 900; font-style: italic;
-        filter: drop-shadow(0 5px 15px rgba(255, 215, 0, 0.3));
-    }
-
-    .atleta-nome { font-size: 1.1rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0; }
-    .km-display { font-size: 1.5rem; font-weight: 900; color: #fff; margin-top: 10px; line-height: 1; }
-    .km-unit { font-size: 0.8rem; color: #888; font-weight: 700; text-transform: uppercase; }
-
-    /* Efeitos de Fundo do Card */
-    .bg-glow-azul { position: absolute; top: -50px; left: -50px; width: 250px; height: 250px; background: radial-gradient(circle, rgba(0,210,255,0.1) 0%, rgba(0,0,0,0) 70%); z-index: 0; }
-    .bg-glow-vermelho { position: absolute; bottom: -50px; right: -50px; width: 250px; height: 250px; background: radial-gradient(circle, rgba(255,65,108,0.1) 0%, rgba(0,0,0,0) 70%); z-index: 0; }
-
-    /* --- MODAL E FORMS --- */
+    /* --- MODAL --- */
     .form-control-dark { background: #121212 !important; border: 1px solid #444 !important; color: white !important; }
     .form-control-dark:focus { border-color: #ff4b2b !important; box-shadow: 0 0 0 4px rgba(255, 75, 43, 0.2) !important; }
 </style>
@@ -114,12 +87,12 @@
 {% block content %}
 <div class="container py-2" style="max-width: 600px;">
     
-    <div class="arena-header d-flex justify-content-between align-items-center">
+    <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h3 class="fw-900 mb-0 text-white" style="letter-spacing: -0.5px;">Arena <span style="color: #ff4b2b;">X1</span></h3>
-            <p class="text-muted small fw-bold mb-0 text-uppercase">Batalhas da Comunidade</p>
+            <h3 class="fw-900 mb-0 text-white">Arena <span style="color: #ff4b2b;">X1</span></h3>
+            <p class="text-muted small fw-bold mb-0 text-uppercase">Batalhas Épicas</p>
         </div>
-        <button class="btn btn-sm fw-900 px-3 py-2 rounded-pill" style="background: linear-gradient(135deg, #ff416c, #ff4b2b); color: white; border: none; box-shadow: 0 5px 15px rgba(255, 75, 43, 0.4);" data-bs-toggle="modal" data-bs-target="#novoDesafioModal">
+        <button class="btn btn-sm fw-900 px-3 py-2 rounded-pill" style="background: linear-gradient(135deg, #ff416c, #ff4b2b); color: white;" data-bs-toggle="modal" data-bs-target="#novoDesafioModal">
             <i class="bi bi-plus-lg"></i> NOVO DUELO
         </button>
     </div>
@@ -127,118 +100,104 @@
     {% for d in desafios %}
         
         {% if d.status == 'pendente' %}
-        <div class="invite-ticket">
-            <div class="row align-items-center">
-                <div class="col-3 text-center border-end border-secondary border-opacity-25">
-                    <i class="bi bi-envelope-paper-heart invite-icon"></i>
-                </div>
-                <div class="col-9 ps-3">
-                    <h6 class="text-warning fw-900 mb-1 text-uppercase" style="letter-spacing: 1px;">Convite de Batalha</h6>
-                    <p class="text-white mb-1" style="font-size: 0.95rem;"><strong>{{ d.desafiante }}</strong> convocou <strong>{{ d.desafiado }}</strong> para a pista!</p>
-                    <small class="text-muted fw-bold">Alvo: <span class="text-white">{{ d.alvo_km|floatformat:0 }} km</span> • Prazo: <span class="text-white">{{ d.prazo_dias }} dias</span></small>
+        <div class="app-notification-card">
+            <div class="d-flex align-items-center">
+                <div class="icon-circle"><i class="bi bi-envelope-paper-fill"></i></div>
+                <div class="ms-3 flex-grow-1">
+                    <h6 class="mb-1 fw-bold text-white">Você foi desafiado!</h6>
+                    <p class="mb-0 text-muted" style="font-size: 0.9rem;"><strong>{{ d.desafiante }}</strong> convocou <strong>{{ d.desafiado }}</strong> para {{ d.alvo_km|floatformat:0 }}KM em {{ d.prazo_dias }} dias.</p>
                 </div>
             </div>
             
             {% if request.user.first_name == d.desafiado %}
-            <div class="d-flex gap-3 mt-3 pt-3 border-top border-secondary border-opacity-25">
-                <a href="{% url 'responder_desafio' d.id 'aceitar' %}" class="btn btn-success flex-grow-1 fw-900 rounded-pill py-2">
-                    <i class="bi bi-check2-circle"></i> ACEITAR
+            <div class="d-flex gap-2 mt-4">
+                <a href="{% url 'responder_desafio' d.id 'aceitar' %}" class="btn btn-success flex-grow-1 fw-bold rounded-pill">
+                    <i class="bi bi-check2-circle"></i> Aceitar
                 </a>
-                <a href="{% url 'responder_desafio' d.id 'recusar' %}" class="btn btn-outline-danger flex-grow-1 fw-900 rounded-pill py-2">
-                    <i class="bi bi-x-lg"></i> RECUSAR
+                <a href="{% url 'responder_desafio' d.id 'recusar' %}" class="btn btn-outline-secondary flex-grow-1 fw-bold rounded-pill">
+                    Recusar
                 </a>
             </div>
             {% endif %}
         </div>
 
         {% elif d.status == 'ativo' %}
-        <div class="duel-card text-center" id="cartaoDesafio_{{ d.id }}">
+        <div class="duel-card" id="cartaoDesafio_{{ d.id }}">
             
-            <div class="bg-glow-azul"></div>
-            <div class="bg-glow-vermelho"></div>
-
-            <div class="badge bg-dark border border-warning text-warning mb-3 px-3 py-2 rounded-pill shadow-sm" style="letter-spacing: 2px;">
-                <i class="bi bi-x-diamond-fill"></i> x1 de kms
+            <div class="duel-header-meta">
+                <div class="d-flex justify-content-center align-items-center mb-3">
+                    <img src="{{ d.avatar_desafiante|default:'' }}" class="avatar-sm avatar-azul" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ d.desafiante }}&background=00d2ff&color=fff&bold=true';">
+                    <div class="mx-3 fw-900 text-warning fst-italic fs-4" style="text-shadow: 0 2px 10px rgba(255,215,0,0.4);">VS</div>
+                    <img src="{{ d.avatar_desafiado|default:'' }}" class="avatar-sm avatar-vermelho" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ d.desafiado }}&background=ff416c&color=fff&bold=true';">
+                </div>
+                <h4 class="fw-900 text-white mb-0">ALVO: {{ d.alvo_km|floatformat:0 }} KM</h4>
+                <small class="text-muted fw-bold text-uppercase">Tempo restante: {{ d.prazo_dias }} dias</small>
             </div>
-            
-            <h3 class="fw-900 text-white mb-1">META: {{ d.alvo_km|floatformat:0 }} KM</h3>
-            <p class="text-muted small fw-bold mb-0 text-uppercase" style="letter-spacing: 1px;">Encerra em: {{ d.prazo_dias }} dias</p>
 
-            <div class="arena-track">
-                
-                <div class="tanque-coluna">
-                    <div class="avatar-wrapper">
-                        <div class="glow-azul"></div>
-                        <img src="{{ d.avatar_desafiante|default:'' }}" class="avatar-duelo avatar-azul" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ d.desafiante }}&background=00d2ff&color=fff&bold=true';">
+            <div class="racer-block">
+                <div class="racer-info">
+                    <h5 class="racer-name text-info">{{ d.desafiante }}</h5>
+                    <div class="racer-stats">
+                        <span class="racer-km text-white">{{ d.km_desafiante|floatformat:1 }}</span>
+                        <span class="racer-pct">{{ d.porc_desafiante|floatformat:0 }}%</span>
                     </div>
-                    <h5 class="atleta-nome" style="color: #00d2ff;">{{ d.desafiante }}</h5>
-                    
-                    <div class="tanque-capsula">
-                        <div class="liquido-base liquido-azul" style="height: {% if d.porc_desafiante > 0 %}max(15%, {{ d.porc_desafiante }}%){% else %}0%{% endif %};"></div>
-                        <div class="porcentagem-pill">{{ d.porc_desafiante|floatformat:0 }}%</div>
-                    </div>
-                    
-                    <div class="km-display">{{ d.km_desafiante|floatformat:1 }} <span class="km-unit">km</span></div>
                 </div>
-
-                <div class="vs-container">
-                    <div class="vs-badge">VS</div>
-                </div>
-
-                <div class="tanque-coluna">
-                    <div class="avatar-wrapper">
-                        <div class="glow-vermelho"></div>
-                        <img src="{{ d.avatar_desafiado|default:'' }}" class="avatar-duelo avatar-vermelho" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ d.desafiado }}&background=ff416c&color=fff&bold=true';">
-                    </div>
-                    <h5 class="atleta-nome" style="color: #ff4b2b;">{{ d.desafiado }}</h5>
-                    
-                    <div class="tanque-capsula">
-                        <div class="liquido-base liquido-vermelho" style="height: {% if d.porc_desafiado > 0 %}max(15%, {{ d.porc_desafiado }}%){% else %}0%{% endif %};"></div>
-                        <div class="porcentagem-pill">{{ d.porc_desafiado|floatformat:0 }}%</div>
-                    </div>
-                    
-                    <div class="km-display">{{ d.km_desafiado|floatformat:1 }} <span class="km-unit">km</span></div>
+                <div class="track-bg">
+                    <div class="track-fill track-fill-azul" style="width: {{ d.porc_desafiante }}%;"></div>
                 </div>
             </div>
 
-            <div class="mt-4 mb-4 text-center px-3 py-2 rounded-pill mx-auto" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); max-width: 90%;">
+            <div class="racer-block">
+                <div class="racer-info">
+                    <h5 class="racer-name text-danger">{{ d.desafiado }}</h5>
+                    <div class="racer-stats">
+                        <span class="racer-km text-white">{{ d.km_desafiado|floatformat:1 }}</span>
+                        <span class="racer-pct">{{ d.porc_desafiado|floatformat:0 }}%</span>
+                    </div>
+                </div>
+                <div class="track-bg">
+                    <div class="track-fill track-fill-vermelho" style="width: {{ d.porc_desafiado }}%;"></div>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
                 {% if d.km_desafiante > d.km_desafiado %}
-                    <h6 class="fw-900 text-white mb-0" style="font-size: 0.9rem;"><i class="bi bi-fire text-warning fs-5 align-middle"></i> {{ d.desafiante }} ESTÁ DOMINANDO!</h6>
+                    <span class="badge bg-dark border border-info text-info px-3 py-2 rounded-pill"><i class="bi bi-fire"></i> {{ d.desafiante }} assumiu a liderança!</span>
                 {% elif d.km_desafiado > d.km_desafiante %}
-                    <h6 class="fw-900 text-white mb-0" style="font-size: 0.9rem;"><i class="bi bi-fire text-warning fs-5 align-middle"></i> {{ d.desafiado }} ESTÁ DOMINANDO!</h6>
+                    <span class="badge bg-dark border border-danger text-danger px-3 py-2 rounded-pill"><i class="bi bi-fire"></i> {{ d.desafiado }} assumiu a liderança!</span>
                 {% else %}
-                    <h6 class="fw-900 text-white mb-0" style="font-size: 0.9rem;"><i class="bi bi-exclamation-circle text-warning fs-5 align-middle"></i> A BATALHA ESTÁ EMPATADA!</h6>
+                    <span class="badge bg-dark border border-warning text-warning px-3 py-2 rounded-pill"><i class="bi bi-dash-circle"></i> Tudo empatado!</span>
                 {% endif %}
             </div>
 
-            <button onclick="partilharDesafio({{ d.id }})" class="btn w-100 fw-900 py-3 rounded-pill btn-partilhar" style="background-color: #25D366; color: white; position: relative; z-index: 2;">
-                <i class="bi bi-whatsapp me-2 fs-5 align-middle"></i> AQUECER O GRUPO
+            <button onclick="partilharDesafio({{ d.id }})" class="btn w-100 fw-bold py-3 mt-4 rounded-pill btn-partilhar" style="background-color: #25D366; color: white;">
+                <i class="bi bi-whatsapp me-2"></i> PARTILHAR STATUS
             </button>
         </div>
         {% endif %}
 
     {% empty %}
         <div class="text-center py-5">
-            <i class="bi bi-shield-slash" style="font-size: 4rem; color: #333;"></i>
-            <h4 class="mt-3 text-white fw-900">ARENA VAZIA</h4>
-            <p class="text-muted fw-bold">Que tal desafiar alguém e colocar fogo na pista?</p>
+            <i class="bi bi-slash-circle text-muted" style="font-size: 3rem; opacity: 0.5;"></i>
+            <h5 class="mt-3 text-white fw-bold">Nenhuma batalha ativa</h5>
+            <p class="text-muted">Desafie alguém e comece a disputa!</p>
         </div>
     {% endfor %}
 </div>
 
 <div class="modal fade" id="novoDesafioModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="background: #15171a; border: 1px solid #333; border-radius: 20px;">
+        <div class="modal-content" style="background: #1a1d21; border: 1px solid #333; border-radius: 20px;">
             <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title text-white fw-900"><i class="bi bi-crosshair text-danger"></i> Lançar Desafio</h5>
+                <h5 class="modal-title text-white fw-900"><i class="bi bi-crosshair text-danger"></i> Convocar Atleta</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <form action="{% url 'criar_desafio' %}" method="POST">
                 {% csrf_token %}
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label text-muted small fw-bold text-uppercase">Escolha o Adversário</label>
-                        <select name="desafiado" class="form-select form-control-dark fw-bold" required>
+                        <label class="form-label text-muted small fw-bold">Oponente</label>
+                        <select name="desafiado" class="form-select form-control-dark" required>
                             <option value="">Selecione...</option>
                             {% for u in usuarios_disponiveis %}
                                 <option value="{{ u }}">{{ u }}</option>
@@ -247,17 +206,17 @@
                     </div>
                     <div class="row">
                         <div class="col-6 mb-3">
-                            <label class="form-label text-muted small fw-bold text-uppercase">Meta (KM)</label>
-                            <input type="number" name="alvo_km" class="form-control form-control-dark fw-bold fs-5" value="30" required>
+                            <label class="form-label text-muted small fw-bold">Alvo (KM)</label>
+                            <input type="number" name="alvo_km" class="form-control form-control-dark fw-bold" value="30" required>
                         </div>
                         <div class="col-6 mb-3">
-                            <label class="form-label text-muted small fw-bold text-uppercase">Prazo (Dias)</label>
-                            <input type="number" name="prazo_dias" class="form-control form-control-dark fw-bold fs-5" value="7" required>
+                            <label class="form-label text-muted small fw-bold">Prazo (Dias)</label>
+                            <input type="number" name="prazo_dias" class="form-control form-control-dark fw-bold" value="7" required>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer border-0 pt-0">
-                    <button type="submit" class="btn fw-900 w-100 py-3 rounded-pill" style="background: linear-gradient(135deg, #ff416c, #ff4b2b); color: white;">INICIAR BATALHA!</button>
+                    <button type="submit" class="btn fw-900 w-100 py-3 rounded-pill" style="background: linear-gradient(135deg, #ff416c, #ff4b2b); color: white;">LANÇAR DESAFIO</button>
                 </div>
             </form>
         </div>
@@ -272,17 +231,17 @@
         const cartao = document.getElementById('cartaoDesafio_' + id);
         const botao = cartao.querySelector('.btn-partilhar');
         
-        botao.style.display = 'none'; // Esconde botão na foto
+        botao.style.display = 'none'; 
         
         html2canvas(cartao, {
             scale: 3, 
-            backgroundColor: '#15171a',
+            backgroundColor: '#16181b',
             useCORS: true,
             allowTaint: true
         }).then(canvas => {
             botao.style.display = 'block';
             const link = document.createElement('a');
-            link.download = 'Duelo_KMS_Arena.png';
+            link.download = 'Duelo_KMS.png';
             link.href = canvas.toDataURL('image/png');
             link.click();
         }).catch(err => {
