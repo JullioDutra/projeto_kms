@@ -1,79 +1,55 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Desenhar Rota - KMS Tracker{% endblock %}
+{% block title %}Criador de Rotas - KMS Tracker{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
-    /* Ajuste para garantir que o mapa ocupe o espaço e não suma */
-    #map-container { position: relative; width: 100%; height: 50vh; margin-bottom: 20px; border-radius: 20px; overflow: hidden; border: 2px solid #333; }
-    #map { height: 100%; width: 100%; z-index: 1; }
-    
+    /* Estilo Base do Código Antigo */
+    #map { height: 60vh; width: 100%; border-radius: 15px; border: 2px solid #333; z-index: 1; }
     .painel-flutuante { 
-        background: #1e1e1e; 
-        padding: 25px; 
-        border-radius: 20px; 
-        border: 1px solid rgba(255,255,255,0.05);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        background: #1a1d20; 
+        padding: 20px; 
+        border-radius: 15px; 
+        margin-top: -30px; 
+        position: relative; 
+        z-index: 10; 
+        box-shadow: 0 -10px 20px rgba(0,0,0,0.5); 
+        border: 1px solid rgba(255,255,255,0.1); 
     }
-
-    .distancia-display { font-size: 2.8rem; font-weight: 900; color: #ffd700; line-height: 1; letter-spacing: -1px; }
+    .distancia-display { font-size: 2.5rem; font-weight: 900; color: #ff6b00; line-height: 1; }
+    .form-control { background-color: #2b2b2b !important; border: 1px solid #444 !important; color: white !important; }
     
-    .form-control-dark { 
-        background-color: #121212 !important; 
-        border: 1px solid #444 !important; 
-        color: white !important; 
-        padding: 12px;
-        border-radius: 12px;
-    }
-    .form-control-dark::placeholder { color: #666; }
-
-    /* Lente Dark Matter */
+    /* Filtro Dark do Código Antigo */
     .leaflet-tile-pane {
-        filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(85%);
+        filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
     }
-    
-    .instrucoes { font-size: 0.85rem; color: #aaa; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container py-2" style="max-width: 600px;">
-    
-    <div class="mb-3">
-        <h3 class="fw-900 mb-1"><i class="bi bi-map-fill text-primary"></i> Desenhar <span class="text-primary">Rota</span></h3>
-        <p class="instrucoes"><i class="bi bi-info-circle"></i> Clique no mapa para traçar o percurso</p>
-    </div>
+<div class="container py-3" style="max-width: 600px;">
+    <h3 class="fw-bold mb-3"><i class="bi bi-map text-warning"></i> Desenhar Rota</h3>
+    <p class="text-muted small">Clique no mapa para ligar os pontos e desenhar o seu percurso.</p>
 
-    <div id="map-container">
-        <div id="map"></div>
-    </div>
+    <div id="map"></div>
 
     <div class="painel-flutuante">
-        <div class="row align-items-center mb-4">
-            <div class="col-7">
-                <small class="text-muted fw-bold d-block mb-1">DISTÂNCIA TOTAL</small>
-                <div class="distancia-display" id="distanciaTexto">0.00 <small style="font-size: 1.2rem; color:#666; font-weight: 700;">km</small></div>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <small class="text-muted text-uppercase fw-bold">Distância Total</small>
+                <div class="distancia-display" id="distanciaTexto">0.00 <span style="font-size: 1rem; color:#888;">km</span></div>
             </div>
-            <div class="col-5 text-end">
-                <button class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-bold" onclick="limparMapa()">
-                    <i class="bi bi-trash"></i> RECOMEÇAR
-                </button>
-            </div>
+            <button class="btn btn-outline-danger rounded-pill" onclick="limparMapa()">
+                <i class="bi bi-trash"></i> Limpar
+            </button>
         </div>
 
-        <div class="mb-3">
-            <label class="form-label text-muted small fw-bold">NOME DA ROTA</label>
-            <input type="text" id="nomeRota" class="form-control form-control-dark" placeholder="Ex: Treino da Orla">
-        </div>
+        <input type="text" id="nomeRota" class="form-control mb-2" placeholder="Nome da Rota (ex: Longão de Sábado)">
+        <input type="text" id="nomeCriador" class="form-control mb-3" placeholder="Seu Nome" value="{{ request.user.first_name }}">
 
-        <div class="mb-4">
-            <label class="form-label text-muted small fw-bold">AUTOR</label>
-            <input type="text" id="nomeCriador" class="form-control form-control-dark" placeholder="Seu nome ou apelido" value="{{ request.user.first_name }}">
-        </div>
-
-        <button class="btn w-100 fw-900 py-3 rounded-pill" style="background: linear-gradient(135deg, #00d2ff, #3a7bd5); color: white; border: none; box-shadow: 0 5px 15px rgba(0, 210, 255, 0.3);" onclick="salvarRota()">
-            <i class="bi bi-cloud-arrow-up-fill"></i> PUBLICAR ROTA
+        <button class="btn w-100 fw-bold py-3 rounded-pill" style="background: linear-gradient(135deg, #ff6b00, #ffca28); color: black;" onclick="salvarRota()">
+            <i class="bi bi-floppy-fill"></i> SALVAR ROTA NA COMUNIDADE
         </button>
     </div>
 </div>
@@ -82,29 +58,26 @@
 {% block extra_js %}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // Inicialização do mapa
+    // 1. Inicia o mapa (Centralizado em Anápolis/GO)
     var map = L.map('map').setView([-16.3267, -48.9528], 14);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap',
+        attribution: '© OpenStreetMap contributors',
         maxZoom: 19
     }).addTo(map);
 
-    // SOLUÇÃO PARA O BUG DO MAPA:
-    // Força o redimensionamento após o carregamento completo do DOM
-    setTimeout(function() {
-        map.invalidateSize();
-    }, 500);
+    // FIX: Força o Leaflet a recalcular o tamanho do container após entrar no bloco do Django
+    setTimeout(function(){ map.invalidateSize(); }, 400);
 
-    var coordenadas = [];
-    var linhaDesenhada = L.polyline([], {color: '#00d2ff', weight: 6, opacity: 0.9}).addTo(map);
+    var coordenadas = []; 
+    var linhaDesenhada = L.polyline([], {color: '#00d2ff', weight: 5, opacity: 0.8}).addTo(map);
     var distanciaTotal = 0;
     var marcadores = [];
     var ultimoPonto = null;
 
     map.on('click', function(e) {
         var latlng = e.latlng;
-        var marcador = L.circleMarker(latlng, {radius: 6, color: '#fff', fillColor: '#00d2ff', fillOpacity: 1, weight: 2}).addTo(map);
+        var marcador = L.circleMarker(latlng, {radius: 5, color: '#fff', fillColor: '#ffca28', fillOpacity: 1}).addTo(map);
         marcadores.push(marcador);
 
         if (!ultimoPonto) {
@@ -119,18 +92,23 @@
             .then(data => {
                 if(data.code === 'Ok') {
                     var rotaOSRM = data.routes[0];
-                    var geometria = rotaOSRM.geometry.coordinates;
+                    var geometria = rotaOSRM.geometry.coordinates; 
                     distanciaTotal += (rotaOSRM.distance / 1000);
-                    document.getElementById('distanciaTexto').innerHTML = distanciaTotal.toFixed(2) + ' <small style="font-size: 1.2rem; color:#666; font-weight: 700;">km</small>';
+                    document.getElementById('distanciaTexto').innerHTML = distanciaTotal.toFixed(2) + ' <span style="font-size: 1rem; color:#888;">km</span>';
                     
                     for (var i = 1; i < geometria.length; i++) {
                         coordenadas.push([geometria[i][1], geometria[i][0]]);
                     }
                     linhaDesenhada.setLatLngs(coordenadas);
                     ultimoPonto = latlng;
-                    // Foca o mapa na linha desenhada
-                    map.panTo(latlng);
+                } else {
+                    alert("Atenção: Não foi possível encontrar uma rua/trilha entre esses pontos!");
+                    map.removeLayer(marcador);
+                    marcadores.pop();
                 }
+            })
+            .catch(error => {
+                alert("Erro ao traçar a rota. Tente novamente.");
             });
         }
     });
@@ -142,29 +120,46 @@
         linhaDesenhada.setLatLngs([]);
         marcadores.forEach(m => map.removeLayer(m));
         marcadores = [];
-        document.getElementById('distanciaTexto').innerHTML = '0.00 <small style="font-size: 1.2rem; color:#666; font-weight: 700;">km</small>';
+        document.getElementById('distanciaTexto').innerHTML = '0.00 <span style="font-size: 1rem; color:#888;">km</span>';
     }
 
     function salvarRota() {
         var nome = document.getElementById('nomeRota').value;
         var criador = document.getElementById('nomeCriador').value;
+
         if (!nome || !criador || coordenadas.length < 2) {
-            alert("Preencha todos os campos e desenhe a rota no mapa!");
+            alert("Preencha o nome, o seu nome e desenhe a rota!");
             return;
         }
 
-        var dados = { nome: nome, criador: criador, distancia: distanciaTotal.toFixed(2), coordenadas: coordenadas };
+        var dados = {
+            nome: nome,
+            criador: criador,
+            distancia: distanciaTotal.toFixed(2),
+            coordenadas: coordenadas 
+        };
+
         var btnSalvar = document.querySelector('button[onclick="salvarRota()"]');
-        btnSalvar.innerHTML = '<span class="spinner-border spinner-border-sm"></span> SALVANDO...';
+        btnSalvar.innerHTML = '<i class="bi bi-hourglass-split"></i> SALVANDO...';
         btnSalvar.disabled = true;
 
         fetch("{% url 'criar_rota' %}", {
             method: "POST",
-            headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
             body: JSON.stringify(dados)
-        }).then(response => response.json()).then(data => {
-            if (data.status === 'sucesso') { window.location.href = "{% url 'listar_rotas' %}"; }
-        });
+        }).then(response => response.json())
+          .then(data => {
+              if (data.status === 'sucesso') {
+                  window.location.href = "{% url 'listar_rotas' %}"; 
+              } else {
+                  alert("Erro ao salvar: " + data.mensagem);
+                  btnSalvar.innerHTML = '<i class="bi bi-floppy-fill"></i> SALVAR ROTA';
+                  btnSalvar.disabled = false;
+              }
+          });
     }
 </script>
 {% endblock %}
