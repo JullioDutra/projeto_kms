@@ -1,7 +1,7 @@
 import requests
 from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Atividade, MetaMensal, Rota, TokenStrava
+from .models import Atividade, MetaMensal, Rota, TokenStrava, Desafio
 from django.db.models import Sum, Count
 from django.db.models.functions import TruncDate
 from datetime import datetime
@@ -540,3 +540,114 @@ def editar_descricao(request, id):
             
     # Independente de dar certo ou errado, devolve a pessoa para o Feed
     return redirect('feed')
+
+# ==========================================
+# ARENA DE DESAFIOS (1 VS 1)
+# ==========================================
+
+def arena_desafios(request):
+    if not request.user.is_authenticated:
+        return redirect('dashboard')
+
+    nome_atleta = request.user.first_name
+
+    # Puxa todos os desafios em que o usuário está envolvido (como Desafiante ou Desafiado)
+    desafios_bd = Desafio.objects.filter(
+        Q(desafiante=nome_atleta) | Q(desafiado=nome_atleta)
+    ).order_by('-data_criacao')
+
+    desafios_processados = []
+    
+    for d in desafios_bd:
+        km_desafiante = 0
+        km_desafiado = 0
+        porc_desafiante = 0
+        porc_desafiado = 0
+        
+        # Só calcula os KMs se o desafio já foi aceito e está valendo!
+        if d.status == 'ativo' and d.data_inicio:
+            # Pega a data limite (se o prazo já passou, congela no data_fim)
+            fim = d.data_fim if d.data_fim and d.data_fim < timezone.now() else timezone.now()
+            
+            # Soma os KMs correndo DEPOIS que o desafio começou
+            km_desafiante = Atividade.objects.filter(
+                nome_usuario=d.desafiante, data_envio__gte=d.data_inicio, data_envio__lte=fim, tipo='corrida'
+            ).aggregate(Sum('quantidade_km'))['quantidade_km__sum'] or 0
+            
+            km_desafiado = Atividade.objects.filter(
+                nome_usuario=d.desafiado, data_envio__gte=d.data_inicio, data_envio__lte=fim, tipo='corrida'
+            ).aggregate(Sum('quantidade_km'))['quantidade_km__sum'] or 0
+
+        # Calcula a porcentagem para os Tanques Visuais
+        if d.alvo_km and d.alvo_km > 0:
+            porc_desafiante = min((km_desafiante / float(d.alvo_km)) * 100, 100)
+            porc_desafiado = min((km_desafiado / float(d.alvo_km)) * 100, 100)
+
+        desafios_processados.append({
+            'id': d.id,
+            'desafiante': d.desafiante,
+            'desafiado': d.desafiado,
+            'status': d.status,
+            'tipo': d.get_tipo_display(),
+            'alvo_km': d.alvo_km,
+            'prazo_dias': d.prazo_dias,
+            'km_desafiante': km_desafiante,
+            'km_desafiado': km_desafiado,
+            'porc_desafiante': porc_desafiante,
+            'porc_desafiado': porc_desafiado,
+            'data_inicio': d.data_inicio,
+            'data_fim': d.data_fim,
+        })
+
+    # Pega os nomes de outros corredores para você poder desafiar
+    usuarios_disponiveis = Atividade.objects.values_list('nome_usuario', flat=True).distinct().exclude(nome_usuario=nome_atleta)
+
+    context = {
+        'desafios': desafios_processados,
+        'usuarios_disponiveis': usuarios_disponiveis
+    }
+    return render(request, 'core/arena.html', context)
+
+
+def criar_desafio(request):
+    if not request.user.is_authenticated:
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        desafiado = request.POST.get('desafiado')
+        tipo = request.POST.get('tipo', 'distancia')
+        alvo_km = request.POST.get('alvo_km', 0)
+        prazo_dias = request.POST.get('prazo_dias', 7)
+
+        # Evita que a pessoa desafie ela mesma (hacker alert!)
+        if desafiado and desafiado != request.user.first_name:
+            Desafio.objects.create(
+                desafiante=request.user.first_name,
+                desafiado=desafiado,
+                tipo=tipo,
+                alvo_km=alvo_km if alvo_km else 0,
+                prazo_dias=prazo_dias
+            )
+            
+    return redirect('arena_desafios')
+
+
+def responder_desafio(request, desafio_id, resposta):
+    if not request.user.is_authenticated:
+        return redirect('dashboard')
+
+    desafio = get_object_or_404(Desafio, id=desafio_id)
+
+    # SEGURANÇA: Só quem foi desafiado pode clicar em "Aceitar"
+    if request.user.first_name == desafio.desafiado and desafio.status == 'pendente':
+        if resposta == 'aceitar':
+            desafio.status = 'ativo'
+            desafio.data_inicio = timezone.now()
+            # O Relógio começa a contar agora!
+            desafio.data_fim = desafio.data_inicio + datetime.timedelta(days=desafio.prazo_dias)
+        elif resposta == 'recusar':
+            desafio.status = 'recusado'
+            
+        desafio.save()
+
+    return redirect('arena_desafios')
