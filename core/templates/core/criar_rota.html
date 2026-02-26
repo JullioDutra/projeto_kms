@@ -5,8 +5,9 @@
 {% block extra_css %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
-    /* Estilo Base do Código Antigo */
+    /* Estilo Base do seu Código Original */
     #map { height: 60vh; width: 100%; border-radius: 15px; border: 2px solid #333; z-index: 1; }
+    
     .painel-flutuante { 
         background: #1a1d20; 
         padding: 20px; 
@@ -17,10 +18,12 @@
         box-shadow: 0 -10px 20px rgba(0,0,0,0.5); 
         border: 1px solid rgba(255,255,255,0.1); 
     }
+    
     .distancia-display { font-size: 2.5rem; font-weight: 900; color: #ff6b00; line-height: 1; }
+    
     .form-control { background-color: #2b2b2b !important; border: 1px solid #444 !important; color: white !important; }
     
-    /* Filtro Dark do Código Antigo */
+    /* Filtro Dark do Mapa */
     .leaflet-tile-pane {
         filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
     }
@@ -29,6 +32,7 @@
 
 {% block content %}
 <div class="container py-3" style="max-width: 600px;">
+    
     <h3 class="fw-bold mb-3"><i class="bi bi-map text-warning"></i> Desenhar Rota</h3>
     <p class="text-muted small">Clique no mapa para ligar os pontos e desenhar o seu percurso.</p>
 
@@ -66,9 +70,13 @@
         maxZoom: 19
     }).addTo(map);
 
-    // FIX: Força o Leaflet a recalcular o tamanho do container após entrar no bloco do Django
-    setTimeout(function(){ map.invalidateSize(); }, 400);
+    // --- CORREÇÃO DO BUG VISUAL ---
+    // Força o mapa a se redesenhar corretamente após o carregamento da página no Django
+    setTimeout(function(){ 
+        map.invalidateSize(); 
+    }, 400);
 
+    // Lógica Original do Desenho
     var coordenadas = []; 
     var linhaDesenhada = L.polyline([], {color: '#00d2ff', weight: 5, opacity: 0.8}).addTo(map);
     var distanciaTotal = 0;
@@ -101,14 +109,7 @@
                     }
                     linhaDesenhada.setLatLngs(coordenadas);
                     ultimoPonto = latlng;
-                } else {
-                    alert("Atenção: Não foi possível encontrar uma rua/trilha entre esses pontos!");
-                    map.removeLayer(marcador);
-                    marcadores.pop();
                 }
-            })
-            .catch(error => {
-                alert("Erro ao traçar a rota. Tente novamente.");
             });
         }
     });
@@ -126,9 +127,8 @@
     function salvarRota() {
         var nome = document.getElementById('nomeRota').value;
         var criador = document.getElementById('nomeCriador').value;
-
         if (!nome || !criador || coordenadas.length < 2) {
-            alert("Preencha o nome, o seu nome e desenhe a rota!");
+            alert("Preencha os campos e desenhe a rota!");
             return;
         }
 
@@ -140,7 +140,7 @@
         };
 
         var btnSalvar = document.querySelector('button[onclick="salvarRota()"]');
-        btnSalvar.innerHTML = '<i class="bi bi-hourglass-split"></i> SALVANDO...';
+        btnSalvar.innerHTML = 'SALVANDO...';
         btnSalvar.disabled = true;
 
         fetch("{% url 'criar_rota' %}", {
@@ -155,9 +155,9 @@
               if (data.status === 'sucesso') {
                   window.location.href = "{% url 'listar_rotas' %}"; 
               } else {
-                  alert("Erro ao salvar: " + data.mensagem);
-                  btnSalvar.innerHTML = '<i class="bi bi-floppy-fill"></i> SALVAR ROTA';
+                  alert("Erro: " + data.mensagem);
                   btnSalvar.disabled = false;
+                  btnSalvar.innerHTML = 'SALVAR ROTA';
               }
           });
     }
