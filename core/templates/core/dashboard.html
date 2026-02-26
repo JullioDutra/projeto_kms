@@ -27,13 +27,32 @@
             background: rgba(30, 30, 30, 0.8);
             backdrop-filter: blur(10px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 15px 0;
+            padding: 12px 0;
             position: sticky;
             top: 0;
             z-index: 1000;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
-        .app-logo { font-weight: 900; font-size: 1.3rem; margin: 0; display: flex; align-items: center; gap: 8px; letter-spacing: -0.5px; }
+        .app-logo { 
+            font-weight: 900; font-size: 1.3rem; margin: 0; 
+            display: flex; align-items: center; gap: 8px; 
+            letter-spacing: -0.5px; text-decoration: none; color: white;
+        }
+        .app-logo:hover { color: #00d2ff; }
+
+        /* Ícones de Navegação no Topo */
+        .nav-icon {
+            color: #aaa;
+            font-size: 1.25rem;
+            transition: all 0.2s ease;
+        }
+        .nav-icon:hover {
+            color: #fff;
+            transform: translateY(-2px);
+        }
+        .nav-icon.arena:hover { color: #ff4b2b; text-shadow: 0 0 10px rgba(255, 75, 43, 0.5); }
+        .nav-icon.rotas:hover { color: #00d2ff; text-shadow: 0 0 10px rgba(0, 210, 255, 0.5); }
+
 
         .glass-card {
             background: var(--card-bg);
