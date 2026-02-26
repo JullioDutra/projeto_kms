@@ -12,9 +12,14 @@
         --gold: #ffd700;
     }
 
-    /* --- CARDS DA ARENA (VISUAL COM VIDA) --- */
+    .arena-container { padding-top: 10px; padding-bottom: 50px; }
+
+    /* CARD ESTILO GAME DE LUTA */
     .arena-card { 
-        background: linear-gradient(145deg, #1a1a1c 0%, #0a0a0b 100%); 
+        background: linear-gradient(145deg, #18181a 0%, #0a0a0b 100%); 
+        /* Efeito de grade sutil no fundo */
+        background-image: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        background-size: 20px 20px;
         border-radius: 30px; 
         padding: 30px 20px; 
         margin-bottom: 35px; 
@@ -24,63 +29,53 @@
         overflow: hidden;
     }
 
-    /* Brilhos Dinâmicos de Fundo */
-    .glow-blue { position: absolute; top: -80px; left: -80px; width: 200px; height: 200px; background: var(--primary-blue); filter: blur(90px); opacity: 0.15; }
-    .glow-red { position: absolute; bottom: -80px; right: -80px; width: 200px; height: 200px; background: var(--primary-red); filter: blur(90px); opacity: 0.15; }
+    .glow-blue { position: absolute; top: -80px; left: -80px; width: 250px; height: 250px; background: var(--primary-blue); filter: blur(100px); opacity: 0.15; z-index: 0; }
+    .glow-red { position: absolute; bottom: -80px; right: -80px; width: 250px; height: 250px; background: var(--primary-red); filter: blur(100px); opacity: 0.15; z-index: 0; }
 
-    /* --- AVATARES COM FOTO --- */
-    .photo-frame {
-        width: 85px; height: 85px; margin: 0 auto 12px; position: relative;
-    }
-    .photo-frame img {
-        width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
-        border: 3px solid; padding: 3px; background: #000;
-    }
-    .frame-blue img { border-color: var(--primary-blue); box-shadow: 0 0 20px rgba(0, 210, 255, 0.4); }
-    .frame-red img { border-color: var(--primary-red); box-shadow: 0 0 20px rgba(255, 65, 108, 0.4); }
-
-    .vs-text-vibrant {
-        font-size: 2.8rem; font-weight: 900; font-style: italic;
-        color: var(--gold); text-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
-        margin-bottom: 50px;
+    .duel-tag { 
+        background: var(--gold); color: #000; font-weight: 900; padding: 5px 15px; 
+        border-radius: 50px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px;
+        box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
     }
 
-    /* --- TANQUES REFINADOS --- */
-    .tank-v2 {
-        width: 65px; height: 180px; background: #121212;
-        border: 2px solid #333; border-radius: 10px 10px 20px 20px;
-        margin: 0 auto; position: relative; overflow: hidden;
-    }
+    /* AVATARES */
+    .fighter-zone { display: flex; justify-content: space-around; align-items: flex-end; position: relative; z-index: 2; margin-top: 20px; }
+    .athlete-column { width: 120px; text-align: center; }
+    
+    .photo-frame { width: 95px; height: 95px; margin: 0 auto 15px; position: relative; }
+    .photo-frame img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 4px solid; padding: 3px; background: #000; }
+    .frame-blue img { border-color: var(--primary-blue); box-shadow: 0 0 20px rgba(0, 210, 255, 0.5); }
+    .frame-red img { border-color: var(--primary-red); box-shadow: 0 0 20px rgba(255, 65, 108, 0.5); }
+
+    .athlete-name { font-weight: 900; font-size: 1.1rem; color: #fff; margin-bottom: 10px; text-transform: uppercase; }
+
+    /* TANQUES DE ENERGIA */
+    .tank-v2 { width: 65px; height: 180px; background: #121212; border: 2px solid #333; border-radius: 10px 10px 20px 20px; margin: 0 auto; position: relative; overflow: hidden; }
     .fill-blue { background: linear-gradient(180deg, var(--primary-blue), var(--deep-blue)); }
     .fill-red { background: linear-gradient(180deg, var(--primary-red), var(--deep-red)); }
     
-    .perc-badge {
-        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-        font-weight: 900; font-size: 1.1rem; color: #fff; text-shadow: 0 2px 4px #000; z-index: 5;
-    }
+    .perc-badge { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-weight: 900; font-size: 1.2rem; color: #fff; text-shadow: 0 2px 5px #000; z-index: 5; }
 
-    .meta-tag-premium {
-        background: rgba(255, 215, 0, 0.1); color: var(--gold);
-        border: 1px solid var(--gold); padding: 6px 16px;
-        border-radius: 50px; font-weight: 800; font-size: 0.85rem;
-        text-transform: uppercase; letter-spacing: 1.5px;
-    }
+    .vs-divider { font-size: 3.5rem; font-weight: 900; font-style: italic; color: var(--gold); text-shadow: 0 0 15px rgba(255, 215, 0, 0.4); margin-bottom: 60px; line-height: 1; }
 
-    .btn-share-premium {
-        background: #25D366; color: white !important; font-weight: 900;
-        border: none; border-radius: 15px; padding: 14px; width: 100%;
-        margin-top: 25px; transition: 0.3s; box-shadow: 0 10px 20px rgba(37, 211, 102, 0.2);
-    }
+    /* Frase Dinâmica */
+    .status-phrase { font-size: 0.9rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; margin-top: 20px; position: relative; z-index: 2; }
+
+    .btn-share { background: #25D366; color: white !important; font-weight: 900; border: none; border-radius: 16px; padding: 16px; width: 100%; margin-top: 25px; transition: 0.3s; box-shadow: 0 10px 20px rgba(37, 211, 102, 0.2); font-size: 0.95rem; }
+    .btn-share:hover { transform: translateY(-3px); box-shadow: 0 15px 25px rgba(37, 211, 102, 0.4); }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container py-2" style="max-width: 550px;">
+<div class="container arena-container" style="max-width: 550px;">
     
     <div class="d-flex justify-content-between align-items-center mb-4 px-2">
-        <h2 class="fw-900 text-white mb-0">ARENA <span class="text-danger">X1</span></h2>
-        <button class="btn btn-sm fw-900 px-4 py-2" style="background: var(--primary-red); color: white; border-radius: 12px;" data-bs-toggle="modal" data-bs-target="#novoDesafioModal">
-            DESAFIAR
+        <div>
+            <p class="mb-0 text-muted small fw-bold text-uppercase">Combate Direto</p>
+            <h1 class="fw-900 text-white mb-0">ARENA <span class="text-primary">X1</span></h1>
+        </div>
+        <button class="btn btn-sm fw-900 px-4 py-2" style="background: var(--primary-red); color: white; border-radius: 12px; box-shadow: 0 0 15px rgba(255, 65, 108, 0.4);" data-bs-toggle="modal" data-bs-target="#novoDesafioModal">
+            ⚔️ DESAFIAR
         </button>
     </div>
 
@@ -90,52 +85,107 @@
             <div class="glow-blue"></div>
             <div class="glow-red"></div>
 
-            <div class="text-center mb-4 position-relative" style="z-index: 2;">
-                <span class="meta-tag-premium">Objetivo: {{ d.alvo_km|floatformat:0 }} KM</span>
-                <p class="text-muted small fw-bold mt-2 mb-0">PRAZO: {{ d.prazo_dias }} DIAS RESTANTES</p>
+            <div class="text-center position-relative" style="z-index: 2;">
+                <span class="duel-tag">⚔️ Duelo de Titãs</span>
+                <h2 class="fw-900 text-white mt-3 mb-0" style="letter-spacing: -1px;">META: {{ d.alvo_km|floatformat:0 }} KM</h2>
+                <p class="text-muted small fw-bold mt-1 mb-0">ENCERRA EM: {{ d.prazo_dias }} DIAS</p>
             </div>
 
-            <div class="d-flex justify-content-around align-items-end mb-4 position-relative" style="z-index: 2;">
-                <div class="text-center" style="width: 120px;">
+            <div class="fighter-zone">
+                <div class="athlete-column">
                     <div class="photo-frame frame-blue">
-                        {% if d.avatar_desafiante %}
-                            <img src="{{ d.avatar_desafiante }}">
-                        {% else %}
-                            <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png">
-                        {% endif %}
+                        <img src="{{ d.avatar_desafiante }}" crossorigin="anonymous">
                     </div>
-                    <h6 class="fw-900 text-white mb-3">{{ d.desafiante|upper }}</h6>
+                    <h6 class="athlete-name text-info">{{ d.desafiante }}</h6>
                     <div class="tank-v2">
                         <div class="perc-badge">{{ d.porc_desafiante|floatformat:0 }}%</div>
                         <div class="fill-blue" style="width: 100%; height: {{ d.porc_desafiante }}%; position: absolute; bottom: 0;"></div>
                     </div>
-                    <h5 class="fw-900 mt-3 text-info">{{ d.km_desafiante|floatformat:1 }} <small style="font-size: 0.7rem;">KM</small></h5>
+                    <h5 class="fw-900 mt-3 text-white">{{ d.km_desafiante|floatformat:1 }} <small style="font-size: 0.7rem; color: #888;">KM</small></h5>
                 </div>
 
-                <div class="vs-text-vibrant">VS</div>
+                <div class="vs-divider">VS</div>
 
-                <div class="text-center" style="width: 120px;">
+                <div class="athlete-column">
                     <div class="photo-frame frame-red">
-                        {% if d.avatar_desafiado %}
-                            <img src="{{ d.avatar_desafiado }}">
-                        {% else %}
-                            <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png">
-                        {% endif %}
+                        <img src="{{ d.avatar_desafiado }}" crossorigin="anonymous">
                     </div>
-                    <h6 class="fw-900 text-white mb-3">{{ d.desafiado|upper }}</h6>
+                    <h6 class="athlete-name text-danger">{{ d.desafiado }}</h6>
                     <div class="tank-v2">
                         <div class="perc-badge">{{ d.porc_desafiado|floatformat:0 }}%</div>
                         <div class="fill-red" style="width: 100%; height: {{ d.porc_desafiado }}%; position: absolute; bottom: 0;"></div>
                     </div>
-                    <h5 class="fw-900 mt-3 text-danger">{{ d.km_desafiado|floatformat:1 }} <small style="font-size: 0.7rem;">KM</small></h5>
+                    <h5 class="fw-900 mt-3 text-white">{{ d.km_desafiado|floatformat:1 }} <small style="font-size: 0.7rem; color: #888;">KM</small></h5>
                 </div>
             </div>
 
-            <button onclick="partilharDesafio({{ d.id }})" class="btn-share-premium btn-partilhar position-relative" style="z-index: 10;">
-                <i class="bi bi-whatsapp me-2"></i> CONVOCAR A TORCIDA
+            <div class="text-center status-phrase">
+                {% if d.porc_desafiante == d.porc_desafiado %}
+                    <span style="color: #ffd700;"><i class="bi bi-lightning-charge-fill"></i> TENSÃO MÁXIMA! EMPATE TÉCNICO!</span>
+                {% elif d.porc_desafiante > d.porc_desafiado %}
+                    <span style="color: var(--primary-blue);"><i class="bi bi-fire"></i> {{ d.desafiante }} ESTÁ DOMINANDO A PISTA!</span>
+                {% else %}
+                    <span style="color: var(--primary-red);"><i class="bi bi-fire"></i> {{ d.desafiado }} ASSUMIU A LIDERANÇA!</span>
+                {% endif %}
+            </div>
+
+            <button onclick="partilharDesafio({{ d.id }})" class="btn-share btn-partilhar position-relative" style="z-index: 10;">
+                <i class="bi bi-whatsapp me-2 fs-5"></i> AQUECER O GRUPO
             </button>
         </div>
         {% endif %}
     {% endfor %}
 </div>
+
+<div class="modal fade" id="novoDesafioModal" tabindex="-1" aria-hidden="true">
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+    function partilharDesafio(id) {
+        const cartao = document.getElementById('cartaoDesafio_' + id);
+        const botao = cartao.querySelector('.btn-partilhar');
+        const originalText = botao.innerHTML;
+        
+        botao.innerHTML = '<span class="spinner-border spinner-border-sm"></span> GERANDO CARD...';
+        
+        // Timeout para garantir que a UI atualizou o botão
+        setTimeout(() => {
+            html2canvas(cartao, {
+                scale: 3, 
+                backgroundColor: '#0a0a0b',
+                useCORS: true,
+                allowTaint: true,
+                borderRadius: 30
+            }).then(canvas => {
+                botao.innerHTML = originalText;
+                
+                canvas.toBlob(function(blob) {
+                    const file = new File([blob], "Duelo_Arena_KMS.png", { type: "image/png" });
+                    
+                    // NOVA LÓGICA DE COMPARTILHAMENTO (Nativo para Celular)
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        navigator.share({
+                            title: 'Duelo KMS Tracker',
+                            text: '🔥 Olha como está essa disputa na Arena KMS!',
+                            files: [file]
+                        }).catch(err => console.log("Erro ao compartilhar", err));
+                    } else {
+                        // Fallback para baixar no PC
+                        const link = document.createElement('a');
+                        link.download = 'Duelo_Arena_KMS.png';
+                        link.href = URL.createObjectURL(blob);
+                        link.click();
+                    }
+                });
+            }).catch(err => {
+                console.error("Erro na imagem:", err);
+                botao.innerHTML = originalText;
+                alert("Erro ao gerar o cartão.");
+            });
+        }, 300);
+    }
+</script>
 {% endblock %}
