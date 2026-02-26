@@ -1,136 +1,129 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ rota.nome }} - Detalhes</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    
-    <style>
-        body { background-color: #121212; color: #fff; font-family: sans-serif; padding-bottom: 50px; }
-        .back-link { color: #888; text-decoration: none; display: flex; align-items: center; gap: 8px; margin-bottom: 15px; font-weight: 600; }
-        .back-link:hover { color: #fff; }
-        
-        #map { height: 45vh; width: 100%; border-radius: 15px; border: 2px solid #333; z-index: 1; }
-        
-        .painel-info { background: #1a1d20; padding: 25px; border-radius: 20px; margin-top: -20px; position: relative; z-index: 10; box-shadow: 0 -10px 25px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.05); }
-        .distancia-display { font-size: 2.5rem; font-weight: 900; color: #00d2ff; line-height: 1; }
-        
-        /* Botão Iniciar Desafio (Gradiente Premium) */
-        .btn-desafio { 
-            background: linear-gradient(135deg, #ffca28, #ff6b00); 
-            color: #000 !important; 
-            font-weight: 900; border: none; 
-            box-shadow: 0 5px 15px rgba(255, 107, 0, 0.3); 
-            transition: transform 0.2s; 
-        }
-        .btn-desafio:hover { transform: scale(1.02); }
+{% extends 'core/base.html' %}
 
-        /* --- ESTILOS DO MODAL (CORREÇÃO DE CORES) --- */
-        .modal-content {
-            background-color: #1a1d20; /* Fundo escuro padrão do site */
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-        }
-        .modal-header { border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
-        .modal-title { color: #fff; font-weight: 800; }
-        .btn-close-white { filter: invert(1) grayscale(100%) brightness(200%); } /* X branco */
-        
-        /* Labels (Rótulos) claros */
-        .form-label { color: #ccc !important; font-weight: 600; font-size: 0.85rem; }
-        
-        /* Inputs escuros com texto claro */
-        .form-control {
-            background-color: #2b2b2b !important;
-            border: 1px solid #444 !important;
-            color: #fff !important; /* Cor do texto digitado */
-            padding: 12px;
-            border-radius: 10px;
-        }
-        /* Cor do Placeholder (Ex: 15) */
-        .form-control::placeholder { color: #888 !important; opacity: 1; }
-        
-        /* Foco no input (Borda Dourada) */
-        .form-control:focus {
-            border-color: #ffca28 !important;
-            box-shadow: 0 0 0 3px rgba(255, 202, 40, 0.2) !important;
-            outline: none;
-        }
-    </style>
-</head>
-<body>
+{% block title %}{{ rota.nome }} - KMS Tracker{% endblock %}
 
-<div class="container py-3" style="max-width: 600px;">
-    <a href="{% url 'listar_rotas' %}" class="back-link"><i class="bi bi-arrow-left"></i> Voltar à Biblioteca</a>
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    #map { height: 40vh; width: 100%; border-radius: 20px; border: 2px solid #333; z-index: 1; }
     
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-            <h3 class="fw-bold mb-0 text-white">{{ rota.nome }}</h3>
-            <small class="fw-bold text-light"><i class="bi bi-person-circle"></i> Criado por {{ rota.criador }}</small>
-        </div>
+    .painel-info { 
+        background: #1e1e1e; 
+        padding: 25px; 
+        border-radius: 20px; 
+        margin-top: -25px; 
+        position: relative; 
+        z-index: 10; 
+        box-shadow: 0 -10px 30px rgba(0,0,0,0.5); 
+        border: 1px solid rgba(255,255,255,0.05); 
+    }
+
+    .distancia-display { font-size: 2.8rem; font-weight: 900; color: #00d2ff; line-height: 1; letter-spacing: -1px; }
+    
+    /* Botão de Desafio no padrão do site */
+    .btn-desafio { 
+        background: linear-gradient(135deg, #ffd700, #ff8c00); 
+        color: #000 !important; 
+        font-weight: 900; 
+        border: none; 
+        box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3); 
+        transition: transform 0.2s; 
+    }
+    .btn-desafio:hover { transform: scale(1.02); }
+
+    /* Leaderboard Estilizado */
+    .leaderboard-card {
+        background: #1a1d20;
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 18px;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: transform 0.2s;
+    }
+    .leaderboard-card:hover { transform: translateX(5px); border-color: rgba(255, 215, 0, 0.2); }
+
+    .atleta-nome { color: #ffffff; font-weight: 800; font-size: 1.1rem; }
+    .tempo-valor { font-family: 'Inter', sans-serif; font-weight: 900; font-size: 1.4rem; }
+
+    /* Modal Styling */
+    .modal-content-dark { background: #1a1d20; border: 1px solid #333; border-radius: 20px; }
+    .form-control-dark { background: #121212 !important; border: 1px solid #444 !important; color: white !important; border-radius: 12px; padding: 12px; }
+    .form-label-dark { color: #888; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; }
+
+    /* Lente Dark para o Mapa */
+    .leaflet-tile-pane { filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(85%); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-2" style="max-width: 600px;">
+    
+    <div class="mb-3">
+        <h3 class="fw-900 text-white mb-0">{{ rota.nome }}</h3>
+        <p class="text-primary small fw-bold mb-0 text-uppercase" style="letter-spacing: 1px;">
+            <i class="bi bi-person-circle"></i> Criado por {{ rota.criador }}
+        </p>
     </div>
 
     <div id="map"></div>
 
     <div class="painel-info">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <small class="text-muted text-light fw-bold">Distância do Percurso</small>
-                <div class="distancia-display">{{ rota.distancia_estimada|floatformat:2 }} <span style="font-size: 1rem; color:#888;">km</span></div>
+        <div class="row align-items-center">
+            <div class="col-7">
+                <small class="text-muted fw-bold text-uppercase d-block mb-1" style="font-size: 0.7rem;">Extensão</small>
+                <div class="distancia-display">{{ rota.distancia_estimada|floatformat:2 }} <small style="font-size: 1.2rem; color:#666;">km</small></div>
             </div>
-            <div class="text-end">
-                <small class="text-muted d-block"><i class="bi bi-calendar3"></i> Adicionada em</small>
-                <span class="fw-bold text-white">{{ rota.data_criacao|date:"d/m/Y" }}</span>
+            <div class="col-5 text-end">
+                <small class="text-muted d-block fw-bold text-uppercase" style="font-size: 0.7rem;">Lançada em</small>
+                <span class="fw-bold text-white">{{ rota.data_criacao|date:"d M Y" }}</span>
             </div>
         </div>
         
         <button class="btn btn-desafio w-100 py-3 mt-4 rounded-pill" data-bs-toggle="modal" data-bs-target="#modalTempo">
-            <i class="bi bi-stopwatch-fill fs-5 me-2"></i> INICIAR DESAFIO
+            <i class="bi bi-stopwatch-fill fs-5 me-2"></i> REGISTRAR MEU TEMPO
         </button>
+
         {% if request.user.is_authenticated and request.user.first_name == rota.criador %}
-        <form action="{% url 'excluir_rota' rota.id %}" method="POST" class="mt-3 text-center" onsubmit="return confirm('Tem certeza que deseja DELETAR esta rota? O ranking dela sumirá para sempre!');">
+        <form action="{% url 'excluir_rota' rota.id %}" method="POST" class="mt-3" onsubmit="return confirm('Apagar esta rota permanentemente?');">
             {% csrf_token %}
-            <button type="submit" class="btn btn-outline-danger btn-sm w-100 fw-bold rounded-pill" style="border-width: 2px;">
-                <i class="bi bi-trash3-fill"></i> Apagar Minha Rota
+            <button type="submit" class="btn btn-outline-danger btn-sm w-100 fw-bold rounded-pill">
+                <i class="bi bi-trash3"></i> Excluir Rota
             </button>
         </form>
         {% endif %}
-        <p class="text-center text-muted small mt-2 mb-0 text-light" style="opacity: 0.7;">Seu tempo será avaliado mediante envio de comprovante.</p>
     </div>
 
-    <h4 class="text-white mt-5 mb-3 fw-bold d-flex align-items-center gap-2">
-        <i class="bi bi-trophy-fill text-warning"></i> Leaderboard Oficial
+    <h4 class="text-white mt-5 mb-4 fw-900 d-flex align-items-center gap-2">
+        <i class="bi bi-trophy-fill text-warning"></i> LEADERBOARD <span class="text-warning">TOP TEMPOS</span>
     </h4>
     
-    <div class="d-flex flex-column gap-2 mb-4">
+    <div class="d-flex flex-column gap-3 mb-5">
         {% for tempo in ranking_tempos %}
-        <div class="d-flex justify-content-between align-items-center p-3 rounded-4" style="background: #1a1d20; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+        <div class="leaderboard-card">
             <div class="d-flex align-items-center gap-3">
-                <span style="width: 30px; text-align: center;">
+                <div style="width: 35px; text-align: center;">
                     {% if forloop.counter == 1 %}
-                        <i class="bi bi-trophy-fill fs-4" style="color: #ffd700; filter: drop-shadow(0 0 5px rgba(255,215,0,0.5));"></i>
+                        <i class="bi bi-trophy-fill fs-4" style="color: #ffd700;"></i>
                     {% elif forloop.counter == 2 %}
                         <i class="bi bi-award-fill fs-4" style="color: #c0c0c0;"></i>
                     {% elif forloop.counter == 3 %}
                         <i class="bi bi-award-fill fs-4" style="color: #cd7f32;"></i>
                     {% else %}
-                        <span class="fw-bold text-muted fs-5">{{ forloop.counter }}º</span>
+                        <span class="fw-900 text-muted">{{ forloop.counter }}º</span>
                     {% endif %}
-                </span>
-                <span class="text-white fw-bold fs-5">{{ tempo.nome_atleta }}</span>
+                </div>
+                <span class="atleta-nome">{{ tempo.nome_atleta }}</span>
             </div>
-            <div class="fs-4 fw-900" style="color: {% if forloop.counter == 1 %}#ffd700{% else %}#00d2ff{% endif %};">
-                {{ tempo.tempo_formatado }} <small class="text-muted fs-6 fw-normal">min</small>
+            <div class="tempo-valor" style="color: {% if forloop.counter == 1 %}#ffd700{% else %}#00d2ff{% endif %};">
+                {{ tempo.tempo_formatado }} <small class="text-muted" style="font-size: 0.8rem; font-weight: 600;">min</small>
             </div>
         </div>
         {% empty %}
-        <div class="text-center py-4 rounded-4" style="background: rgba(255,255,255,0.03); border: 1px dashed #444;">
+        <div class="text-center py-5 rounded-4" style="background: rgba(255,255,255,0.02); border: 2px dashed #333;">
             <i class="bi bi-stopwatch text-muted fs-1 mb-2"></i>
-            <p class="text-muted fw-bold mb-0 text-light">Nenhum tempo registrado.<br>Seja o primeiro a dominar esta rota!</p>
+            <p class="text-muted fw-bold mb-0">Nenhum tempo registrado.<br>Seja o primeiro a dominar!</p>
         </div>
         {% endfor %}
     </div>
@@ -139,83 +132,54 @@
 
 <div class="modal fade" id="modalTempo" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      
-      <div class="modal-header pb-3">
-        <h5 class="modal-title"><i class="bi bi-flag-fill text-warning me-2"></i>Registrar Tempo</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-content modal-content-dark">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title text-white fw-bold">Registrar Marca</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
-      
-      <div class="modal-body pt-2">
-        <p class="text-muted small mb-4">Insira o seu tempo e anexe a foto do seu relógio ou Strava para validar a sua marca no placar.</p>
-        
+      <div class="modal-body">
         <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
-            
             <div class="mb-3">
-                <label class="form-label">Nome do Atleta</label>
-                <input type="text" name="atleta" class="form-control" required placeholder="Seu nome">
+                <label class="form-label-dark">Nome do Atleta</label>
+                <input type="text" name="atleta" class="form-control form-control-dark" required placeholder="Ex: Jullio">
             </div>
-            
             <div class="row">
                 <div class="col-6 mb-3">
-                    <label class="form-label">Minutos</label>
-                    <input type="number" name="minutos" class="form-control" required min="0" placeholder="Ex: 15">
+                    <label class="form-label-dark">Minutos</label>
+                    <input type="number" name="minutos" class="form-control form-control-dark" required placeholder="00">
                 </div>
                 <div class="col-6 mb-3">
-                    <label class="form-label">Segundos</label>
-                    <input type="number" name="segundos" class="form-control" required min="0" max="59" placeholder="Ex: 30">
+                    <label class="form-label-dark">Segundos</label>
+                    <input type="number" name="segundos" class="form-control form-control-dark" required max="59" placeholder="00">
                 </div>
             </div>
-
-            <div class="row">
-                <div class="col-6 mb-3">
-                    <label class="form-label">Pace (Min/Km)</label>
-                    <input type="text" name="pace" class="form-control" placeholder="Ex: 05:30">
-                </div>
-            </div>
-
             <div class="mb-4">
-                <label class="form-label">Foto do Comprovante</label>
-                <input type="file" name="foto_comprovante" class="form-control" accept="image/*" required>
+                <label class="form-label-dark">Foto Comprovante</label>
+                <input type="file" name="foto_comprovante" class="form-control form-control-dark" accept="image/*" required>
             </div>
-            
-            <button type="submit" class="btn btn-desafio w-100 fw-bold py-3 rounded-pill">
-                ENVIAR MARCA OFICIAL
-            </button>
+            <button type="submit" class="btn btn-desafio w-100 fw-bold py-3 rounded-pill">ENVIAR PARA VALIDAÇÃO</button>
         </form>
       </div>
     </div>
   </div>
 </div>
+{% endblock %}
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
     var map = L.map('map');
-
-// 2. Coloca as imagens das ruas (Com filtro Dark no CSS)
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
-        maxZoom: 19
-    }).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
 
     var coordenadas = {{ rota.coordenadas|safe }};
-
     if (coordenadas && coordenadas.length > 0) {
         var polyline = L.polyline(coordenadas, {color: '#00d2ff', weight: 6, opacity: 0.9}).addTo(map);
-        
-        var inicio = coordenadas[0];
-        var fim = coordenadas[coordenadas.length - 1];
-        
-        L.circleMarker(inicio, {radius: 6, color: '#fff', fillColor: '#2ecc71', fillOpacity: 1}).addTo(map).bindPopup("<b>Início</b>");
-        L.circleMarker(fim, {radius: 6, color: '#fff', fillColor: '#e74c3c', fillOpacity: 1}).addTo(map).bindPopup("<b>Fim</b>");
-
-        map.fitBounds(polyline.getBounds(), {padding: [20, 20]});
+        L.circleMarker(coordenadas[0], {radius: 6, color: '#fff', fillColor: '#2ecc71', fillOpacity: 1}).addTo(map);
+        L.circleMarker(coordenadas[coordenadas.length - 1], {radius: 6, color: '#fff', fillColor: '#e74c3c', fillOpacity: 1}).addTo(map);
+        map.fitBounds(polyline.getBounds(), {padding: [30, 30]});
     } else {
         map.setView([-16.3267, -48.9528], 14);
     }
 </script>
-
-</body>
-</html>
+{% endblock %}
