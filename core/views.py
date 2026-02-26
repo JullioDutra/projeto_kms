@@ -612,17 +612,20 @@ def arena_desafios(request):
         km_desafiado = 0
         
         if d.status == 'ativo':
-            user_desafiante = User.objects.filter(first_name=d.desafiante).first()
-            if user_desafiante:
-                km_desafiante = Atividade.objects.filter(
-                    user=user_desafiante, data_inicio__gte=d.data_inicio, data_inicio__lte=d.data_fim
-                ).aggregate(Sum('distancia'))['distancia__sum'] or 0
+            # CORREÇÃO: Usar 'nome_usuario', 'data_envio' e 'quantidade_km'
+            km_desafiante = Atividade.objects.filter(
+                nome_usuario=d.desafiante, 
+                data_envio__gte=d.data_inicio, 
+                data_envio__lte=d.data_fim,
+                tipo='corrida' # É bom manter o tipo corrida para não contar de bike
+            ).aggregate(Sum('quantidade_km'))['quantidade_km__sum'] or 0
 
-            user_desafiado = User.objects.filter(first_name=d.desafiado).first()
-            if user_desafiado:
-                km_desafiado = Atividade.objects.filter(
-                    user=user_desafiado, data_inicio__gte=d.data_inicio, data_inicio__lte=d.data_fim
-                ).aggregate(Sum('distancia'))['distancia__sum'] or 0
+            km_desafiado = Atividade.objects.filter(
+                nome_usuario=d.desafiado, 
+                data_envio__gte=d.data_inicio, 
+                data_envio__lte=d.data_fim,
+                tipo='corrida'
+            ).aggregate(Sum('quantidade_km'))['quantidade_km__sum'] or 0
 
         # Converte para float para evitar erro de Decimal
         alvo = float(d.alvo_km) if d.alvo_km > 0 else 1
@@ -652,6 +655,7 @@ def arena_desafios(request):
         'desafios': desafios,
         'usuarios_disponiveis': usuarios_disponiveis
     })
+
 
 
 def criar_desafio(request):
