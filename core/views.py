@@ -600,66 +600,58 @@ def editar_descricao(request, id):
 def arena_desafios(request):
     if not request.user.is_authenticated:
         return redirect('dashboard')
-
-    nome_atleta = request.user.first_name
-
-    # Puxa todos os desafios em que o usuário está envolvido (como Desafiante ou Desafiado)
-    desafios_bd = Desafio.objects.filter(
-        Q(desafiante=nome_atleta) | Q(desafiado=nome_atleta)
-    ).order_by('-data_criacao')
-
-    desafios_processados = []
+        
+    desafios_db = Desafio.objects.all().order_by('-data_criacao')
+    desafios = []
     
-    for d in desafios_bd:
+    usuarios = User.objects.exclude(id=request.user.id)
+    usuarios_disponiveis = [u.first_name for u in usuarios if u.first_name]
+
+    for d in desafios_db:
         km_desafiante = 0
         km_desafiado = 0
-        porc_desafiante = 0
-        porc_desafiado = 0
         
-        # Só calcula os KMs se o desafio já foi aceito e está valendo!
-        if d.status == 'ativo' and d.data_inicio:
-            # Pega a data limite (se o prazo já passou, congela no data_fim)
-            fim = d.data_fim if d.data_fim and d.data_fim < timezone.now() else timezone.now()
-            
-            # Soma os KMs correndo DEPOIS que o desafio começou
-            km_desafiante = Atividade.objects.filter(
-                nome_usuario=d.desafiante, data_envio__gte=d.data_inicio, data_envio__lte=fim, tipo='corrida'
-            ).aggregate(Sum('quantidade_km'))['quantidade_km__sum'] or 0
-            
-            km_desafiado = Atividade.objects.filter(
-                nome_usuario=d.desafiado, data_envio__gte=d.data_inicio, data_envio__lte=fim, tipo='corrida'
-            ).aggregate(Sum('quantidade_km'))['quantidade_km__sum'] or 0
+        if d.status == 'ativo':
+            user_desafiante = User.objects.filter(first_name=d.desafiante).first()
+            if user_desafiante:
+                km_desafiante = Atividade.objects.filter(
+                    user=user_desafiante, data_inicio__gte=d.data_inicio, data_inicio__lte=d.data_fim
+                ).aggregate(Sum('distancia'))['distancia__sum'] or 0
 
-        # Calcula a porcentagem para os Tanques Visuais
-        if d.alvo_km and d.alvo_km > 0:
-            # Mude as linhas 635 e 636 para:
-            porc_desafiante = min((float(km_desafiante) / float(d.alvo_km)) * 100, 100)
-            porc_desafiado = min((float(km_desafiado) / float(d.alvo_km)) * 100, 100)
+            user_desafiado = User.objects.filter(first_name=d.desafiado).first()
+            if user_desafiado:
+                km_desafiado = Atividade.objects.filter(
+                    user=user_desafiado, data_inicio__gte=d.data_inicio, data_inicio__lte=d.data_fim
+                ).aggregate(Sum('distancia'))['distancia__sum'] or 0
 
-        desafios_processados.append({
+        # Converte para float para evitar erro de Decimal
+        alvo = float(d.alvo_km) if d.alvo_km > 0 else 1
+        porc_desafiante = min((float(km_desafiante) / alvo) * 100, 100)
+        porc_desafiado = min((float(km_desafiado) / alvo) * 100, 100)
+
+        # SOLUÇÃO DAS FOTOS: Puxa da sessão se for o logado, senão cria um Avatar Gamer
+        avatar_desafiante = request.session.get('foto_strava') if request.user.first_name == d.desafiante else f"https://ui-avatars.com/api/?name={d.desafiante}&background=00d2ff&color=fff&bold=true&size=150"
+        avatar_desafiado = request.session.get('foto_strava') if request.user.first_name == d.desafiado else f"https://ui-avatars.com/api/?name={d.desafiado}&background=ff416c&color=fff&bold=true&size=150"
+
+        desafios.append({
             'id': d.id,
             'desafiante': d.desafiante,
             'desafiado': d.desafiado,
             'status': d.status,
-            'tipo': d.get_tipo_display(),
-            'alvo_km': d.alvo_km,
+            'alvo_km': alvo,
             'prazo_dias': d.prazo_dias,
-            'km_desafiante': km_desafiante,
-            'km_desafiado': km_desafiado,
+            'km_desafiante': float(km_desafiante),
+            'km_desafiado': float(km_desafiado),
             'porc_desafiante': porc_desafiante,
             'porc_desafiado': porc_desafiado,
-            'data_inicio': d.data_inicio,
-            'data_fim': d.data_fim,
+            'avatar_desafiante': avatar_desafiante,
+            'avatar_desafiado': avatar_desafiado,
         })
 
-    # Pega os nomes de outros corredores para você poder desafiar
-    usuarios_disponiveis = Atividade.objects.values_list('nome_usuario', flat=True).distinct().exclude(nome_usuario=nome_atleta)
-
-    context = {
-        'desafios': desafios_processados,
+    return render(request, 'core/arena.html', {
+        'desafios': desafios,
         'usuarios_disponiveis': usuarios_disponiveis
-    }
-    return render(request, 'core/arena.html', context)
+    })
 
 
 def criar_desafio(request):
