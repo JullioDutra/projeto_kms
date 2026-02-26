@@ -644,7 +644,7 @@ def responder_desafio(request, desafio_id, resposta):
             desafio.status = 'ativo'
             desafio.data_inicio = timezone.now()
             # O Relógio começa a contar agora!
-            desafio.data_fim = desafio.data_inicio + datetime.timedelta(days=desafio.prazo_dias)
+            desafio.data_fim = desafio.data_inicio + timedelta(days=desafio.prazo_dias)
         elif resposta == 'recusar':
             desafio.status = 'recusado'
             
