@@ -67,3 +67,74 @@ class DesafioAdmin(admin.ModelAdmin):
 class TokenStravaAdmin(admin.ModelAdmin):
     list_display = ('user', 'strava_id', 'expires_at')
     search_fields = ('user__username', 'strava_id', 'user__first_name')
+from django.contrib.auth.models import User
+from django.contrib.auth.admin import UserAdmin
+from django.utils import timezone
+
+# ==========================================
+# PAINEL DE USUÁRIOS E FOGUINHOS (STREAK)
+# ==========================================
+
+# 1. Removemos a tabela chata padrão do Django
+admin.site.unregister(User)
+
+# 2. Criamos a nossa tabela turbinada
+@admin.register(User)
+class AtletaAdmin(UserAdmin):
+    # Escolhemos exatamente o que vai aparecer nas colunas
+    list_display = ('first_name', 'username', 'foguinhos_atuais', 'status_foguinho', 'date_joined')
+    
+    # Função que calcula os Foguinhos atuais do atleta
+    def foguinhos_atuais(self, obj):
+        if not obj.first_name:
+            return "0 🔥"
+            
+        atividades = Atividade.objects.filter(nome_usuario=obj.first_name).order_by('-data_envio')
+        datas_treinos = list(atividades.dates('data_envio', 'day', order='DESC'))
+        hoje = timezone.now().date()
+        
+        streak = 0
+        if datas_treinos:
+            dias_sem_treino = (hoje - datas_treinos[0]).days
+            if dias_sem_treino <= 3:
+                streak = 1 
+                for i in range(len(datas_treinos) - 1):
+                    if (datas_treinos[i] - datas_treinos[i+1]).days <= 3:
+                        streak += 1
+                    else:
+                        break 
+        return f"{streak} 🔥"
+    foguinhos_atuais.short_description = 'Sequência'
+
+    # Função que calcula quanto tempo falta para perder
+    def status_foguinho(self, obj):
+        if not obj.first_name:
+            return "-"
+            
+        ultima_ativ = Atividade.objects.filter(nome_usuario=obj.first_name).order_by('-data_envio').first()
+        if not ultima_ativ:
+            return "Sem treinos"
+            
+        hoje = timezone.now().date()
+        
+        # Pega a data do último treino
+        try:
+            data_ultimo = ultima_ativ.data_envio.date()
+        except AttributeError:
+            data_ultimo = ultima_ativ.data_envio
+            
+        dias_sem_treino = (hoje - data_ultimo).days
+        
+        # A regra de ouro: expira se passar de 3 dias
+        dias_restantes = 3 - dias_sem_treino
+        
+        if dias_restantes < 0:
+            return "❌ Apagado (Perdeu)"
+        elif dias_restantes == 0:
+            return "⚠️ Vence HOJE!"
+        elif dias_restantes == 1:
+            return "⏳ Vence amanhã"
+        else:
+            return f"✅ Seguro por {dias_restantes} dias"
+            
+    status_foguinho.short_description = 'Status do Fogo'
