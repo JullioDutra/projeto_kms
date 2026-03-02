@@ -20,5 +20,5 @@ urlpatterns = [
     # NOVAS ROTAS DO STRAVA
     path('strava/login/', views.strava_login, name='strava_login'),
     path('strava/callback/', views.strava_callback, name='strava_callback'),
-    path('desafio-fenix/', desafio_fenix, name='desafio_fenix'),
+    path('desafio-fenix/', views.desafio_fenix, name='desafio_fenix'),
 ]
