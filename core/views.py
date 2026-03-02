@@ -718,49 +718,53 @@ def desafio_fenix(request):
         return redirect('dashboard')
     
     if request.method == 'POST':
-        # Recebe os dados do formulário especial
-        tempo_segundos = float(request.POST.get('segundos', 0))
-        foto = request.FILES.get('foto_comprovante')
-        
-        # A Regra: 100m (0.1km) em 15 segundos ou menos
-        # Pace de 15s/100m = 2:30 min/km (Muito rápido!)
-        
-        if tempo_segundos > 0 and tempo_segundos <= 15 and foto:
-            # 1. Cria a atividade do Desafio (Para constar no histórico de hoje)
-            Atividade.objects.create(
-                nome_usuario=request.user.first_name,
-                tipo='corrida',
-                quantidade_km=0.1, # 100 metros
-                pace=f"00:{int(tempo_segundos)}", # Ex: 00:14
-                descricao="🔥 DESAFIO FÊNIX (100m < 15s)",
-                avatar_url=request.session.get('foto_strava', ''),
-                foto_comprovante=foto,
-                data_envio=timezone.now() # Data de hoje
-            )
+        try:
+            tempo_segundos = float(request.POST.get('segundos', 0))
+            foto = request.FILES.get('foto_comprovante')
+            genero = request.POST.get('genero', 'homem') # Pega a escolha do formulário
             
-            # 2. A MÁGICA DO RESGATE (Cria o Elo Perdido)
-            # Descobre qual foi o último Domingo para salvar a sequência
-            hoje = timezone.now().date()
-            dias_para_domingo = (hoje.weekday() + 1) % 7
-            ultimo_domingo = hoje - timedelta(days=dias_para_domingo)
+            # DEFINE A META BASEADA NO GÉNERO
+            limite_tempo = 25.0 if genero == 'mulher' else 15.0
             
-            # Verifica se já não existe o salvamento para não duplicar
-            ja_resgatou = Atividade.objects.filter(
-                nome_usuario=request.user.first_name,
-                data_envio=ultimo_domingo,
-                descricao="🔥 Elo de Resgate (Fênix)"
-            ).exists()
-            
-            if not ja_resgatou:
+            # Valida se o tempo está dentro do limite do género escolhido
+            if tempo_segundos > 0 and tempo_segundos <= limite_tempo and foto:
+                
+                # 1. Cria o registro do desafio HOJE
                 Atividade.objects.create(
                     nome_usuario=request.user.first_name,
                     tipo='corrida',
-                    quantidade_km=0.0, # Zero km para não fraudar a meta mensal
-                    pace="00:00",
-                    descricao="🔥 Elo de Resgate (Fênix)",
-                    data_envio=ultimo_domingo # A data que salva o foguinho!
+                    quantidade_km=0.1, # 100 metros
+                    pace=f"00:{int(tempo_segundos):02d}", 
+                    descricao=f"🔥 DESAFIO FÊNIX ({genero.capitalize()}: 100m em {tempo_segundos}s)",
+                    avatar_url=request.session.get('foto_strava', ''),
+                    foto_comprovante=foto,
+                    data_envio=timezone.now()
                 )
                 
-            return redirect('dashboard')
+                # 2. A MÁGICA: Cria o "Elo Perdido" no Domingo Passado
+                hoje = timezone.now().date()
+                dias_para_domingo = (hoje.weekday() + 1) % 7
+                if dias_para_domingo == 0: dias_para_domingo = 7
+                
+                ultimo_domingo = hoje - timedelta(days=dias_para_domingo)
+                
+                # Verifica se já não existe o salvamento para não duplicar
+                ja_resgatou = Atividade.objects.filter(
+                    nome_usuario=request.user.first_name,
+                    data_envio=ultimo_domingo,
+                    descricao="🔥 Elo de Resgate (Fênix)"
+                ).exists()
+                
+                if not ja_resgatou:
+                    Atividade.objects.create(
+                        nome_usuario=request.user.first_name,
+                        tipo='corrida',
+                        quantidade_km=0.0,
+                        pace="00:00",
+                        descricao="🔥 Elo de Resgate (Fênix)",
+                        data_envio=ultimo_domingo
+                    )
+        except ValueError:
+            pass
             
     return redirect('dashboard')
